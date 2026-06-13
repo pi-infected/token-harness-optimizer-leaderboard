@@ -42,3 +42,9 @@ reports/
 
 # redundant copy of docs/data/results.json (canonical for the site)
 /results.json
+# Added by code-review-graph
+.code-review-graph/
+
+# QA artifacts
+.playwright-mcp/
+*-page-check.png
