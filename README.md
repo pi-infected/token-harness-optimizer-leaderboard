@@ -103,6 +103,64 @@ trust:
 - the control (no optimizer) is a first-class competitor and its variance
   bounds every claim.
 
+## Results (latest campaign)
+
+Dataset: **660 runs** = 11 entries × 20 tasks × 3 repetitions, model
+`claude-sonnet-4-6`, **single** Claude Code version `2.1.177`, fixtures seed-pinned,
+generated 2026-06-13. Infrastructure-noise runs (transient API 401s during a
+credential rotation, usage-policy false-positives) are excluded from scoring,
+not silently dropped. Regenerate anytime with `python3 leaderboard.py`; every
+raw per-run measurement lives in `docs/data/results.json`.
+
+End-to-end **cost per solved task, relative to control** (vanilla Claude Code).
+Lower is better; **1.00 = no difference**. Control's median per-task
+coefficient of variation (the noise floor) is **~7%** — differences smaller
+than that are not real effects.
+
+| # | optimizer | cost ratio | vs control | adoption | success |
+|---|-----------|-----------|-----------|----------|---------|
+| 1 | tok-mcponly | 1.01 | +1.1% | 3/60 | 60/60 |
+| 2 | tok-hooksonly | 1.02 | +2.2% | 0/60 | 60/60 |
+| 3 | claude-token-efficient | 1.03 | +2.6% | 0/60 | 60/60 |
+| 4 | serena | 1.05 | +4.6% | 0/60 | 59/60 |
+| 5 | lean-ctx | 1.06 | +6.0% | 1/60 | 59/60 |
+| 6 | token-optimizer-mcp | 1.06 | +6.2% | 0/60 | 60/60 |
+| 7 | tokenade (0.5.6) | 1.08 | +7.8% | 4/60 | 60/60 |
+| 8 | rtk | 1.08 | +8.3% | 0/60 | 60/60 |
+| 9 | squeez | 1.10 | +10.4% | 0/60 | 60/60 |
+| 10 | codegraph | 1.12 | +12.3% | 1/60 | 60/60 |
+
+**Findings.**
+
+1. **No optimizer reduces end-to-end session cost.** Every tool sits *at or
+   above* control (+1.1% to +12.3%). The four leaders are within the noise
+   floor (statistically indistinguishable from doing nothing); the rest are
+   measurably **more expensive**.
+2. **The cause is adoption, not compression.** Across 60 runs each, the agent
+   invoked an optimizer's tools in **0–4** of them. A compaction/index tool the
+   agent never calls cannot save tokens — but its always-loaded MCP tool
+   schemas, hook banners and CLAUDE.md rules are paid every turn regardless.
+3. **Advertised compression rate ≠ real savings.** Tools headlining −58%,
+   −90%, even −99% token reduction land between +1% and +12% on *whole-session*
+   cost. That gap is the entire reason THOL measures end to end.
+4. **When a tool *is* adopted on a fitting task, it can win big.** Example:
+   on `code-migration-py` (a token-heavy refactor across 12 files) tokenade is
+   triggered on all 3 reps and cuts cost to **0.37× (−63%), 95% CI [0.22, 0.84]**
+   — a real, significant saving. The bottleneck is how rarely such triggering
+   happens on everyday tasks.
+
+**Scope & exclusions (for honesty).**
+
+- **claude-context** — excluded from the ranking: it requires an `OPENAI_API_KEY`
+  and a Milvus/Zilliz vector DB; verified that keyless its MCP server never
+  exposes tools, so it would only measure vanilla Claude Code.
+- **claude-mem, code-review-graph** — not in this run: their manifests are not
+  yet wired to a working mechanism (a memory tool is also fundamentally at odds
+  with the per-run throwaway-HOME isolation, since memory never persists across
+  runs). Pending proper integration before inclusion.
+- Figures are end-to-end USD, not isolated compression ratios. Early single-rep
+  numbers were noisy; only the ≥3-rep figures above should be quoted.
+
 ## Task battery (20 tasks, 7 code / 13 non-code)
 
 Pre-registered and frozen before any competitor run. Most tasks are scored
