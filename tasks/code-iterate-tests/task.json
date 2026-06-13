@@ -1,0 +1,1 @@
+{"id":"code-iterate-tests","kind":"code","max_turns":30,"success_threshold":1.0,"timeout_s":900,"title":"Fix multiple failing tests via an iterative run-fix-rerun loop","workspace":{"fixture":"iterledger"}}

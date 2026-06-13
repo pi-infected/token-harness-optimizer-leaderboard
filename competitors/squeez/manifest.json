@@ -1,0 +1,13 @@
+{
+  "name": "squeez",
+  "display_name": "squeez",
+  "verified": true,
+  "upstream": "https://github.com/claudioemmanuel/squeez",
+  "install_doc": "README: `cargo install squeez` then `squeez setup` (auto-registers hooks + memory file for detected hosts). `squeez setup` runs per-run inside the sandboxed HOME, exactly as documented.",
+  "version_pin": "1.22.1",
+  "version_checked": "2026-06-10",
+  "notes": "Hook-based output compressor (bash wrap, signature-mode reads, session memory, persona block prepended to the global CLAUDE.md at session start). Its binary writes to $HOME/.claude unconditionally — the per-run HOME sandbox is what makes it safe AND lets its memory file actually reach the session. `squeez setup` needs a working python3 to patch settings.json (on pyenv machines export PYENV_VERSION).",
+  "requires": ["squeez"],
+  "setup_commands": ["squeez setup"],
+  "bash_command_markers": ["squeez "]
+}

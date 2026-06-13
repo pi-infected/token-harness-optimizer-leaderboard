@@ -1,0 +1,1 @@
+{"id":"log-needle-zh","kind":"noncode","max_turns":20,"success_threshold":0.8,"timeout_s":900,"title":"Recover 5 verbatim ASCII needles from a noisy 6k-line Chinese release log","workspace":{"fixture":"log-needle-zh"}}

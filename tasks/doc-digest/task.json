@@ -1,0 +1,9 @@
+{
+  "id": "doc-digest",
+  "title": "Factual questions about a long internal document",
+  "kind": "noncode",
+  "workspace": {"fixture": "longdoc"},
+  "max_turns": 12,
+  "timeout_s": 600,
+  "success_threshold": 1.0
+}

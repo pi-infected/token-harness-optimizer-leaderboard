@@ -1,0 +1,19 @@
+{
+  "name": "token-optimizer-mcp",
+  "display_name": "Token Optimizer MCP (ooples)",
+  "verified": false,
+  "upstream": "https://github.com/ooples/token-optimizer-mcp",
+  "install_doc": "README: `npm install -g @ooples/token-optimizer-mcp` (hooks auto-install on install)",
+  "version_pin": "5.0.1",
+  "version_checked": "2026-06-10 (npm stale since 2025-11; repo still active — consider building from source)",
+  "notes": "MCP server with caching + compression. CAUTION: its npm postinstall writes hooks into the user's Claude settings — install it inside a container or with HOME/CLAUDE_CONFIG_DIR redirected, capture the hooks + MCP entry it writes, transcribe them here, then mark verified:true.",
+  "mcp": {
+    "mcpServers": {
+      "token-optimizer": {
+        "command": "npx",
+        "args": ["-y", "@ooples/token-optimizer-mcp@5.0.1"]
+      }
+    }
+  },
+  "tool_prefixes": ["mcp__token-optimizer__"]
+}

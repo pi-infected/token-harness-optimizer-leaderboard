@@ -1,0 +1,10 @@
+{
+  "id": "code-migration-py",
+  "title": "Migrate a deprecated API across 12 modules",
+  "kind": "code",
+  "workspace": {"fixture": "migration-py"},
+  "max_turns": 40,
+  "timeout_s": 1200,
+  "success_threshold": 1.0,
+  "baseline_score": 0.5
+}

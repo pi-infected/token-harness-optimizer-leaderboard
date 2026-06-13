@@ -1,0 +1,9 @@
+{
+  "id": "report-pdf",
+  "title": "Analyze a CSV and produce a PDF report",
+  "kind": "noncode",
+  "workspace": {"fixture": "sales-csv"},
+  "max_turns": 35,
+  "timeout_s": 1200,
+  "success_threshold": 0.8
+}

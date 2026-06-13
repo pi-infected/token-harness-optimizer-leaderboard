@@ -1,0 +1,11 @@
+{
+  "name": "claude-mem",
+  "display_name": "claude-mem",
+  "verified": false,
+  "upstream": "https://github.com/thedotmack/claude-mem",
+  "install_doc": "README: `npx claude-mem@13.5.4 install`",
+  "version_pin": "13.5.4",
+  "version_checked": "2026-06-10",
+  "notes": "Persistent memory plugin (lifecycle hooks + MCP search + local worker on :37777). Cross-session memory mostly helps REPEATED sessions; THOL runs are single-shot, which this benchmark measures honestly — note it in the writeup. Run its installer against a sandboxed CLAUDE_CONFIG_DIR, transcribe the hooks/MCP entries here, mark verified:true.",
+  "tool_prefixes": ["mcp__claude-mem__"]
+}

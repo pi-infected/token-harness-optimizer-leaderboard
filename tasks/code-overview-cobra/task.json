@@ -1,0 +1,9 @@
+{
+  "id": "code-overview-cobra",
+  "title": "Write an architecture overview of a real repo",
+  "kind": "code",
+  "workspace": {"repo": "cobra"},
+  "max_turns": 30,
+  "timeout_s": 1200,
+  "success_threshold": 0.8
+}

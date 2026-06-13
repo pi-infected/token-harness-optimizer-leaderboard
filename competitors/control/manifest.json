@@ -1,0 +1,6 @@
+{
+  "name": "control",
+  "display_name": "Control — vanilla Claude Code",
+  "verified": true,
+  "notes": "No optimizer. Same model, same prompts, empty config dir."
+}

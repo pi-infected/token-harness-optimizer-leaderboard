@@ -1,0 +1,9 @@
+{
+  "id": "data-analysis",
+  "title": "Aggregate questions over a 2000-row CSV",
+  "kind": "noncode",
+  "workspace": {"fixture": "sales-csv"},
+  "max_turns": 20,
+  "timeout_s": 900,
+  "success_threshold": 1.0
+}

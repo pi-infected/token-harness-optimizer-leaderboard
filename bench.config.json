@@ -1,0 +1,7 @@
+{
+  "model": "claude-sonnet-4-6",
+  "claude_bin": "claude",
+  "runs_root": "/tmp/thol-runs",
+  "default_reps": 5,
+  "est_cost_per_run_usd": 0.5
+}

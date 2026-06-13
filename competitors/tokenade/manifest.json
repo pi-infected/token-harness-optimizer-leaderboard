@@ -1,0 +1,94 @@
+{
+  "name": "tokenade",
+  "display_name": "Tokenade",
+  "verified": true,
+  "version_pin": "0.5.1",
+  "version_checked": "2026-06-10",
+  "upstream": "https://tokenade.net",
+  "install_doc": "replicates what `tokenade install` writes: MCP server + hooks (validated against a live install)",
+  "requires": [
+    "tokenade"
+  ],
+  "mcp": {
+    "mcpServers": {
+      "tokenade": {
+        "command": "tokenade",
+        "args": [
+          "mcp"
+        ]
+      }
+    }
+  },
+  "settings": {
+    "hooks": {
+      "PreToolUse": [
+        {
+          "matcher": "Bash|Grep|Glob|Read|Task|Agent|WebFetch",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "tokenade hookwrap-pretool"
+            }
+          ]
+        },
+        {
+          "matcher": "Edit|Write|MultiEdit",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "tokenade pre-edit-snapshot"
+            }
+          ]
+        }
+      ],
+      "PostToolUse": [
+        {
+          "matcher": "Bash",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "tokenade hookwrap"
+            }
+          ]
+        },
+        {
+          "matcher": "Read",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "tokenade hookwrap-postread"
+            }
+          ]
+        },
+        {
+          "matcher": "Edit|Write|MultiEdit",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "tokenade index-touch"
+            }
+          ]
+        }
+      ],
+      "PreCompact": [
+        {
+          "hooks": [
+            {
+              "type": "command",
+              "command": "tokenade hookwrap-precompact"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "home_files": [
+    ".tokenade/license.key"
+  ],
+  "tool_prefixes": [
+    "mcp__tokenade__"
+  ],
+  "bash_command_markers": [
+    "tokenade "
+  ]
+}

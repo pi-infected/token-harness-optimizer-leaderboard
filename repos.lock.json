@@ -1,0 +1,10 @@
+{
+  "click": {
+    "url": "https://github.com/pallets/click",
+    "commit": "6a141c3681027e8124ce5a3c70e608dbbebffafb"
+  },
+  "cobra": {
+    "url": "https://github.com/spf13/cobra",
+    "commit": "ad460ea8f249db69c943a365fb84f3a59042d54e"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "claude-context",
+  "display_name": "Claude Context (Zilliz)",
+  "verified": false,
+  "upstream": "https://github.com/zilliztech/claude-context",
+  "install_doc": "README: `claude mcp add claude-context -e OPENAI_API_KEY=... -- npx -y @zilliz/claude-context-mcp`",
+  "version_pin": "0.1.14",
+  "version_checked": "2026-06-10",
+  "notes": "Semantic code search via embeddings. Requires OPENAI_API_KEY (embedding cost is external to total_cost_usd — report separately). Mark verified:true after one sandboxed session confirms the server starts and indexes.",
+  "mcp": {
+    "mcpServers": {
+      "claude-context": {
+        "command": "npx",
+        "args": ["-y", "@zilliz/claude-context-mcp@0.1.14"],
+        "env": {"OPENAI_API_KEY": "${OPENAI_API_KEY}"}
+      }
+    }
+  },
+  "tool_prefixes": ["mcp__claude-context__"]
+}

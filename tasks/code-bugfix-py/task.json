@@ -1,0 +1,9 @@
+{
+  "id": "code-bugfix-py",
+  "title": "Fix failing tests in a small Python library",
+  "kind": "code",
+  "workspace": {"fixture": "tinyledger"},
+  "max_turns": 30,
+  "timeout_s": 900,
+  "success_threshold": 1.0
+}

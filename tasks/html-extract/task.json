@@ -1,0 +1,9 @@
+{
+  "id": "html-extract",
+  "title": "Extract facts from noisy HTML pages",
+  "kind": "noncode",
+  "workspace": {"fixture": "html-docs"},
+  "max_turns": 20,
+  "timeout_s": 900,
+  "success_threshold": 0.8
+}

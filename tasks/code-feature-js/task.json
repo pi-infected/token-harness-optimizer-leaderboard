@@ -1,0 +1,10 @@
+{
+  "id": "code-feature-js",
+  "title": "Implement a function from a written spec (JS)",
+  "kind": "code",
+  "workspace": {"fixture": "jsfeature"},
+  "max_turns": 30,
+  "timeout_s": 900,
+  "success_threshold": 1.0,
+  "needs": ["node"]
+}

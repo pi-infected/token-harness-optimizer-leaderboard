@@ -1,0 +1,11 @@
+{
+  "name": "claude-token-efficient",
+  "display_name": "claude-token-efficient (drona23)",
+  "verified": true,
+  "upstream": "https://github.com/drona23/claude-token-efficient",
+  "install_doc": "README: drop the provided CLAUDE.md into the project. files/CLAUDE.md fetched verbatim from upstream main @ b32fa8b71f818e14458a6e9909039c5f429aef99 (2026-04-22).",
+  "version_pin": "b32fa8b",
+  "version_checked": "2026-06-10",
+  "notes": "Pure-prompt competitor: a single project CLAUDE.md that makes the agent terse. Zero schema overhead — important comparison point against MCP-based tools.",
+  "claude_md_file": "files/CLAUDE.md"
+}

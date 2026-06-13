@@ -1,0 +1,9 @@
+{
+  "id": "seo-audit",
+  "title": "SEO audit of a website export",
+  "kind": "noncode",
+  "workspace": {"fixture": "seo-site"},
+  "max_turns": 35,
+  "timeout_s": 1200,
+  "success_threshold": 0.7
+}

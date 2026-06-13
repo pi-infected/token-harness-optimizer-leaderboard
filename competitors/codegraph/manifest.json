@@ -1,0 +1,22 @@
+{
+  "name": "codegraph",
+  "display_name": "CodeGraph",
+  "verified": true,
+  "upstream": "https://github.com/colbymchenry/codegraph",
+  "install_doc": "README: `npm install -g @colbymchenry/codegraph@0.9.9` then `codegraph install --yes`; MCP entry captured verbatim from a sandboxed run of the installer (HOME + CLAUDE_CONFIG_DIR redirected). Per-repo index: `codegraph init`.",
+  "version_pin": "0.9.9",
+  "version_checked": "2026-06-10",
+  "notes": "Local code index + knowledge graph MCP. Indexing runs per workspace in setup_commands so its cost is measured as setup_ms.",
+  "requires": ["codegraph"],
+  "setup_commands": ["codegraph init"],
+  "mcp": {
+    "mcpServers": {
+      "codegraph": {
+        "type": "stdio",
+        "command": "codegraph",
+        "args": ["serve", "--mcp"]
+      }
+    }
+  },
+  "tool_prefixes": ["mcp__codegraph__"]
+}

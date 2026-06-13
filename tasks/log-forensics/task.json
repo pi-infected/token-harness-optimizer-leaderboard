@@ -1,0 +1,9 @@
+{
+  "id": "log-forensics",
+  "title": "Answer precise questions about a 5k-line access log",
+  "kind": "noncode",
+  "workspace": {"fixture": "access-log"},
+  "max_turns": 20,
+  "timeout_s": 900,
+  "success_threshold": 1.0
+}

@@ -1,0 +1,9 @@
+{
+  "id": "code-qa-click",
+  "title": "Locate and explain a mechanism in a real codebase",
+  "kind": "code",
+  "workspace": {"repo": "click"},
+  "max_turns": 25,
+  "timeout_s": 900,
+  "success_threshold": 1.0
+}

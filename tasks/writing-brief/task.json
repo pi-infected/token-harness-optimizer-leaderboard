@@ -1,0 +1,9 @@
+{
+  "id": "writing-brief",
+  "title": "Write a post under hard editorial constraints",
+  "kind": "noncode",
+  "workspace": {},
+  "max_turns": 10,
+  "timeout_s": 600,
+  "success_threshold": 0.85
+}

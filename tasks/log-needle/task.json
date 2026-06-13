@@ -1,0 +1,9 @@
+{
+  "id": "log-needle",
+  "title": "Recover 5 verbatim needles from a noisy 6k-line release log",
+  "kind": "noncode",
+  "workspace": {"fixture": "release-log"},
+  "max_turns": 20,
+  "timeout_s": 900,
+  "success_threshold": 0.8
+}

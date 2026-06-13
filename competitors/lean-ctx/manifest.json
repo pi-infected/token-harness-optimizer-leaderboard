@@ -1,0 +1,17 @@
+{
+  "name": "lean-ctx",
+  "display_name": "LeanCTX",
+  "verified": true,
+  "upstream": "https://github.com/yvgude/lean-ctx",
+  "install_doc": "README get-started offers `curl -fsSL https://leanctx.com/install.sh | sh`, brew, `npm install -g lean-ctx-bin`, or `cargo install lean-ctx`. We pin the npm prebuilt binary `lean-ctx-bin@3.8.4` (no host build, matches codegraph approach). The stdio MCP server is the bare `lean-ctx` command with NO args (`lean-ctx help all`: 'lean-ctx  Start MCP server (stdio)'; `lean-ctx serve` is the HTTP variant). `lean-ctx onboard` is deliberately NOT used: it rewrites the host ~/.zshrc with a shell hook (host pollution) and the benchmark injects the MCP config directly anyway.",
+  "version_pin": "3.8.4",
+  "version_checked": "2026-06-13",
+  "notes": "Claims up to 99% savings — exactly the kind of headline THOL exists to test. Single Rust binary exposing 76 MCP tools (ctx_*) at the default profile; those tool schemas are themselves per-turn overhead the benchmark will surface. MCP server validated via an initialize handshake on this machine (serverInfo lean-ctx 3.8.4, capabilities.tools).",
+  "requires": ["lean-ctx"],
+  "mcp": {
+    "mcpServers": {
+      "lean-ctx": {"command": "lean-ctx", "args": []}
+    }
+  },
+  "tool_prefixes": ["mcp__lean-ctx__"]
+}

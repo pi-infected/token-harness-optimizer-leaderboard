@@ -1,0 +1,21 @@
+{
+  "name": "rtk",
+  "display_name": "RTK (Rust Token Killer)",
+  "verified": true,
+  "upstream": "https://github.com/rtk-ai/rtk",
+  "install_doc": "README: `cargo install --git https://github.com/rtk-ai/rtk --tag v0.42.3 rtk`, then `rtk init -g` (writes global CLAUDE.md + RTK.md + filters template) plus the PreToolUse hook its output asks you to add manually. `rtk init -g` runs per-run inside the sandboxed HOME; files/ holds a captured copy for reference.",
+  "version_pin": "v0.42.3",
+  "version_checked": "2026-06-10",
+  "notes": "CLI proxy: the PreToolUse hook rewrites Bash commands through `rtk`, which filters/compresses their output.",
+  "requires": ["rtk"],
+  "setup_commands": ["rtk init -g"],
+  "settings": {
+    "hooks": {
+      "PreToolUse": [
+        {"matcher": "Bash",
+         "hooks": [{"type": "command", "command": "rtk hook claude"}]}
+      ]
+    }
+  },
+  "bash_command_markers": ["rtk "]
+}
