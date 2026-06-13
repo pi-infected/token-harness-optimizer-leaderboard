@@ -153,6 +153,16 @@ than that are not real effects.
    — a real, significant saving. The bottleneck is how rarely such triggering
    happens on everyday tasks.
 
+**Per-task notes.** Adoption is concentrated: across all 11 × 20 = 220
+(optimizer, task) cells, the agent actually invoked the tool in only **5**. The
+two real wins are both on `code-migration-py` (a heavy multi-file refactor),
+where the MCP tools are triggered on all 3 reps — **tokenade 0.37×** and
+**tok-mcponly 0.40×**. Conversely, output-compaction hooks can *raise* cost on
+retrieval tasks by hiding bytes the agent then re-fetches: **squeez 3.94×** on
+`log-needle-zh` (verbatim needles in a noisy Chinese log) and **tok-hooksonly
+1.80×** on `log-needle`. Most remaining cells sit within ±5% of control. Full
+per-task ratios with 95% CIs are in `leaderboard.md` / `docs/data/results.json`.
+
 **Scope & exclusions (for honesty).**
 
 - **claude-context** — excluded from the ranking: it requires an `OPENAI_API_KEY`
