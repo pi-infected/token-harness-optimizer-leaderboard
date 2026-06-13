@@ -105,7 +105,7 @@ trust:
 
 ## Results (latest campaign)
 
-Dataset: **660 runs** = 11 entries × 20 tasks × 3 repetitions, model
+Dataset: **720 runs** = 12 entries × 20 tasks × 3 repetitions, model
 `claude-sonnet-4-6`, **single** Claude Code version `2.1.177`, fixtures seed-pinned,
 generated 2026-06-13. Infrastructure-noise runs (transient API 401s during a
 credential rotation, usage-policy false-positives) are excluded from scoring,
@@ -122,13 +122,14 @@ than that are not real effects.
 | 1 | tok-mcponly | 1.01 | +1.1% | 3/60 | 60/60 |
 | 2 | tok-hooksonly | 1.02 | +2.2% | 0/60 | 60/60 |
 | 3 | claude-token-efficient | 1.03 | +2.6% | 0/60 | 60/60 |
-| 4 | serena | 1.05 | +4.6% | 0/60 | 59/60 |
-| 5 | lean-ctx | 1.06 | +6.0% | 1/60 | 59/60 |
+| 4 | serena | 1.05 | +4.6% | 0/60 | 60/60 |
+| 5 | lean-ctx | 1.06 | +6.0% | 1/60 | 60/60 |
 | 6 | token-optimizer-mcp | 1.06 | +6.2% | 0/60 | 60/60 |
 | 7 | tokenade (0.5.6) | 1.08 | +7.8% | 4/60 | 60/60 |
 | 8 | rtk | 1.08 | +8.3% | 0/60 | 60/60 |
-| 9 | squeez | 1.10 | +10.4% | 0/60 | 60/60 |
-| 10 | codegraph | 1.12 | +12.3% | 1/60 | 60/60 |
+| 9 | code-review-graph | 1.09 | +9.1% | 0/60 | 60/60 |
+| 10 | squeez | 1.10 | +10.4% | 0/60 | 60/60 |
+| 11 | codegraph | 1.12 | +12.3% | 1/60 | 60/60 |
 
 **Findings.**
 
@@ -154,10 +155,10 @@ than that are not real effects.
 - **claude-context** — excluded from the ranking: it requires an `OPENAI_API_KEY`
   and a Milvus/Zilliz vector DB; verified that keyless its MCP server never
   exposes tools, so it would only measure vanilla Claude Code.
-- **claude-mem, code-review-graph** — not in this run: their manifests are not
-  yet wired to a working mechanism (a memory tool is also fundamentally at odds
-  with the per-run throwaway-HOME isolation, since memory never persists across
-  runs). Pending proper integration before inclusion.
+- **claude-mem** — excluded: it is a cross-session *memory* tool, fundamentally
+  at odds with the per-run throwaway-HOME isolation (memory never persists
+  between runs), so a single-session-cost benchmark can only measure its
+  overhead, not its benefit. Documented rather than ranked.
 - Figures are end-to-end USD, not isolated compression ratios. Early single-rep
   numbers were noisy; only the ≥3-rep figures above should be quoted.
 
