@@ -1,10 +1,22 @@
 {
   "name": "code-review-graph",
   "display_name": "code-review-graph",
-  "verified": false,
+  "verified": true,
   "upstream": "https://github.com/tirth8205/code-review-graph",
-  "install_doc": "README: pip install, CLI auto-writes MCP config; per-repo graph build belongs in setup_commands",
-  "version_checked": "2026-06-10 (18.3k stars)",
-  "notes": "Tree-sitter AST graph computing the minimal file set per task; claims 6.8-49x fewer tokens. Capture the MCP entry its installer writes, move graph build into setup_commands so indexing cost lands in setup_ms, mark verified:true.",
+  "install_doc": "README: `pip install code-review-graph` (we pin 2.3.6 via `uv tool install`, isolated). The README's `code-review-graph install` is NOT used: it writes into the *current* project (MCP config, .claude hooks, a git pre-commit hook, a CLAUDE.md block) regardless of HOME — host/repo pollution. Instead we transcribe the MCP entry it writes verbatim (`code-review-graph serve`, stdio) and run the per-repo graph build in setup_commands so indexing cost lands in setup_ms.",
+  "version_pin": "2.3.6",
+  "version_checked": "2026-06-13",
+  "notes": "Tree-sitter AST knowledge graph; claims 6.8-49x fewer tokens on review tasks. MCP server validated via initialize+tools/list handshake (12+ ctx tools). Build runs per workspace; on non-code workspaces the graph is near-empty (honest: nothing to index).",
+  "requires": ["code-review-graph"],
+  "setup_commands": ["code-review-graph build"],
+  "mcp": {
+    "mcpServers": {
+      "code-review-graph": {
+        "command": "code-review-graph",
+        "args": ["serve"],
+        "type": "stdio"
+      }
+    }
+  },
   "tool_prefixes": ["mcp__code-review-graph__"]
 }
