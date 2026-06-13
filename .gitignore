@@ -39,3 +39,6 @@ AGENTS.md
 reports/
 
 .DS_Store
+
+# redundant copy of docs/data/results.json (canonical for the site)
+/results.json

@@ -78,23 +78,25 @@
    ]
   },
   "code-migration-py": {
-   "n": 2,
-   "successes": 2,
-   "mean_cost": 0.3527253,
-   "cv": 0.8200062135478595,
+   "n": 3,
+   "successes": 3,
+   "mean_cost": 0.3360491,
+   "cv": 0.6146451159096054,
    "costs": [
     0.14820389999999997,
-    0.5572467000000001
+    0.5572467000000001,
+    0.3026967
    ]
   },
   "code-overview-cobra": {
-   "n": 2,
-   "successes": 2,
-   "mean_cost": 0.245917575,
-   "cv": 0.1356163496947711,
+   "n": 3,
+   "successes": 3,
+   "mean_cost": 0.26359003333333336,
+   "cv": 0.1465924470680054,
    "costs": [
     0.2694999,
-    0.22233525
+    0.22233525,
+    0.29893495000000003
    ]
   },
   "code-qa-click": {
@@ -241,9 +243,9 @@
  "competitors": {
   "claude-token-efficient": {
    "version": "b32fa8b",
-   "aggregate_cost_ratio": 0.9933068877495977,
-   "n_success": 44,
-   "n_runs": 44,
+   "aggregate_cost_ratio": 0.9828590415954802,
+   "n_success": 46,
+   "n_runs": 46,
    "tasks_compared": 20,
    "per_task": {
     "code-bugfix-py": {
@@ -367,53 +369,61 @@
      ]
     },
     "code-migration-py": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.29166285000000003,
-     "ratio": 0.8268838384998185,
-     "ci_lo": 0.5231934078748244,
-     "ci_hi": 1.9687599314188093,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.246761,
+     "ratio": 0.7343004340734732,
+     "ci_lo": 0.4272273705552981,
+     "ci_hi": 1.4610701471946885,
      "adoption": 0,
-     "mean_wall_s": 52.223,
+     "mean_wall_s": 51.161,
      "costs": [
       0.29154779999999997,
-      0.29177790000000003
+      0.29177790000000003,
+      0.15695730000000002
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       27,
-      27
+      27,
+      9
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
     },
     "code-overview-cobra": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.2348946,
-     "ratio": 0.9551761398102596,
-     "ci_lo": 0.8561813937593297,
-     "ci_hi": 1.0751709411800423,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.22947689999999998,
+     "ratio": 0.8705826130755322,
+     "ci_lo": 0.7676482793330119,
+     "ci_hi": 1.0196660223693723,
      "adoption": 0,
-     "mean_wall_s": 66.0335,
+     "mean_wall_s": 68.45733333333334,
      "costs": [
       0.2307408,
-      0.2390484
+      0.2390484,
+      0.2186415
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       12,
-      13
+      13,
+      12
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
@@ -786,7 +796,7 @@
   },
   "codegraph": {
    "version": "0.9.9",
-   "aggregate_cost_ratio": 1.1124619724049363,
+   "aggregate_cost_ratio": 1.1112963736464239,
    "n_success": 42,
    "n_runs": 42,
    "tasks_compared": 20,
@@ -907,9 +917,9 @@
      "n": 2,
      "successes": 2,
      "mean_cost": 0.46451264999999997,
-     "ratio": 1.3169246719756138,
-     "ci_lo": 0.8194352698723921,
-     "ci_hi": 3.1874849447281757,
+     "ratio": 1.3822761316724252,
+     "ci_lo": 0.8335852863731628,
+     "ci_hi": 3.1342808792481174,
      "adoption": 0,
      "mean_wall_s": 66.2285,
      "costs": [
@@ -933,9 +943,9 @@
      "n": 2,
      "successes": 2,
      "mean_cost": 0.29184465000000004,
-     "ratio": 1.186758002147671,
-     "ci_lo": 1.0490163447184953,
-     "ci_hi": 1.353719214564492,
+     "ratio": 1.1071915212778025,
+     "ci_lo": 0.9762814619033339,
+     "ci_hi": 1.3126332868944535,
      "adoption": 1,
      "mean_wall_s": 78.905,
      "costs": [
@@ -1323,9 +1333,9 @@
   },
   "lean-ctx": {
    "version": "3.8.4",
-   "aggregate_cost_ratio": 1.0533956522313972,
-   "n_success": 44,
-   "n_runs": 44,
+   "aggregate_cost_ratio": 1.0404146554199714,
+   "n_success": 46,
+   "n_runs": 46,
    "tasks_compared": 20,
    "per_task": {
     "code-bugfix-py": {
@@ -1364,7 +1374,7 @@
      "mean_cost": 0.0781872,
      "ratio": 1.0101535762319236,
      "ci_lo": 1.008986161131076,
-     "ci_hi": 1.0113221985669838,
+     "ci_hi": 1.0113185408786827,
      "adoption": 0,
      "mean_wall_s": 10.818666666666667,
      "costs": [
@@ -1449,55 +1459,63 @@
      ]
     },
     "code-migration-py": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.38956935000000004,
-     "ratio": 1.1044553651240783,
-     "ci_lo": 0.5836379111800931,
-     "ci_hi": 3.0627291184644942,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.3042688,
+     "ratio": 0.9054295934730967,
+     "ci_lo": 0.39776241031444515,
+     "ci_hi": 2.0581502893067904,
      "adoption": 0,
-     "mean_wall_s": 59.175,
+     "mean_wall_s": 49.48466666666666,
      "costs": [
       0.3252303,
-      0.4539084
+      0.4539084,
+      0.1336677
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       29,
-      40
+      40,
+      7
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
     },
     "code-overview-cobra": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.24442147499999997,
-     "ratio": 0.9939162542571428,
-     "ci_lo": 0.7031919121305795,
-     "ci_hi": 1.346312831636009,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.24938541666666664,
+     "ratio": 0.9461109493138395,
+     "ci_lo": 0.7189579499781288,
+     "ci_hi": 1.201364408270071,
      "adoption": 1,
-     "mean_wall_s": 113.4445,
+     "mean_wall_s": 126.078,
      "costs": [
       0.18951015,
-      0.29933279999999995
+      0.29933279999999995,
+      0.25931329999999997
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       23,
-      29
+      29,
+      25
      ],
      "competitor_tool_calls": [
       0,
-      21
+      21,
+      0
      ]
     },
     "code-qa-click": {
@@ -1868,9 +1886,9 @@
   },
   "rtk": {
    "version": "v0.42.3",
-   "aggregate_cost_ratio": 1.0602876712441702,
-   "n_success": 43,
-   "n_runs": 43,
+   "aggregate_cost_ratio": 1.0488774223232495,
+   "n_success": 45,
+   "n_runs": 45,
    "tasks_compared": 20,
    "per_task": {
     "code-bugfix-py": {
@@ -1964,53 +1982,61 @@
      ]
     },
     "code-iterate-tests": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.12244635,
-     "ratio": 1.0558823757673592,
-     "ci_lo": 1.019045813942171,
-     "ci_hi": 1.0934647576689602,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.1283048,
+     "ratio": 1.1064011058423209,
+     "ci_lo": 1.0339663143560303,
+     "ci_hi": 1.2019659398474944,
      "adoption": 0,
-     "mean_wall_s": 30.128999999999998,
+     "mean_wall_s": 30.19333333333333,
      "costs": [
       0.11935889999999999,
-      0.1255338
+      0.1255338,
+      0.14002170000000003
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       10,
+      10,
       10
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
     },
     "code-migration-py": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.40087575,
-     "ratio": 1.1365097712015553,
-     "ci_lo": 0.3329936274185203,
-     "ci_hi": 4.1577306670067395,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.314658,
+     "ratio": 0.9363453138246762,
+     "ci_lo": 0.3316454158125999,
+     "ci_hi": 2.366771406323939,
      "adoption": 0,
-     "mean_wall_s": 61.4935,
+     "mean_wall_s": 53.25366666666667,
      "costs": [
       0.6161919,
-      0.1855596
+      0.1855596,
+      0.1422225
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       55,
-      10
+      10,
+      8
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
@@ -2019,9 +2045,9 @@
      "n": 2,
      "successes": 2,
      "mean_cost": 0.1584627,
-     "ratio": 0.6443732213933876,
-     "ci_lo": 0.4531450661020653,
-     "ci_hi": 0.876167184465801,
+     "ratio": 0.6011710609695535,
+     "ci_lo": 0.4223892162258819,
+     "ci_hi": 0.8183040770101925,
      "adoption": 0,
      "mean_wall_s": 68.1645,
      "costs": [
@@ -2409,9 +2435,9 @@
   },
   "serena": {
    "version": "v1.5.3",
-   "aggregate_cost_ratio": 1.0350998902778683,
-   "n_success": 43,
-   "n_runs": 44,
+   "aggregate_cost_ratio": 1.0334399285395701,
+   "n_success": 44,
+   "n_runs": 45,
    "tasks_compared": 20,
    "per_task": {
     "code-bugfix-py": {
@@ -2449,7 +2475,7 @@
      "successes": 3,
      "mean_cost": 0.078155,
      "ratio": 1.009737562547399,
-     "ci_lo": 1.00472533734412,
+     "ci_lo": 1.0047902535720146,
      "ci_hi": 1.0164138559967346,
      "adoption": 0,
      "mean_wall_s": 9.904666666666667,
@@ -2509,7 +2535,7 @@
      "successes": 3,
      "mean_cost": 0.1198776,
      "ratio": 1.033731467612462,
-     "ci_lo": 1.020398179429189,
+     "ci_lo": 1.017962454877325,
      "ci_hi": 1.0487662731446843,
      "adoption": 0,
      "mean_wall_s": 28.805666666666667,
@@ -2535,27 +2561,31 @@
      ]
     },
     "code-migration-py": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.464097,
-     "ratio": 1.3157462762098435,
-     "ci_lo": 0.8199580185939189,
-     "ci_hi": 3.1799102452769463,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.4589589,
+     "ratio": 1.3657495288634904,
+     "ci_lo": 0.828545597488509,
+     "ci_hi": 3.078282690266586,
      "adoption": 0,
-     "mean_wall_s": 66.3065,
+     "mean_wall_s": 73.05033333333333,
      "costs": [
       0.47127509999999995,
-      0.4569189
+      0.4569189,
+      0.44868270000000005
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       42,
-      42
+      42,
+      41
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
@@ -2564,9 +2594,9 @@
      "n": 2,
      "successes": 2,
      "mean_cost": 0.215416775,
-     "ratio": 0.8759714510034511,
-     "ci_lo": 0.7678466671045148,
-     "ci_hi": 1.0070330728033454,
+     "ratio": 0.8172417305611327,
+     "ci_lo": 0.7157313985338203,
+     "ci_hi": 0.9688826895420316,
      "adoption": 0,
      "mean_wall_s": 92.32249999999999,
      "costs": [
@@ -2953,9 +2983,9 @@
   },
   "squeez": {
    "version": "1.22.1",
-   "aggregate_cost_ratio": 1.087229659456586,
-   "n_success": 43,
-   "n_runs": 43,
+   "aggregate_cost_ratio": 1.081770672562066,
+   "n_success": 45,
+   "n_runs": 45,
    "tasks_compared": 20,
    "per_task": {
     "code-bugfix-py": {
@@ -3049,53 +3079,61 @@
      ]
     },
     "code-iterate-tests": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.1453332,
-     "ratio": 1.2532408233799763,
-     "ci_lo": 1.2327835933477962,
-     "ci_hi": 1.2741122455112508,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.1416998,
+     "ratio": 1.221909199169756,
+     "ci_lo": 1.1645482116358665,
+     "ci_hi": 1.268655975373616,
      "adoption": 0,
-     "mean_wall_s": 34.2235,
+     "mean_wall_s": 34.184666666666665,
      "costs": [
       0.14627279999999998,
-      0.1443936
+      0.1443936,
+      0.134433
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       13,
-      13
+      13,
+      12
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
     },
     "code-migration-py": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.137931,
-     "ratio": 0.3910436818680145,
-     "ci_lo": 0.21385860158525835,
-     "ci_hi": 1.0572596267709555,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.1306295,
+     "ratio": 0.38872146957096454,
+     "ci_lo": 0.23630108531822613,
+     "ci_hi": 0.8743427129785385,
      "adoption": 0,
-     "mean_wall_s": 35.697500000000005,
+     "mean_wall_s": 33.79633333333334,
      "costs": [
       0.15669,
-      0.119172
+      0.119172,
+      0.1160265
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       11,
-      7
+      7,
+      8
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
@@ -3104,9 +3142,9 @@
      "n": 2,
      "successes": 2,
      "mean_cost": 0.23034037500000004,
-     "ratio": 0.936656824954459,
-     "ci_lo": 0.7014023010769207,
-     "ci_hi": 1.22181660353003,
+     "ratio": 0.873858438754829,
+     "ci_lo": 0.653796742750324,
+     "ci_hi": 1.1411264034465727,
      "adoption": 0,
      "mean_wall_s": 112.99549999999999,
      "costs": [
@@ -3494,9 +3532,9 @@
   },
   "tok-hooksonly": {
    "version": "0.5.1",
-   "aggregate_cost_ratio": 0.9620043742883019,
-   "n_success": 43,
-   "n_runs": 43,
+   "aggregate_cost_ratio": 0.9659501708837313,
+   "n_success": 45,
+   "n_runs": 45,
    "tasks_compared": 20,
    "per_task": {
     "code-bugfix-py": {
@@ -3505,7 +3543,7 @@
      "mean_cost": 0.0880257,
      "ratio": 1.0043505346605144,
      "ci_lo": 0.9748933605862525,
-     "ci_hi": 1.033317481640384,
+     "ci_hi": 1.0337143524930548,
      "adoption": 0,
      "mean_wall_s": 18.766666666666666,
      "costs": [
@@ -3534,7 +3572,7 @@
      "successes": 3,
      "mean_cost": 0.0712189,
      "ratio": 0.9201253725712617,
-     "ci_lo": 0.9095537005517192,
+     "ci_lo": 0.9093774106391803,
      "ci_hi": 0.9358223009882933,
      "adoption": 0,
      "mean_wall_s": 10.826666666666666,
@@ -3590,53 +3628,61 @@
      ]
     },
     "code-iterate-tests": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.11791905,
-     "ratio": 1.0168424510998493,
-     "ci_lo": 0.9963014852968674,
-     "ci_hi": 1.0377993043778206,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.1291753,
+     "ratio": 1.1139076228443017,
+     "ci_lo": 1.0032690703597174,
+     "ci_hi": 1.3021093808345332,
      "adoption": 0,
-     "mean_wall_s": 77.7,
+     "mean_wall_s": 64.352,
      "costs": [
       0.1166949,
-      0.1191432
+      0.1191432,
+      0.1516878
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       10,
-      10
+      10,
+      11
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
     },
     "code-migration-py": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.12564015,
-     "ratio": 0.35619829368633327,
-     "ci_lo": 0.2159802830595497,
-     "ci_hi": 0.8834180477031983,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.12711360000000002,
+     "ratio": 0.3782590103648545,
+     "ci_lo": 0.22862782318854466,
+     "ci_hi": 0.8576940282948022,
      "adoption": 0,
-     "mean_wall_s": 29.847499999999997,
+     "mean_wall_s": 31.49533333333333,
      "costs": [
       0.13092600000000001,
-      0.1203543
+      0.1203543,
+      0.13006050000000002
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       9,
-      8
+      8,
+      9
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
@@ -3645,9 +3691,9 @@
      "n": 2,
      "successes": 2,
      "mean_cost": 0.18996467499999997,
-     "ratio": 0.7724729515570409,
-     "ci_lo": 0.6414503307793434,
-     "ci_hi": 0.9312897977266311,
+     "ratio": 0.7206823133550445,
+     "ci_lo": 0.5979138309865064,
+     "ci_hi": 0.8697863283048414,
      "adoption": 0,
      "mean_wall_s": 87.598,
      "costs": [
@@ -4035,9 +4081,9 @@
   },
   "tok-mcponly": {
    "version": "0.5.1",
-   "aggregate_cost_ratio": 0.9825154958144345,
-   "n_success": 43,
-   "n_runs": 43,
+   "aggregate_cost_ratio": 0.9808830715465872,
+   "n_success": 45,
+   "n_runs": 45,
    "tasks_compared": 20,
    "per_task": {
     "code-bugfix-py": {
@@ -4075,7 +4121,7 @@
      "successes": 3,
      "mean_cost": 0.0787847,
      "ratio": 1.0178730848189887,
-     "ci_lo": 1.013118642710135,
+     "ci_lo": 1.013315018291351,
      "ci_hi": 1.0220289525590864,
      "adoption": 0,
      "mean_wall_s": 11.537666666666667,
@@ -4131,53 +4177,61 @@
      ]
     },
     "code-iterate-tests": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.12793905,
-     "ratio": 1.103247161450047,
-     "ci_lo": 1.0612201512702757,
-     "ci_hi": 1.1461250813344865,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.12908029999999998,
+     "ratio": 1.1130884165086459,
+     "ci_lo": 1.0728380964217927,
+     "ci_hi": 1.1454961817432714,
      "adoption": 0,
-     "mean_wall_s": 27.570999999999998,
+     "mean_wall_s": 28.508333333333333,
      "costs": [
       0.13157939999999999,
-      0.12429869999999998
+      0.12429869999999998,
+      0.13136279999999997
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       10,
+      10,
       10
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
     },
     "code-migration-py": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.13656735,
-     "ratio": 0.38717764220485457,
-     "ci_lo": 0.23356369808919458,
-     "ci_hi": 0.9647661093938825,
-     "adoption": 2,
-     "mean_wall_s": 32.4305,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.1337064,
+     "ratio": 0.39787757205717855,
+     "ci_lo": 0.23994112481958166,
+     "ci_hi": 0.8973022977128134,
+     "adoption": 3,
+     "mean_wall_s": 34.107,
      "costs": [
       0.1301526,
-      0.1429821
+      0.1429821,
+      0.1279845
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       7,
-      7
+      7,
+      6
      ],
      "competitor_tool_calls": [
+      1,
       1,
       1
      ]
@@ -4186,9 +4240,9 @@
      "n": 2,
      "successes": 2,
      "mean_cost": 0.27315692500000005,
-     "ratio": 1.1107661784644716,
-     "ci_lo": 0.7882106820818858,
-     "ci_hi": 1.5017463492631062,
+     "ratio": 1.036294588022486,
+     "ci_lo": 0.7347132676281789,
+     "ci_hi": 1.4025692607814608,
      "adoption": 0,
      "mean_wall_s": 121.75,
      "costs": [
@@ -4576,9 +4630,9 @@
   },
   "token-optimizer-mcp": {
    "version": "5.0.1",
-   "aggregate_cost_ratio": 1.0332255691530674,
-   "n_success": 43,
-   "n_runs": 43,
+   "aggregate_cost_ratio": 1.0185219646573134,
+   "n_success": 45,
+   "n_runs": 45,
    "tasks_compared": 20,
    "per_task": {
     "code-bugfix-py": {
@@ -4587,7 +4641,7 @@
      "mean_cost": 0.0958978,
      "ratio": 1.0941691654001853,
      "ci_lo": 1.0700473877116046,
-     "ci_hi": 1.1216195107727873,
+     "ci_hi": 1.1243772694709913,
      "adoption": 0,
      "mean_wall_s": 21.136666666666667,
      "costs": [
@@ -4646,7 +4700,7 @@
      "successes": 3,
      "mean_cost": 0.14469549999999998,
      "ratio": 0.9467388836508744,
-     "ci_lo": 0.7161127006106573,
+     "ci_lo": 0.7068112321237547,
      "ci_hi": 1.2656443353957751,
      "adoption": 0,
      "mean_wall_s": 40.647666666666666,
@@ -4672,53 +4726,61 @@
      ]
     },
     "code-iterate-tests": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.13141334999999998,
-     "ratio": 1.133206830628659,
-     "ci_lo": 1.1159203751964764,
-     "ci_hi": 1.149967578409058,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.1287307,
+     "ratio": 1.1100737371934337,
+     "ci_lo": 1.068673286676213,
+     "ci_hi": 1.1452226713947373,
      "adoption": 0,
-     "mean_wall_s": 27.6855,
+     "mean_wall_s": 28.625333333333334,
      "costs": [
       0.13160070000000001,
-      0.13122599999999998
+      0.13122599999999998,
+      0.1233654
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       10,
+      10,
       10
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
     },
     "code-migration-py": {
-     "n": 2,
-     "successes": 2,
-     "mean_cost": 0.46412594999999995,
-     "ratio": 1.3158283514111404,
-     "ci_lo": 0.8210562754342016,
-     "ci_hi": 3.176171477268817,
+     "n": 3,
+     "successes": 3,
+     "mean_cost": 0.3632485,
+     "ratio": 1.0809387675789044,
+     "ci_lo": 0.4805654887931555,
+     "ci_hi": 2.4510050005431707,
      "adoption": 0,
-     "mean_wall_s": 62.415000000000006,
+     "mean_wall_s": 54.006,
      "costs": [
       0.47072099999999995,
-      0.45753089999999996
+      0.45753089999999996,
+      0.1614936
      ],
      "scores": [
+      1.0,
       1.0,
       1.0
      ],
      "tool_calls": [
       41,
-      40
+      40,
+      7
      ],
      "competitor_tool_calls": [
+      0,
       0,
       0
      ]
@@ -4727,9 +4789,9 @@
      "n": 2,
      "successes": 2,
      "mean_cost": 0.2113311,
-     "ratio": 0.8593574493404955,
-     "ci_lo": 0.6815245571519692,
-     "ci_hi": 1.0749145715760322,
+     "ratio": 0.8017416187081428,
+     "ci_lo": 0.6352681405324464,
+     "ci_hi": 1.0039259538059824,
      "adoption": 0,
      "mean_wall_s": 87.858,
      "costs": [
@@ -5120,77 +5182,161 @@
   {
    "rank": 1,
    "competitor": "tok-hooksonly",
-   "aggregate_cost_ratio": 0.9620043742883019,
-   "n_success": 43,
-   "n_runs": 43,
+   "aggregate_cost_ratio": 0.9659501708837313,
+   "n_success": 45,
+   "n_runs": 45,
    "tasks_compared": 20
   },
   {
    "rank": 2,
    "competitor": "tok-mcponly",
-   "aggregate_cost_ratio": 0.9825154958144345,
-   "n_success": 43,
-   "n_runs": 43,
+   "aggregate_cost_ratio": 0.9808830715465872,
+   "n_success": 45,
+   "n_runs": 45,
    "tasks_compared": 20
   },
   {
    "rank": 3,
    "competitor": "claude-token-efficient",
-   "aggregate_cost_ratio": 0.9933068877495977,
-   "n_success": 44,
-   "n_runs": 44,
+   "aggregate_cost_ratio": 0.9828590415954802,
+   "n_success": 46,
+   "n_runs": 46,
    "tasks_compared": 20
   },
   {
    "rank": 4,
    "competitor": "token-optimizer-mcp",
-   "aggregate_cost_ratio": 1.0332255691530674,
-   "n_success": 43,
-   "n_runs": 43,
+   "aggregate_cost_ratio": 1.0185219646573134,
+   "n_success": 45,
+   "n_runs": 45,
    "tasks_compared": 20
   },
   {
    "rank": 5,
    "competitor": "serena",
-   "aggregate_cost_ratio": 1.0350998902778683,
-   "n_success": 43,
-   "n_runs": 44,
+   "aggregate_cost_ratio": 1.0334399285395701,
+   "n_success": 44,
+   "n_runs": 45,
    "tasks_compared": 20
   },
   {
    "rank": 6,
    "competitor": "lean-ctx",
-   "aggregate_cost_ratio": 1.0533956522313972,
-   "n_success": 44,
-   "n_runs": 44,
+   "aggregate_cost_ratio": 1.0404146554199714,
+   "n_success": 46,
+   "n_runs": 46,
    "tasks_compared": 20
   },
   {
    "rank": 7,
    "competitor": "rtk",
-   "aggregate_cost_ratio": 1.0602876712441702,
-   "n_success": 43,
-   "n_runs": 43,
+   "aggregate_cost_ratio": 1.0488774223232495,
+   "n_success": 45,
+   "n_runs": 45,
    "tasks_compared": 20
   },
   {
    "rank": 8,
    "competitor": "squeez",
-   "aggregate_cost_ratio": 1.087229659456586,
-   "n_success": 43,
-   "n_runs": 43,
+   "aggregate_cost_ratio": 1.081770672562066,
+   "n_success": 45,
+   "n_runs": 45,
    "tasks_compared": 20
   },
   {
    "rank": 9,
    "competitor": "codegraph",
-   "aggregate_cost_ratio": 1.1124619724049363,
+   "aggregate_cost_ratio": 1.1112963736464239,
    "n_success": 42,
    "n_runs": 42,
    "tasks_compared": 20
   }
  ],
  "non_ok": [
+  {
+   "competitor": "claude-token-efficient",
+   "task": "code-qa-click",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "config-peek",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "data-analysis",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "data-bigvolume",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "doc-digest",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "doc-digest-fr",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "doc-digest-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "html-extract",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "log-forensics",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "log-needle",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "log-needle-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "report-pdf",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "seo-audit",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "task": "writing-brief",
+   "status": "claude_error",
+   "n": 1
+  },
   {
    "competitor": "codegraph",
    "task": "code-feature-js",
@@ -5204,8 +5350,806 @@
    "n": 1
   },
   {
+   "competitor": "codegraph",
+   "task": "code-migration-py",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "code-overview-cobra",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "code-qa-click",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "config-peek",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "data-analysis",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "data-bigvolume",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "doc-digest",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "doc-digest-fr",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "doc-digest-zh",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "html-extract",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "log-forensics",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "log-needle",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "log-needle-zh",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "report-pdf",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "seo-audit",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "codegraph",
+   "task": "writing-brief",
+   "status": "install_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "code-qa-click",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "config-peek",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "data-analysis",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "data-bigvolume",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "doc-digest",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "doc-digest-fr",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "doc-digest-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "html-extract",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "log-forensics",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "log-needle",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "log-needle-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "report-pdf",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "seo-audit",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "control",
+   "task": "writing-brief",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "code-qa-click",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "config-peek",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "data-analysis",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "data-bigvolume",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "doc-digest",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "doc-digest-fr",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "doc-digest-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "html-extract",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "log-forensics",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "log-needle",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "log-needle-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "report-pdf",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "seo-audit",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "lean-ctx",
+   "task": "writing-brief",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "code-overview-cobra",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "code-qa-click",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "config-peek",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "data-analysis",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "data-bigvolume",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "doc-digest",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "doc-digest-fr",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "doc-digest-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "html-extract",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "log-forensics",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "log-needle",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "log-needle-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "report-pdf",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "seo-audit",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "rtk",
+   "task": "writing-brief",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "code-overview-cobra",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "code-qa-click",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "config-peek",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "data-analysis",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "data-bigvolume",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
    "competitor": "serena",
    "task": "doc-digest",
+   "status": "claude_error",
+   "n": 2
+  },
+  {
+   "competitor": "serena",
+   "task": "doc-digest-fr",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "doc-digest-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "html-extract",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "log-forensics",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "log-needle",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "log-needle-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "report-pdf",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "seo-audit",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "serena",
+   "task": "writing-brief",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "code-overview-cobra",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "code-qa-click",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "config-peek",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "data-analysis",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "data-bigvolume",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "doc-digest",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "doc-digest-fr",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "doc-digest-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "html-extract",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "log-forensics",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "log-needle",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "log-needle-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "report-pdf",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "seo-audit",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "squeez",
+   "task": "writing-brief",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "code-overview-cobra",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "code-qa-click",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "config-peek",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "data-analysis",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "data-bigvolume",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "doc-digest",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "doc-digest-fr",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "doc-digest-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "html-extract",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "log-forensics",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "log-needle",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "log-needle-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "report-pdf",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "seo-audit",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-hooksonly",
+   "task": "writing-brief",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "code-overview-cobra",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "code-qa-click",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "config-peek",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "data-analysis",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "data-bigvolume",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "doc-digest",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "doc-digest-fr",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "doc-digest-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "html-extract",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "log-forensics",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "log-needle",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "log-needle-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "report-pdf",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "seo-audit",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "tok-mcponly",
+   "task": "writing-brief",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "code-overview-cobra",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "code-qa-click",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "config-peek",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "data-analysis",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "data-bigvolume",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "doc-digest",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "doc-digest-fr",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "doc-digest-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "html-extract",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "log-forensics",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "log-needle",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "log-needle-zh",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "report-pdf",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "seo-audit",
+   "status": "claude_error",
+   "n": 1
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "task": "writing-brief",
    "status": "claude_error",
    "n": 1
   }

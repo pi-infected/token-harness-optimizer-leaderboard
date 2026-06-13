@@ -6,7 +6,8 @@
   "install_doc": "README: `claude mcp add claude-context -e OPENAI_API_KEY=... -- npx -y @zilliz/claude-context-mcp`",
   "version_pin": "0.1.14",
   "version_checked": "2026-06-10",
-  "notes": "Semantic code search via embeddings. Requires OPENAI_API_KEY (embedding cost is external to total_cost_usd — report separately). Mark verified:true after one sandboxed session confirms the server starts and indexes.",
+  "notes": "Semantic code search via embeddings. NON-OPERATIONAL in the default harness: verified 2026-06-13 that without OPENAI_API_KEY (and a Milvus/Zilliz vector DB) the MCP server never completes its handshake — stderr shows 'OpenAI API Key: ❌ Missing', stdout returns no tools. Its near-1.0 cost ratio therefore just reflects vanilla Claude Code with an inert server, NOT a real measurement of the tool. Excluded from the headline ranking and flagged as 'requires paid external services' unless an OPENAI_API_KEY + vector DB are provisioned. Embedding cost would also be external to total_cost_usd.",
+  "operational": false,
   "mcp": {
     "mcpServers": {
       "claude-context": {

@@ -2,8 +2,8 @@
   "name": "tokenade",
   "display_name": "Tokenade",
   "verified": true,
-  "version_pin": "0.5.1",
-  "version_checked": "2026-06-10",
+  "version_pin": "0.5.6",
+  "version_checked": "2026-06-13",
   "upstream": "https://tokenade.net",
   "install_doc": "replicates what `tokenade install` writes: MCP server + hooks (validated against a live install)",
   "requires": [
