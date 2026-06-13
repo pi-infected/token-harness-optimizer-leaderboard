@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THOL — Token-Harness Optimizer Leaderboard</title>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#262b36;
+        --good:#3fb950;--warn:#d29922;--bad:#f85149;--accent:#58a6ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:28px;margin:0 0 4px} h2{font-size:19px;margin:34px 0 10px}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  .sub{color:var(--mut);margin:0 0 20px}
+  .banner{border:1px solid var(--warn);background:rgba(210,153,34,.1);
+          color:#f0d28a;padding:10px 14px;border-radius:8px;margin:0 0 22px;font-size:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px 0;overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  td.num,th.num{text-align:right}
+  .ratio{font-weight:700} .r-good{color:var(--good)} .r-warn{color:var(--ink)} .r-bad{color:var(--bad)}
+  .pill{font-size:12px;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+  .meta{color:var(--mut);font-size:13px;margin-top:8px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  code{background:#0b0d11;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:13px}
+  .foot{color:var(--mut);font-size:12px;margin-top:40px;border-top:1px solid var(--line);padding-top:16px}
+  details{margin:6px 0} summary{cursor:pointer;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>THOL — Token-Harness Optimizer Leaderboard</h1>
+  <p class="sub">An open, reproducible, <b>end-to-end</b> benchmark of tools that claim to cut the
+     token cost of coding agents. We measure the only thing that matters:
+     <b>did the task succeed, and what did the whole session actually cost</b> — with and without each optimizer.</p>
+
+  <div id="banner"></div>
+  <div id="content">Loading results…</div>
+
+  <h2>How to read this</h2>
+  <p class="sub"><b>Cost ratio vs control</b> = mean end-to-end USD of an optimizer's successful runs ÷ the same for
+     vanilla Claude Code, geometric-mean-aggregated across tasks. <b>Lower is better; 1.00 = no difference.</b>
+     A ratio is only a real effect if it sits outside the control's own noise floor. <b>Adoption</b> = share of
+     runs in which the agent actually invoked the optimizer's tools — a tool the agent never calls cannot save anything.</p>
+
+  <h2>Method &amp; reproduction</h2>
+  <p class="sub">Each run is one fully isolated headless Claude Code session (throwaway <code>HOME</code>, throwaway
+     <code>/tmp</code> workspace, <code>--strict-mcp-config</code>), single pinned model and Claude Code version,
+     deterministic fixtures, programmatic verifiers scoring against ground truth never present in the workspace.
+     Every step, manifest and verifier is in the repository.
+     → <a id="repolink" href="#">Full method &amp; exact reproduction steps in the README</a>.</p>
+
+  <h2>Impartiality</h2>
+  <p class="sub">This benchmark is maintained by the author of one of the measured tools (tokenade). The conflict is
+     handled by construction: the harness cannot tell competitors apart, install steps follow each tool's own
+     documentation, verifiers are frozen before any run and check task outcomes (not tool behaviour), the control
+     is a first-class entry whose variance bounds every claim, and all raw data — including runs unfavourable to
+     any tool, tokenade included — is published unedited.</p>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const fmt2 = x => (x==null? "—" : x.toFixed(2));
+function ratioClass(r, floor){ if(r==null) return "r-warn";
+  if(r < 1-floor) return "r-good"; if(r > 1+floor) return "r-bad"; return "r-warn"; }
+
+fetch("data/results.json").then(r=>r.json()).then(d=>{
+  // repo link (best-effort; adjust if hosted elsewhere)
+  document.getElementById("repolink").href = "https://github.com/";
+  // median control CV as the noise floor reference
+  const cvs = Object.values(d.control_noise_floor||{}).map(v=>v.cv).filter(v=>v!=null).sort((a,b)=>a-b);
+  const floor = cvs.length? cvs[Math.floor(cvs.length/2)] : 0.08;
+
+  // preliminary if any compared cell has fewer than 3 reps
+  let maxRep=0, minRep=99;
+  for(const c of Object.values(d.competitors||{}))
+    for(const pt of Object.values(c.per_task||{})){ maxRep=Math.max(maxRep,pt.n); minRep=Math.min(minRep,pt.n); }
+  const prelim = minRep < 3;
+  document.getElementById("banner").innerHTML = prelim
+    ? `<div class="banner">⚠️ <b>Preliminary.</b> The campaign is still running — some cells have fewer than 3
+        repetitions (currently ${minRep}–${maxRep}). Rankings and confidence intervals will firm up on completion.</div>`
+    : "";
+
+  // ranking table
+  const rows = (d.ranking||[]).map(e=>{
+    const c = d.competitors[e.competitor]||{};
+    let adopt=0, runs=0;
+    for(const pt of Object.values(c.per_task||{})){ adopt+=pt.adoption||0; runs+=pt.n||0; }
+    const r = e.aggregate_cost_ratio;
+    const rank = e.rank==null? "—" : e.rank;
+    return `<tr>
+      <td class="num">${rank}</td>
+      <td>${e.competitor}${c.version?` <span class="pill">${c.version}</span>`:""}</td>
+      <td class="num ratio ${ratioClass(r,floor)}">${r==null?"n/a":fmt2(r)}</td>
+      <td class="num">${e.n_success}/${e.n_runs}</td>
+      <td class="num">${adopt}/${runs}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("content").innerHTML = `
+    <h2 style="margin-top:6px">Ranking — cost per solved task vs control (lower is better)</h2>
+    <div class="card"><table>
+      <thead><tr><th class="num">#</th><th>Optimizer</th>
+        <th class="num">cost ratio</th><th class="num">success</th><th class="num">adoption</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    <p class="meta">Model: <code>${(d.model||[]).join(", ")}</code> ·
+      Claude Code: <code>${(d.claude_versions||[]).join(", ")}</code> ·
+      control noise floor (median CV): <b>${(floor*100).toFixed(0)}%</b> ·
+      bootstrap ${d.params?.bootstrap_draws?.toLocaleString?.()||""} draws, ${d.params?.ci||"95%"} CI.</p>`;
+
+  document.getElementById("foot").innerHTML =
+    `Generated from <code>results.json</code> (every raw per-run measurement is in that file). ` +
+    `Tasks compared: ${ (d.tasks||[]).length }. THOL is open-source and re-runnable end to end.`;
+}).catch(e=>{
+  document.getElementById("content").innerHTML =
+    `<div class="banner">Could not load <code>data/results.json</code> yet. ${e}</div>`;
+});
+</script>
+</body>
+</html>

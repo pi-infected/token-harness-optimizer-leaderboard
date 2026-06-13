@@ -222,7 +222,13 @@ def main():
     d = compute(ok, bad)
     md = render_md(d)
     (ROOT / "leaderboard.md").write_text(md)
-    (ROOT / "results.json").write_text(json.dumps(d, indent=1))
+    payload = json.dumps(d, indent=1)
+    (ROOT / "results.json").write_text(payload)
+    # also publish into the GitHub Pages tree (committed, since the sqlite DB
+    # is gitignored — results.json is the published dataset of record)
+    site_data = ROOT / "docs" / "data"
+    site_data.mkdir(parents=True, exist_ok=True)
+    (site_data / "results.json").write_text(payload)
     print(md)
 
 
