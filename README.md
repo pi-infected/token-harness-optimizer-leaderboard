@@ -110,7 +110,10 @@ Dataset: **720 runs** = 12 entries × 20 tasks × 3 repetitions, model
 generated 2026-06-13. Infrastructure-noise runs (transient API 401s during a
 credential rotation, usage-policy false-positives) are excluded from scoring,
 not silently dropped. Regenerate anytime with `python3 leaderboard.py`; every
-raw per-run measurement lives in `docs/data/results.json`.
+raw per-run measurement lives in `docs/data/results.json`. All 20 task
+verifiers pass `python3 runner.py selftest` (they award no credit on an
+untouched workspace), so reported successes are earned, not an artifact of a
+lenient grader.
 
 End-to-end **cost per solved task, relative to control** (vanilla Claude Code).
 Lower is better; **1.00 = no difference**. Control's median per-task
