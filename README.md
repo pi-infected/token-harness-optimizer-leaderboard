@@ -80,7 +80,9 @@ failed runs never count as savings.
    delta smaller than the control noise floor is presented as a real effect.
 2. **Fixed everything else.** Model ID, Claude Code version, repo commits
    (`repos.lock.json`), task prompts and fixtures are pinned. Fixtures are
-   generated deterministically (`fixtures/generate_fixtures.py`, fixed seed).
+   generated deterministically (`fixtures/generate_fixtures.py`, fixed seed) —
+   verified byte-identical (same SHA-256 over `fixtures/out` + `fixtures/truth`)
+   across regenerations, so anyone reproduces the exact same inputs + ground truth.
 3. **Pre-registered tasks.** The task set is frozen before competitor runs;
    tasks are never added/removed to flatter or punish a specific tool.
 4. **Everything published.** Full per-run transcripts, raw results DB, all
