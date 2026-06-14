@@ -210,6 +210,18 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       label quality, it's that command output is a fraction of the budget.
       (Scoped to Bash, the deployed surface; needs `pip install model2vec`.)
 
+- [x] **Input-token breakdown — why a content filter can't win** (`research/
+      input_breakdown.py`, control runs). Content composition: **Read outputs 57%**,
+      model-generated tool-call args 17%, **Bash 14%**, thinking/text ~8%. Billed
+      usage: **86.7% cache_read** (context re-read every turn), 11.2% fresh, 2.1%
+      output. So ~85% of input content is either **model-generated** (unfilterable)
+      or **needed file content** (filtering Read backfires *and* breaks the cache —
+      you repay fresh cache_creation to save ~10×-cheaper cache_read); only ~14%
+      (Bash) is cleanly droppable noise. The budget is **fundamentally hard to
+      compress with a content filter** — the real levers are **fewer turns** and
+      **less accumulated/re-read context**, not line filtering. This is the
+      mechanistic reason the learned filter is end-to-end neutral.
+
 ## Conclusions & implications for tokenade
 
 What this track established, end to end:
