@@ -48,3 +48,6 @@ reports/
 # QA artifacts
 .playwright-mcp/
 *-page-check.png
+
+# generated research dataset (derived from transcripts; rebuild with research/build_dataset.py)
+research/dataset/
