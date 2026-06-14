@@ -166,8 +166,21 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       approach validated as safe; **leverage requires compressing `Read` too**
       and/or the long-session regime where command output dominates. (learned-hook
       is excluded from the public leaderboard — it's our own research baseline.)
-- [ ] **Extend compaction to `Read` outputs** (the dominant output type) — the
-      single change most likely to convert line-compression into end-to-end savings.
+- [x] **Extended compaction to `Read` — and it BACKFIRED (key negative result).**
+      Bash+Read learned-hook scored **+13.8% vs control** (worse than Bash-only's
+      +3.9%, and worse than doing nothing): turns rose 6.6→8.2 and one task failed.
+      Mechanism = the lossy-compaction re-fetch loop, now reproduced by our own
+      hook — the model re-reads to recover dropped content (the "re-run for full
+      output" marker invites it), `Read` content (docs/code) must be reasoned over
+      in full, and non-Latin breaks the line features (`doc-digest-zh` **2.64×**,
+      the same failure mode as squeez). **Lesson: WHERE you compress matters more
+      than per-line recall.** Command-noise (`Bash`) is safe to compress; file
+      content (`Read`) is not. ⇒ compression must be a **gated per-output
+      decision** (don't compress content surfaces), which merges with the routing
+      model. Deployed learned-hook reverted to Bash-only (+3.9%, safe).
+- [ ] **Per-output gate**: a model that decides *whether* to compress an output
+      at all (surface + content type + cache-friendliness), upstream of the
+      per-line scorer. Likely the highest-value next model.
 - [ ] Long-session / high-noise task for the eval battery
 - [~] **Tier-2 routing data — descriptive pass** (`research/tool_calls.py`, 193
       tokenade tool calls). Usefulness proxy (result referenced downstream ∧ no
