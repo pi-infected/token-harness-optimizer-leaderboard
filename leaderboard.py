@@ -32,8 +32,11 @@ SEED = 1234
 def rows():
     con = sqlite3.connect(DB)
     con.row_factory = sqlite3.Row
+    # 'learned-hook' is THIS repo's own research baseline (RESEARCH.md), not a
+    # surveyed third-party tool — kept out of the impartial public ranking.
     out = [dict(r) for r in con.execute(
-        "SELECT * FROM runs WHERE status='ok' AND score IS NOT NULL")]
+        "SELECT * FROM runs WHERE status='ok' AND score IS NOT NULL "
+        "AND competitor != 'learned-hook'")]
     bad = [dict(r) for r in con.execute(
         "SELECT competitor, task, status, COUNT(*) n FROM runs "
         "WHERE status!='ok' GROUP BY competitor, task, status")]

@@ -155,9 +155,19 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       hook keeps the linear model* (fast, 32%) until the GBM is exported to a
       pure-Python tree evaluator. Features cached (`features.npz`); split made
       deterministic (hashlib, not Python's salted `hash()`).
-- [~] End-to-end eval: wire the scorer as `competitors/learned-hook/` and measure
-      real session cost via THOL (does 32% line-compression convert to end-to-end
-      savings without extra re-fetches?).
+- [x] **End-to-end eval** (`competitors/learned-hook/`, logistic model in a
+      PostToolUse Bash hook, 60 runs). Result: **+3.9% vs control, CI [0.93,1.15]
+      — indistinguishable from control, 0 task failures**, and *better than every
+      static compactor* (rtk +8.3%, squeez +10.4%, tokenade +7.8%; only
+      tok-hooksonly +2.2% is comparable). So the learned compaction is **safe**
+      (high recall ⇒ no re-fetch / no lost success) and overhead-free. BUT it only
+      fired on **12/60 runs** — Bash-only, and Bash stdout is a small share of
+      total tokens vs Read+cache — so it can't move the aggregate yet. Verdict:
+      approach validated as safe; **leverage requires compressing `Read` too**
+      and/or the long-session regime where command output dominates. (learned-hook
+      is excluded from the public leaderboard — it's our own research baseline.)
+- [ ] **Extend compaction to `Read` outputs** (the dominant output type) — the
+      single change most likely to convert line-compression into end-to-end savings.
 - [ ] Long-session / high-noise task for the eval battery
 - [ ] Tier-2 routing data (forced-adoption arm / decision-point A/B)
 - [ ] Stronger model + richer features (embeddings, cross-line context) once the
