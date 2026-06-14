@@ -136,10 +136,13 @@ than that are not real effects.
 
 **Findings.**
 
-1. **No optimizer reduces end-to-end session cost.** Every tool sits *at or
-   above* control (+1.1% to +12.3%). The four leaders are within the noise
-   floor (statistically indistinguishable from doing nothing); the rest are
-   measurably **more expensive**.
+1. **No optimizer reduces end-to-end session cost.** Every point estimate sits
+   *at or above* control (+1.1% to +12.3%). With a 95% bootstrap CI on the
+   aggregate ratio (resampling tasks **and** runs), **only `codegraph` is
+   significantly more expensive** (CI `[1.04, 1.24]`, excludes 1.00); the other
+   ten — tokenade included — are **statistically indistinguishable from doing
+   nothing** (CIs straddle 1.00). Crucially, **none is significantly cheaper.**
+   The per-row CI and a significance verdict are in `leaderboard.md`.
 2. **The cause is adoption, not compression.** Across 60 runs each, the agent
    invoked an optimizer's tools in **0–4** of them. A compaction/index tool the
    agent never calls cannot save tokens — but its always-loaded MCP tool

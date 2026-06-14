@@ -53,6 +53,30 @@ def boot_ratio(comp_costs, ctrl_costs, rng):
     return draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws))]
 
 
+def boot_aggregate(pairs, rng):
+    """95% CI on the AGGREGATE geometric-mean cost ratio. Each draw resamples
+    tasks (with replacement) and, within each, the competitor's and control's
+    successful-run costs — so both the across-task and within-task variance feed
+    the interval. A tool whose interval excludes 1.00 differs significantly from
+    control overall; one that straddles 1.00 is within the noise."""
+    if not pairs:
+        return None, None
+    n = len(pairs)
+    draws = []
+    for _ in range(BOOT):
+        logs = []
+        for _ in range(n):
+            comp_costs, ctrl_costs = rng.choice(pairs)
+            a = st.mean([rng.choice(comp_costs) for _ in comp_costs])
+            b = st.mean([rng.choice(ctrl_costs) for _ in ctrl_costs])
+            if a > 0 and b > 0:
+                logs.append(math.log(a / b))
+        if logs:
+            draws.append(math.exp(st.mean(logs)))
+    draws.sort()
+    return draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws))]
+
+
 def compute(ok, bad):
     """Single source of truth: returns a structured dict consumed by both the
     markdown renderer and the JSON export. The RNG is advanced in a fixed
@@ -91,6 +115,7 @@ def compute(ok, bad):
                     None)
         per_task = {}
         ratios = []
+        compared_pairs = []
         n_runs = n_succ = 0
         for t in tasks:
             runs = by.get((c, t), [])
@@ -108,6 +133,7 @@ def compute(ok, bad):
                 ratio = st.mean(costs) / st.mean(ctrl_succ_costs[t])
                 lo, hi = boot_ratio(costs, ctrl_succ_costs[t], rng)
                 ratios.append(ratio)
+                compared_pairs.append((costs, ctrl_succ_costs[t]))
             per_task[t] = {
                 "n": len(runs), "successes": len(succ),
                 "mean_cost": (st.mean(costs) if costs else None),
@@ -121,22 +147,26 @@ def compute(ok, bad):
             }
         agg = (math.exp(st.mean(list(map(math.log, ratios))))
                if ratios else None)
+        agg_lo, agg_hi = boot_aggregate(compared_pairs, rng)
         competitors[c] = {
             "version": cver, "aggregate_cost_ratio": agg,
+            "aggregate_ci_lo": agg_lo, "aggregate_ci_hi": agg_hi,
             "n_success": n_succ, "n_runs": n_runs,
             "tasks_compared": len(ratios), "per_task": per_task,
         }
-        summary.append((c, agg, n_succ, n_runs, len(ratios)))
+        summary.append((c, agg, agg_lo, agg_hi, n_succ, n_runs, len(ratios)))
 
     ranked = sorted([s for s in summary if s[1] is not None],
                     key=lambda s: s[1])
     ranking = [{"rank": i, "competitor": c, "aggregate_cost_ratio": agg,
+                "aggregate_ci_lo": lo, "aggregate_ci_hi": hi,
                 "n_success": ns, "n_runs": nr, "tasks_compared": nt}
-               for i, (c, agg, ns, nr, nt) in enumerate(ranked, 1)]
+               for i, (c, agg, lo, hi, ns, nr, nt) in enumerate(ranked, 1)]
     ranking += [{"rank": None, "competitor": c,
-                 "aggregate_cost_ratio": None, "n_success": ns,
+                 "aggregate_cost_ratio": None, "aggregate_ci_lo": None,
+                 "aggregate_ci_hi": None, "n_success": ns,
                  "n_runs": nr, "tasks_compared": 0}
-                for c, agg, ns, nr, nt in summary if agg is None]
+                for c, agg, lo, hi, ns, nr, nt in summary if agg is None]
 
     return {
         "params": {"bootstrap_draws": BOOT, "seed": SEED, "ci": "95%"},
@@ -162,18 +192,26 @@ def render_md(d):
     # ---- ranking (inserted at top after title)
     rank_lines = ["## Ranking (geometric mean cost ratio vs control, "
                   "successful runs only — lower is better)\n",
-                  "| rank | competitor | agg. cost ratio | success | "
-                  "tasks compared |", "|---|---|---|---|---|"]
+                  "| rank | competitor | agg. cost ratio [95% CI] | "
+                  "vs control | success |", "|---|---|---|---|---|"]
     for e in d["ranking"]:
         if e["rank"] is not None:
+            lo, hi = e.get("aggregate_ci_lo"), e.get("aggregate_ci_hi")
+            ci = f" [{lo:.2f}, {hi:.2f}]" if lo is not None else ""
+            if lo is not None and lo > 1:
+                verdict = "more expensive (sig.)"
+            elif hi is not None and hi < 1:
+                verdict = "cheaper (sig.)"
+            else:
+                verdict = "≈ control (n.s.)"
             rank_lines.append(
                 f"| {e['rank']} | {e['competitor']} | "
-                f"**{e['aggregate_cost_ratio']:.2f}** | "
-                f"{e['n_success']}/{e['n_runs']} | {e['tasks_compared']} |")
+                f"**{e['aggregate_cost_ratio']:.2f}**{ci} | {verdict} | "
+                f"{e['n_success']}/{e['n_runs']} |")
         else:
             rank_lines.append(
-                f"| — | {e['competitor']} | no comparable successes | "
-                f"{e['n_success']}/{e['n_runs']} | 0 |")
+                f"| — | {e['competitor']} | no comparable successes | — | "
+                f"{e['n_success']}/{e['n_runs']} |")
     L[1:1] = rank_lines
 
     # ---- control noise floor
