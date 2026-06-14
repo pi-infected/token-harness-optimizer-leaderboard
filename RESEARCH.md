@@ -189,6 +189,15 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
 - [ ] Wire the gate into the hook (skip not-worth-it outputs) + export the GBM
       line-scorer to stdlib; re-measure end-to-end on Bash.
 
+- [x] **Cost model — marginal cost per tool call** (`research/cost_model.py`,
+      178 MCP-family runs). Regressing cost-ratio-vs-control on tool-call count:
+      **each tokenade MCP call adds ≈ +5.7% to end-to-end cost** [95% CI +2.9%,
+      +9.0%], atop a ~+11% standing overhead (binned: 0 calls → 1.11, 1–3 → 1.23,
+      4–9 → 1.45; R²=0.12 — task variance dominates, but the slope is significant).
+      **Decision rule: a call must save >~6% of a control session to be worth it —
+      on this battery almost none do.** This is the cost objective a router should
+      optimize (not reference-usefulness).
+
 ## Conclusions & implications for tokenade
 
 What this track established, end to end:
