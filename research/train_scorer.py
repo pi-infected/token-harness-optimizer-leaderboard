@@ -177,6 +177,17 @@ def main():
     for name, c in sorted(zip(FEATS, clf.coef_[0]), key=lambda x: -abs(x[1]))[:8]:
         print(f"  {name:<10} {c:+.2f}")
 
+    # persist for the hook: scaler params + coef + threshold (no sklearn needed
+    # at inference — the hook re-implements the linear score in pure Python)
+    import json
+    model = {
+        "feats": FEATS, "mean": sc.mean_.tolist(), "scale": sc.scale_.tolist(),
+        "coef": clf.coef_[0].tolist(), "intercept": float(clf.intercept_[0]),
+        "threshold": float(chosen), "maxlines": MAXLINES,
+    }
+    (ROOT / "research" / "dataset" / "scorer.json").write_text(json.dumps(model))
+    print(f"\nsaved model -> research/dataset/scorer.json (thr={chosen:.3f})")
+
 
 if __name__ == "__main__":
     main()
