@@ -144,7 +144,7 @@ than that are not real effects.
    significantly more expensive** (CI `[1.04, 1.24]`, excludes 1.00); the other
    ten — tokenade included — are **statistically indistinguishable from doing
    nothing** (CIs straddle 1.00). Crucially, **none is significantly cheaper.**
-   The per-row CI and a significance verdict are in `leaderboard.md`.
+   The per-row CI and a significance verdict are in [RESULTS.md](RESULTS.md).
 2. **The cause is adoption, not compression.** Across 60 runs each, the agent
    invoked an optimizer's tools in **0–4** of them. A compaction/index tool the
    agent never calls cannot save tokens — but its always-loaded MCP tool
@@ -166,7 +166,7 @@ where the MCP tools are triggered on all 3 reps — **tokenade 0.37×** and
 retrieval tasks by hiding bytes the agent then re-fetches: **squeez 3.94×** on
 `log-needle-zh` (verbatim needles in a noisy Chinese log) and **tok-hooksonly
 1.80×** on `log-needle`. Most remaining cells sit within ±5% of control. Full
-per-task ratios with 95% CIs are in `leaderboard.md` / `docs/data/results.json`.
+per-task ratios with 95% CIs are in [RESULTS.md](RESULTS.md) / `docs/data/results.json`.
 
 **Scope & exclusions (for honesty).**
 
