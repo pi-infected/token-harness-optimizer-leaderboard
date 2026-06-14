@@ -218,6 +218,25 @@ What this track established, end to end:
 - **Where tokenade genuinely wins** is the rare heavy-context op (e.g.
   `code-migration-py`, −63% when triggered); target the tooling at those, not at
   everyday turns.
+
+## Reproduce
+
+The datasets under `research/dataset/` are gitignored (regenerated from the run
+transcripts in `runs/`). From a completed campaign:
+
+```bash
+python3 research/build_dataset.py   # decision_points.jsonl + oracle headroom + baselines + re-fetch
+python3 research/train_scorer.py    # per-line scorer (logistic + GBM) -> scorer.json + features.npz
+python3 research/train_gate.py      # per-output gate (whether to compress)
+python3 research/tool_calls.py      # Tier-2 tokenade tool-call dataset
+python3 research/train_router.py    # router feasibility
+# end-to-end arms (each writes rows to results.sqlite; excluded from the public board):
+python3 runner.py run -c learned-hook    -t all --reps 3 --allow-unverified
+python3 runner.py run -c tokenade-forced -t all --reps 3 --allow-unverified
+```
+
+All numbers in this file are from these scripts on the 2.1.177 / sonnet-4-6
+campaign; re-running on new transcripts updates them.
 - [ ] Long-session / high-noise task for the eval battery
 - [~] **Tier-2 routing data — descriptive pass** (`research/tool_calls.py`, 193
       tokenade tool calls). Usefulness proxy (result referenced downstream ∧ no
