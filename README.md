@@ -274,12 +274,15 @@ run on a single version (check with `SELECT DISTINCT claude_version FROM runs`).
   near-zero adoption the board might measure *standing overhead*, not *capability
   when used* — "+7.8%" could mean "useless" or "never invoked." We ran a
   **forced-adoption arm**: tokenade + a CLAUDE.md that mandates the MCP tools.
-  It moved adoption **7% → 91%** — and end-to-end cost went from **+7.8% to
-  +33.0% vs control** (worse). So it is **not** an adoption problem: the MCP
-  tools are **net-negative when used** (each call's schema+result+extra turns
-  exceed its savings), and the agent's low default adoption is already near
-  cost-optimal. The one −63% case (`code-migration-py`) is an exception, not the
-  rule. (Forced arm is a research artifact, excluded from the public board.)
+  It moved adoption **7% → 88%** — and end-to-end cost went from **+7.8% to
+  +32.5% vs control** (worse), and it even caused **2 outright timeouts** on the
+  verbatim-recovery tasks (`log-needle`, `log-needle-zh`), where forced tool use
+  drove the agent into a recovery loop (58/60 completed). So it is **not** an
+  adoption problem: the MCP tools are **net-negative when used** (each call's
+  schema+result+extra turns exceed its savings; on retrieval tasks they actively
+  obstruct), and the agent's low default adoption is already near cost-optimal.
+  The one −63% case (`code-migration-py`) is an exception, not the rule. (Forced
+  arm is a research artifact, excluded from the public board.)
 - **One model, one harness version.** Results are for `claude-sonnet-4-6` on
   Claude Code `2.1.177`. A smarter or cheaper model, or a future CC version,
   could shift both the overhead and the adoption rate. Re-running on more

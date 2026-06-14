@@ -207,8 +207,9 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       not over-fitting a model on 193 points.
 - [x] **Forced-adoption arm — resolves the central confound** (`competitors/
       tokenade-forced/`, tokenade + a tool-mandating CLAUDE.md, 60 runs). It moved
-      adoption **7% → 91%** (clean manipulation of the one variable) and cost went
-      **+7.8% → +33.0% vs control** — *worse*. Verdict: **not an adoption problem;
+      adoption **7% → 88%** (clean manipulation of the one variable) and cost went
+      **+7.8% → +32.5% vs control** — *worse*; it also caused 2 timeouts on the
+      needle/recovery tasks (58/60 completed). Verdict: **not an adoption problem;
       the MCP tools are net-negative when used.** This reframes the router: its
       value is **negative selection** (when NOT to call a tool), and the
       cost-optimal policy is close to the agent's already-low default adoption.
