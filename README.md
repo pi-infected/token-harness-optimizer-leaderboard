@@ -291,6 +291,20 @@ run on a single version (check with `SELECT DISTINCT claude_version FROM runs`).
 - **Small per-task samples.** 3 reps per cell; noisy tasks have wide CIs. The
   aggregate CI is the reliable figure; single per-task ratios should be read
   with their interval.
+- **Task regime ≠ a long real session (likely the biggest caveat).** The 20
+  tasks are mostly short, single-objective, and not command-output-heavy. Real
+  agent work is long, multi-turn, and *noisy* — repeated `git`/`npm`/test runs,
+  large `diff`/log dumps, the same files re-read many times — which is exactly
+  the regime where command-output compaction and read-dedup earn their keep. So
+  the board probably **under-credits hook-based compactors**: it tests them off
+  their home turf. (Anecdote, not data: across the long, command-heavy session
+  that produced this repo, with tokenade's hooks live, they read as *mildly
+  net-helpful* — noisy-command compaction and read-dedup saved tokens; the
+  occasional truncated-read→`expand_ref` round-trip was cheap — the opposite of
+  the +7.8% these same hooks score on the short benchmark tasks.) A
+  **long-session / high-noise task class** (a multi-step debugging or migration
+  *session*, not a one-shot task) is the most important missing piece, and the
+  fairest next addition to the battery.
 
 ## License & contributing
 
