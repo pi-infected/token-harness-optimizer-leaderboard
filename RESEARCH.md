@@ -198,6 +198,18 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       on this battery almost none do.** This is the cost objective a router should
       optimize (not reference-usefulness).
 
+- [x] **Embedding-strengthened label** (`research/embed_relabel.py`, tokenade's
+      bundled model2vec `potion-code-16M`). A line is "needed" if its embedding's
+      max cosine to a downstream chunk clears a (prevalence-matched) threshold —
+      catching semantic reuse the token-overlap label misses. On 58,985 Bash
+      lines it **disagrees with the lexical label on 45%** of lines, is **more
+      learnable** (scorer VAL AUC **0.80 → 0.88**) and yields **more compression
+      at equal recall (24% → 30%)**. So the label *is* better. BUT this lifts
+      filter quality, not the end-to-end verdict: we compress only Bash (a small
+      share of session tokens) and (correctly) never Read — the cost lever isn't
+      label quality, it's that command output is a fraction of the budget.
+      (Scoped to Bash, the deployed surface; needs `pip install model2vec`.)
+
 ## Conclusions & implications for tokenade
 
 What this track established, end to end:
