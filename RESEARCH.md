@@ -247,13 +247,17 @@ campaign; re-running on new transcripts updates them.
       from the tool side, 482 tok); a router should avoid it / fixing compaction
       removes the need. (exec_script 0% is a proxy artifact: a compute tool whose
       output is the answer, not "referenced".)
-- [x] **Router feasibility** (`research/train_router.py`, grouped-CV on 193 calls):
-      tool identity alone predicts usefulness at **AUC 0.847**; adding task context
-      does NOT help (0.817) — with this little data the **per-tool base rate is the
-      signal**. Actionable router today = a base-rate policy (call symbol_find /
-      call_hierarchy / semantic_search freely; **avoid search_stash**). A genuine
-      context-aware router is **data-starved** and needs the forced-adoption arm —
-      not over-fitting a model on 193 points.
+- [x] **Router feasibility** (`research/train_router.py`, grouped-CV). At 193
+      calls tool identity predicted usefulness at AUC 0.847, task context didn't
+      help. Re-run after the forced-adoption arm **doubled the data to 399 calls**:
+      tool-only AUC **0.851**, tool+task **0.845** — context *still* adds nothing.
+      So it was never just data-starvation: **the routing signal is the tool, not
+      the situation** (semantic_search 99% / symbol_find 94% / skeleton 95% useful;
+      **search_stash 21%**). **Key caveat: "useful" = result referenced ≠ end-to-end
+      cost.** The forced-adoption arm proved high-usefulness tool use still costs
+      **+32.5%** — so a router trained on reference-usefulness optimizes the wrong
+      thing. The correct objective is end-to-end cost, and it says: **call fewer
+      tools** (the agent's default restraint is already near-optimal).
 - [x] **Forced-adoption arm — resolves the central confound** (`competitors/
       tokenade-forced/`, tokenade + a tool-mandating CLAUDE.md, 60 runs). It moved
       adoption **7% → 88%** (clean manipulation of the one variable) and cost went

@@ -67,8 +67,11 @@ def main():
             best[t] = max(rates, key=rates.get)
     print(f"\nbest-tool varies across tasks: {len(set(best.values()))} distinct "
           f"winners over {len(best)} tasks (with >=2 calls/tool)")
-    print("verdict: with 193 calls the per-tool base rate dominates; a "
-          "context-aware router needs the forced-adoption arm for data.")
+    print(f"verdict: with {len(rows)} calls, TOOL IDENTITY dominates usefulness; "
+          "task context adds nothing (even at 2x data). BUT 'useful' = result "
+          "referenced, NOT end-to-end cost — the forced-adoption arm showed "
+          "high-usefulness tool use still costs +32.5%. A router must optimize "
+          "cost, not reference-usefulness; that objective says: call fewer tools.")
 
 
 if __name__ == "__main__":
