@@ -197,7 +197,16 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       followed by another recovery — it IS the lossy-compaction re-fetch loop seen
       from the tool side, 482 tok); a router should avoid it / fixing compaction
       removes the need. (exec_script 0% is a proxy artifact: a compute tool whose
-      output is the answer, not "referenced".) Next: per-decision-point
-      counterfactual labels (forced-adoption arm / A/B) before training a router.
+      output is the answer, not "referenced".)
+- [x] **Router feasibility** (`research/train_router.py`, grouped-CV on 193 calls):
+      tool identity alone predicts usefulness at **AUC 0.847**; adding task context
+      does NOT help (0.817) — with this little data the **per-tool base rate is the
+      signal**. Actionable router today = a base-rate policy (call symbol_find /
+      call_hierarchy / semantic_search freely; **avoid search_stash**). A genuine
+      context-aware router is **data-starved** and needs the forced-adoption arm —
+      not over-fitting a model on 193 points.
+- [ ] **Forced-adoption arm**: a campaign that mandates tool use (CLAUDE.md /
+      prompt) to collect the tool-use trajectories a context router needs, and to
+      separate "tool ineffective" from "tool not invoked" (README limitation #1).
 - [ ] Stronger model + richer features (embeddings, cross-line context) once the
       LR baseline's end-to-end value is confirmed.
