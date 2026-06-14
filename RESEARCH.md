@@ -139,7 +139,19 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       that happens to go unused downstream* — only identifiable with task/context
       awareness. **The headroom is real AND out of reach of dumb rules → a
       context-aware learned compactor is warranted.**
+- [x] **Scorer v1** (`research/train_scorer.py`, logistic regression, 18
+      features, split by run). VAL **ROC-AUC 0.838**; at a threshold tuned on
+      train for ≥0.95 recall of needed lines, it compresses **32%** on held-out
+      runs — vs **6%** for the best heuristic and **47%** lossless oracle, i.e. it
+      safely captures ~2/3 of the headroom that rules cannot. Top signals: drop
+      decorative lines (−1.58), **keep lines overlapping the task prompt (+0.87 —
+      context-conditioning is the #2 feature, exactly why context-free rules
+      fail)**, keep salient/path-bearing content. Tiny + interpretable =
+      hook-deployable.
+- [ ] End-to-end eval: wire the scorer as `competitors/learned-hook/` and measure
+      real session cost via THOL (does 32% line-compression convert to end-to-end
+      savings without extra re-fetches?).
 - [ ] Long-session / high-noise task for the eval battery
 - [ ] Tier-2 routing data (forced-adoption arm / decision-point A/B)
-- [ ] A small context-conditioned salience scorer (the actual model), trained on
-      this dataset, evaluated vs the oracle and then end-to-end via THOL.
+- [ ] Stronger model + richer features (embeddings, cross-line context) once the
+      LR baseline's end-to-end value is confirmed.
