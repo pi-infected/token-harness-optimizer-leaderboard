@@ -205,8 +205,14 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       call_hierarchy / semantic_search freely; **avoid search_stash**). A genuine
       context-aware router is **data-starved** and needs the forced-adoption arm —
       not over-fitting a model on 193 points.
-- [ ] **Forced-adoption arm**: a campaign that mandates tool use (CLAUDE.md /
-      prompt) to collect the tool-use trajectories a context router needs, and to
-      separate "tool ineffective" from "tool not invoked" (README limitation #1).
+- [x] **Forced-adoption arm — resolves the central confound** (`competitors/
+      tokenade-forced/`, tokenade + a tool-mandating CLAUDE.md, 60 runs). It moved
+      adoption **7% → 91%** (clean manipulation of the one variable) and cost went
+      **+7.8% → +33.0% vs control** — *worse*. Verdict: **not an adoption problem;
+      the MCP tools are net-negative when used.** This reframes the router: its
+      value is **negative selection** (when NOT to call a tool), and the
+      cost-optimal policy is close to the agent's already-low default adoption.
+      Tool "usefulness" (the Tier-2 proxy) ≠ end-to-end cost-benefit. (Research
+      arm; excluded from the public board.)
 - [ ] Stronger model + richer features (embeddings, cross-line context) once the
       LR baseline's end-to-end value is confirmed.
