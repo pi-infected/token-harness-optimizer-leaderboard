@@ -312,6 +312,24 @@ run on a single version (check with `SELECT DISTINCT claude_version FROM runs`).
   *session*, not a one-shot task) is the most important missing piece, and the
   fairest next addition to the battery.
 
+## Beyond the benchmark — can a *better* optimizer be built?
+
+The benchmark says today's optimizers don't help end to end. [`RESEARCH.md`](RESEARCH.md)
+asks whether a learned one could, mining the run transcripts into training data.
+Headlines (all quantified, reproducible from `research/`):
+
+- **Lossless headroom is real but rules can't get it** — ~47% of output lines
+  (65% on large outputs) are never used downstream; simple denoising captures
+  2–6%, a learned per-line scorer 32% (logistic) / 51% (gradient boosting) at
+  ≥0.95 recall.
+- **Where you compress decides everything** — compacting *command output* (Bash)
+  is safe (≈neutral); compacting *file content* (Read) **backfires (+13.8%)** via
+  re-reads. So compression must be a **gated per-output decision**, not blanket.
+- **The MCP tools are net-negative when used** — a forced-adoption arm (7%→88%
+  adoption) raised cost **+7.8%→+32.5%**; the cost model puts each tool call at
+  **≈+5.7%** end-to-end. The agent's low default adoption is already near optimal;
+  a router's value is *negative selection* (when **not** to call).
+
 ## License & contributing
 
 MIT (see [LICENSE](LICENSE)). Tool maintainers can correct their own entry —
