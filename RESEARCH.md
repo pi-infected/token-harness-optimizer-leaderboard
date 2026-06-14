@@ -126,11 +126,20 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       never referenced downstream**, and **~65% on large (≥30-line) outputs** — real
       lossless compression headroom. By producer: `Read` keeps 0.47, `Bash` 0.51,
       `Edit` 0.77.
-- [ ] **Refine the re-fetch label** — v1 heuristic (same file re-touched) is too
-      coarse: control shows 50%, so it captures normal re-access, not
-      compaction-induced recovery. Need to scope it to bytes a compactor actually
-      dropped (diff delivered-vs-raw, then re-acquisition). `oracle_keep_ratio` is
-      the reliable signal meanwhile.
+- [x] **Refined re-fetch label** — two clean signals that net out normal
+      re-reading: (a) *strong* = an explicit recovery call (`expand_ref` /
+      `search_stash`) after a compacted output → tokenade **4%** of outputs;
+      (b) *excess re-access vs control per task* → **rtk +5 pts, squeez +3 pts**
+      (lossy compaction forcing re-access), tokenade ~+1, tok-hooksonly −1. The
+      v1 (everything ~50%, control included) didn't discriminate; this does.
+- [x] **Heuristic baselines vs oracle — the result that justifies a learned model.**
+      B1 denoise: recall 0.99, **2%** compression. B2 salient: recall 0.96, **6%**.
+      The oracle says **47% (65% on large outputs)** is losslessly droppable. Simple
+      rules capture almost none of it, because the droppable lines are *real content
+      that happens to go unused downstream* — only identifiable with task/context
+      awareness. **The headroom is real AND out of reach of dumb rules → a
+      context-aware learned compactor is warranted.**
 - [ ] Long-session / high-noise task for the eval battery
 - [ ] Tier-2 routing data (forced-adoption arm / decision-point A/B)
-- [ ] Baselines (heuristic salience) before any learned model
+- [ ] A small context-conditioned salience scorer (the actual model), trained on
+      this dataset, evaluated vs the oracle and then end-to-end via THOL.
