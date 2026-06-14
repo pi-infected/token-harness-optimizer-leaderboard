@@ -255,6 +255,30 @@ completion, and all state lives in the project directory (workspaces under
 The Claude Code version is recorded per run; a publishable campaign should
 run on a single version (check with `SELECT DISTINCT claude_version FROM runs`).
 
+## Limitations & future work
+
+- **Adoption confound.** With near-zero adoption, the board mostly measures each
+  tool's *standing overhead*, not its *capability when used*. A "+8%" can mean
+  "the tool is useless" **or** "the agent never reached for it." A planned
+  **forced-adoption arm** (a CLAUDE.md instruction that mandates the tool, or
+  prompts engineered to invoke it) would separate the two — the
+  `code-migration-py` result (−63% when tokenade *is* triggered) hints the
+  capability is real and the bottleneck is triggering.
+- **One model, one harness version.** Results are for `claude-sonnet-4-6` on
+  Claude Code `2.1.177`. A smarter or cheaper model, or a future CC version,
+  could shift both the overhead and the adoption rate. Re-running on more
+  models is the obvious extension.
+- **Finite, general task battery.** 20 tasks chosen to span everyday coding and
+  non-coding work. A tool tuned for a workflow we don't cover (huge monorepos,
+  long multi-session projects) could look better there.
+- **Memory / external-service tools aren't covered.** Cross-session memory
+  tools (claude-mem) can't show value under per-run isolation, and tools
+  requiring paid external services (claude-context → OpenAI + Milvus) aren't
+  provisioned. Both are documented exclusions, not measured.
+- **Small per-task samples.** 3 reps per cell; noisy tasks have wide CIs. The
+  aggregate CI is the reliable figure; single per-task ratios should be read
+  with their interval.
+
 ## License & contributing
 
 MIT (see [LICENSE](LICENSE)). Tool maintainers can correct their own entry —
