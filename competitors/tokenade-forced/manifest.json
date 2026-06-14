@@ -1,0 +1,38 @@
+{
+  "name": "tokenade-forced",
+  "display_name": "Tokenade (forced adoption)",
+  "verified": true,
+  "version_pin": "0.5.6",
+  "version_checked": "2026-06-14",
+  "upstream": "https://tokenade.net",
+  "install_doc": "RESEARCH arm, not a public-board entry: identical to the `tokenade` competitor (MCP + hooks + license) PLUS the tool-mandating CLAUDE.md that `tokenade install` actually writes. Isolates the ADOPTION variable — does forcing the agent to call the tools change end-to-end cost? Separates 'tool ineffective' from 'tool not invoked'.",
+  "requires": ["tokenade"],
+  "claude_md": "# Project rules for AI coding agents\n\n**MANDATORY tool policy — use tokenade MCP tools BEFORE native ones:**\n- Codebase questions / understanding: `mcp__tokenade__semantic_search` (natural language), `mcp__tokenade__symbol_find` (known identifier), `mcp__tokenade__structure_map` (repo overview), `mcp__tokenade__skeleton` (large file signatures), `mcp__tokenade__call_hierarchy` (who calls what). Use these INSTEAD of Grep/Glob and whole-file Read whenever they fit.\n- Noisy shell commands (git, tests, build, data): `mcp__tokenade__exec_compact <cmd>` instead of raw Bash; `mcp__tokenade__exec_script` to compute a derived value without reading data into context.\n- Recover folded bytes with `mcp__tokenade__expand_ref` (hash from the banner) rather than re-running.\n\nFall back to native Read/Bash/Grep only when no tokenade tool fits.",
+  "mcp": {
+    "mcpServers": {
+      "tokenade": {
+        "command": "tokenade",
+        "args": ["mcp"]
+      }
+    }
+  },
+  "settings": {
+    "hooks": {
+      "PreToolUse": [
+        {"matcher": "Bash|Grep|Glob|Read|Task|Agent|WebFetch", "hooks": [{"type": "command", "command": "tokenade hookwrap-pretool"}]},
+        {"matcher": "Edit|Write|MultiEdit", "hooks": [{"type": "command", "command": "tokenade pre-edit-snapshot"}]}
+      ],
+      "PostToolUse": [
+        {"matcher": "Bash", "hooks": [{"type": "command", "command": "tokenade hookwrap"}]},
+        {"matcher": "Read", "hooks": [{"type": "command", "command": "tokenade hookwrap-postread"}]},
+        {"matcher": "Edit|Write|MultiEdit", "hooks": [{"type": "command", "command": "tokenade index-touch"}]}
+      ],
+      "PreCompact": [
+        {"hooks": [{"type": "command", "command": "tokenade hookwrap-precompact"}]}
+      ]
+    }
+  },
+  "home_files": [".tokenade/license.key"],
+  "tool_prefixes": ["mcp__tokenade__"],
+  "bash_command_markers": ["tokenade "]
+}
