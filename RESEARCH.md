@@ -188,6 +188,36 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       scorer (per-line: which lines to keep).**
 - [ ] Wire the gate into the hook (skip not-worth-it outputs) + export the GBM
       line-scorer to stdlib; re-measure end-to-end on Bash.
+
+## Conclusions & implications for tokenade
+
+What this track established, end to end:
+
+1. **There IS lossless headroom** — ~47% of output lines (65% on large outputs)
+   are never referenced downstream — and **simple rules can't capture it** (2–6%);
+   a context-aware model can (line-scorer 32% logistic / 51% GBM at ≥0.95 recall).
+   So a learned compactor is justified *in principle*.
+2. **But where you compress decides everything.** Compressing **Bash command
+   noise** is safe and ~neutral end-to-end (+3.9%); compressing **Read file
+   content backfires (+13.8%)** via re-reads, completeness needs, and non-Latin
+   blow-ups. Per-line recall is necessary but not sufficient.
+3. **The MCP tools are net-negative when used.** Forcing adoption 7%→88% pushed
+   cost +7.8%→+32.5% and caused timeouts on retrieval tasks. The agent's low
+   default adoption is already near cost-optimal; `search_stash` recovery is a
+   *symptom* of over-compaction, not a feature.
+
+**Product implications (tokenade):**
+- **Compress less, not more.** Default to command-output (Bash/shell) compaction
+  only; do **not** compact file Reads or content the model must reason over. Make
+  the postread hook conservative (this matches the doc-digest truncation pain).
+- **Make compaction a gated, high-recall decision** (per-output gate → per-line
+  scorer), and keep `expand_ref` as the bounded-downside safety net.
+- **Don't push tool adoption.** The MCP tool schemas/calls cost more than they
+  save here; promoting them (CLAUDE.md mandates) makes sessions *worse*. A future
+  router's value is **negative selection** — knowing when NOT to call.
+- **Where tokenade genuinely wins** is the rare heavy-context op (e.g.
+  `code-migration-py`, −63% when triggered); target the tooling at those, not at
+  everyday turns.
 - [ ] Long-session / high-noise task for the eval battery
 - [~] **Tier-2 routing data — descriptive pass** (`research/tool_calls.py`, 193
       tokenade tool calls). Usefulness proxy (result referenced downstream ∧ no
