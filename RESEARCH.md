@@ -178,9 +178,16 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       content (`Read`) is not. ⇒ compression must be a **gated per-output
       decision** (don't compress content surfaces), which merges with the routing
       model. Deployed learned-hook reverted to Bash-only (+3.9%, safe).
-- [ ] **Per-output gate**: a model that decides *whether* to compress an output
-      at all (surface + content type + cache-friendliness), upstream of the
-      per-line scorer. Likely the highest-value next model.
+- [x] **Per-output gate v1** (`research/train_gate.py`): a HistGBM predicts an
+      output's compressibility (keep_ratio) from surface+size at **VAL MAE 0.159**
+      (predict-mean baseline 0.316). Per-surface headroom: Read 53% / Bash 49% /
+      mcp 43% / **Edit 25%** (skip edits). Gate policy = compress only Bash
+      outputs predicted highly compressible — fires on ~21% of outputs, which are
+      ~69% truly droppable: it targets the safe AND worthwhile cases, matching the
+      end-to-end lesson. **Synthesis: gate (per-output: worth-it ∧ safe surface) →
+      scorer (per-line: which lines to keep).**
+- [ ] Wire the gate into the hook (skip not-worth-it outputs) + export the GBM
+      line-scorer to stdlib; re-measure end-to-end on Bash.
 - [ ] Long-session / high-noise task for the eval battery
 - [~] **Tier-2 routing data — descriptive pass** (`research/tool_calls.py`, 193
       tokenade tool calls). Usefulness proxy (result referenced downstream ∧ no
