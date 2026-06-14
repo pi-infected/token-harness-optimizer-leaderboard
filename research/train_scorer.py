@@ -112,23 +112,37 @@ def featurize_run(run_dir, taskprompts):
 
 
 def main():
-    tp = task_tokens()
-    X, y, runs = [], [], []
-    seen_runs = 0
-    for run_dir in sorted(RUNS.iterdir()):
-        if not run_dir.is_dir():
-            continue
-        rows = featurize_run(run_dir, tp)
-        if rows:
-            seen_runs += 1
-        for rid, f, lab in rows:
-            X.append(f); y.append(lab); runs.append(rid)
-    X = np.array(X); y = np.array(y); runs = np.array(runs)
-    print(f"runs={seen_runs}  lines={len(y)}  needed_rate={y.mean():.2f}")
+    cache = ROOT / "research" / "dataset" / "features.npz"
+    if cache.exists() and "--rebuild" not in sys.argv:
+        d = np.load(cache, allow_pickle=True)
+        X, y, runs = d["X"], d["y"], d["runs"]
+        print(f"loaded cached features: lines={len(y)}  needed_rate={y.mean():.2f}"
+              f"  (use --rebuild to re-extract)")
+    else:
+        tp = task_tokens()
+        X, y, runs = [], [], []
+        seen_runs = 0
+        for run_dir in sorted(RUNS.iterdir()):
+            if not run_dir.is_dir():
+                continue
+            rows = featurize_run(run_dir, tp)
+            if rows:
+                seen_runs += 1
+            for rid, f, lab in rows:
+                X.append(f); y.append(lab); runs.append(rid)
+        X = np.array(X); y = np.array(y); runs = np.array(runs)
+        np.savez(cache, X=X, y=y, runs=runs)
+        print(f"runs={seen_runs}  lines={len(y)}  needed_rate={y.mean():.2f}  "
+              f"(features cached -> research/dataset/features.npz)")
 
-    # split BY RUN (no leakage): 80/20 by stable hash of run_id
-    uniq = sorted(set(runs))
-    val_runs = set(r for r in uniq if (hash(r) % 5) == 0)
+    # split BY RUN (no leakage): 80/20 by a STABLE hash of run_id (hashlib, not
+    # Python's per-process-salted hash() — so the split is reproducible).
+    import hashlib
+    def _h(s):
+        return int(hashlib.md5(str(s).encode()).hexdigest()[:8], 16)
+    uniq = sorted(set(map(str, runs)))
+    val_runs = set(r for r in uniq if _h(r) % 5 == 0)
+    runs = np.array([str(r) for r in runs])
     val = np.array([r in val_runs for r in runs])
     Xtr, ytr, Xv, yv = X[~val], y[~val], X[val], y[val]
     print(f"train lines={len(ytr)}  val lines={len(yv)}  "
@@ -172,6 +186,26 @@ def main():
     print(f"  VAL recall={rec:.2f}  compression={comp*100:.0f}%")
     print(f"  vs baselines (B2 salient ~0.96 recall / 6% comp) and "
           f"oracle headroom (~47%, 65% on large)")
+
+    # stronger model on the same features: is it worth the deployment cost?
+    from sklearn.ensemble import HistGradientBoostingClassifier
+    gb = HistGradientBoostingClassifier(max_iter=300, learning_rate=0.1,
+                                        max_leaf_nodes=31, class_weight="balanced")
+    gb.fit(Xtr, ytr)                       # trees: no scaling needed
+    pgb, pgb_tr = gb.predict_proba(Xv)[:, 1], gb.predict_proba(Xtr)[:, 1]
+    g_thr = 0.0
+    for thr in sorted(np.unique(np.round(pgb_tr, 3))):
+        if ytr[pgb_tr >= thr].sum() / max(1, ytr.sum()) >= 0.95:
+            g_thr = thr
+        else:
+            break
+    gkeep = pgb >= g_thr
+    print(f"\nGBM (HistGradientBoosting) VAL ROC-AUC={roc_auc_score(yv, pgb):.3f}  "
+          f"AP={average_precision_score(yv, pgb):.3f}")
+    print(f"  @train-recall>=0.95 (thr={g_thr:.3f}): VAL recall="
+          f"{gkeep[yv == 1].mean():.2f}  compression={(1-gkeep.mean())*100:.0f}%")
+    print("  (logreg stays the deployed model unless GBM is materially better —"
+          " the stdlib hook needs the linear form)")
 
     print("\ntop features (logreg coef, standardized):")
     for name, c in sorted(zip(FEATS, clf.coef_[0]), key=lambda x: -abs(x[1]))[:8]:

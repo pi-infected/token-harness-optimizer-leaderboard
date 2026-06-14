@@ -148,7 +148,14 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
       context-conditioning is the #2 feature, exactly why context-free rules
       fail)**, keep salient/path-bearing content. Tiny + interpretable =
       hook-deployable.
-- [ ] End-to-end eval: wire the scorer as `competitors/learned-hook/` and measure
+- [x] **Model comparison** (same 18 features, same deterministic run-split):
+      HistGradientBoosting beats the linear model materially — **VAL ROC-AUC
+      0.948** and **51% compression at 0.94 recall** (vs 32% for logistic),
+      reaching the ~47% lossless oracle. Trees aren't stdlib, so the *deployed
+      hook keeps the linear model* (fast, 32%) until the GBM is exported to a
+      pure-Python tree evaluator. Features cached (`features.npz`); split made
+      deterministic (hashlib, not Python's salted `hash()`).
+- [~] End-to-end eval: wire the scorer as `competitors/learned-hook/` and measure
       real session cost via THOL (does 32% line-compression convert to end-to-end
       savings without extra re-fetches?).
 - [ ] Long-session / high-noise task for the eval battery
