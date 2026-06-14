@@ -145,10 +145,23 @@ than that are not real effects.
    ten — tokenade included — are **statistically indistinguishable from doing
    nothing** (CIs straddle 1.00). Crucially, **none is significantly cheaper.**
    The per-row CI and a significance verdict are in [RESULTS.md](RESULTS.md).
-2. **The cause is adoption, not compression.** Across 60 runs each, the agent
-   invoked an optimizer's tools in **0–4** of them. A compaction/index tool the
-   agent never calls cannot save tokens — but its always-loaded MCP tool
-   schemas, hook banners and CLAUDE.md rules are paid every turn regardless.
+2. **Two distinct failure modes — neither nets out.**
+   - *MCP / index tools* (codegraph, lean-ctx, serena, token-optimizer-mcp,
+     code-review-graph) are **adoption-gated**: the agent invoked them in only
+     0–1 of 60 runs each, so their always-loaded tool schemas are paid every
+     turn for nothing.
+   - *Hook-based command-output compression* (rtk, squeez, tokenade's hooks)
+     needs **no adoption** — the PostToolUse hook fires on every Bash/Read, and
+     it does fire (transcripts show the compaction markers). But measured at the
+     token level it does **not** net-reduce `input + cache_read` tokens, and for
+     squeez/rtk it *inflates* them: lossy truncation drops the exact bytes a
+     retrieval task needs, so the agent re-runs commands to recover them — more
+     turns, more tokens (squeez reached **4.2× control** input on `log-needle-zh`,
+     and +2–5 turns on `seo-audit`/`code-iterate-tests`). The always-on per-turn
+     cost (injected CLAUDE.md/RTK.md, hook banners) is paid regardless. tokenade's
+     hooks are the gentlest — they sometimes genuinely compress (−36% input and
+     fewer turns on `code-feature-js`) — which is why `tok-hooksonly` lands
+     closest to control, but its wins and overhead roughly cancel.
 3. **Advertised compression rate ≠ real savings.** Tools headlining −58%,
    −90%, even −99% token reduction land between +1% and +12% on *whole-session*
    cost. That gap is the entire reason THOL measures end to end.
