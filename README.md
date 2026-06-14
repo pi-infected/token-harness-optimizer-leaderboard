@@ -249,3 +249,9 @@ completion, and all state lives in the project directory (workspaces under
 
 The Claude Code version is recorded per run; a publishable campaign should
 run on a single version (check with `SELECT DISTINCT claude_version FROM runs`).
+
+## License & contributing
+
+MIT (see [LICENSE](LICENSE)). Tool maintainers can correct their own entry —
+see [CONTRIBUTING.md](CONTRIBUTING.md); manifest PRs are the only accepted way
+to change how a tool is installed, which is what keeps the board impartial.
