@@ -169,6 +169,15 @@ see README "Limitations"). Train → evaluate → refine, closed by the harness.
 - [ ] **Extend compaction to `Read` outputs** (the dominant output type) — the
       single change most likely to convert line-compression into end-to-end savings.
 - [ ] Long-session / high-noise task for the eval battery
-- [ ] Tier-2 routing data (forced-adoption arm / decision-point A/B)
+- [~] **Tier-2 routing data — descriptive pass** (`research/tool_calls.py`, 193
+      tokenade tool calls). Usefulness proxy (result referenced downstream ∧ no
+      recovery call after): symbol_find **95%** (cheap, 123 tok), call_hierarchy
+      93%, semantic_search 92%, skeleton 91% (pricey, 860 tok), structure_map 87%
+      — all worth calling. **search_stash only 20% useful** (referenced but 80%
+      followed by another recovery — it IS the lossy-compaction re-fetch loop seen
+      from the tool side, 482 tok); a router should avoid it / fixing compaction
+      removes the need. (exec_script 0% is a proxy artifact: a compute tool whose
+      output is the answer, not "referenced".) Next: per-decision-point
+      counterfactual labels (forced-adoption arm / A/B) before training a router.
 - [ ] Stronger model + richer features (embeddings, cross-line context) once the
       LR baseline's end-to-end value is confirmed.
