@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS runs (
   num_turns INTEGER, api_duration_ms INTEGER,
   wall_ms INTEGER, setup_ms INTEGER,
   tool_calls INTEGER, competitor_tool_calls INTEGER,
+  tool_rounds INTEGER,
   verify_detail TEXT, error TEXT
 );
 """
@@ -162,10 +163,17 @@ def build_env(cfgdir, manifest):
 
 
 def parse_stream(transcript_path, manifest):
-    """Returns (result_event, tool_calls, competitor_tool_calls)."""
+    """Returns (result_event, tool_calls, competitor_tool_calls, tool_rounds).
+
+    tool_rounds = number of assistant messages carrying >=1 tool_use, i.e. the
+    real count of serial tool-call rounds (each one re-reads the whole context).
+    This is the true cost driver — the harness `num_turns` field is unreliable
+    (observed 2-3 while the transcript holds 17-25 tool rounds). With one
+    tool_use per message tool_rounds == tool_calls; they diverge once the model
+    batches (parallel tool_use), so adoption shows up as calls > rounds."""
     prefixes = tuple(manifest.get("tool_prefixes") or ())
     markers = manifest.get("bash_command_markers") or []
-    result_ev, calls, comp_calls = None, 0, 0
+    result_ev, calls, comp_calls, rounds = None, 0, 0, 0
     with transcript_path.open() as f:
         for line in f:
             line = line.strip()
@@ -176,9 +184,11 @@ def parse_stream(transcript_path, manifest):
             except json.JSONDecodeError:
                 continue
             if ev.get("type") == "assistant":
+                msg_has_tool = False
                 for block in (ev.get("message") or {}).get("content") or []:
                     if block.get("type") != "tool_use":
                         continue
+                    msg_has_tool = True
                     calls += 1
                     name = block.get("name", "")
                     if prefixes and name.startswith(prefixes):
@@ -187,9 +197,11 @@ def parse_stream(transcript_path, manifest):
                         cmd = (block.get("input") or {}).get("command", "")
                         if any(m in cmd for m in markers):
                             comp_calls += 1
+                if msg_has_tool:
+                    rounds += 1
             elif ev.get("type") == "result":
                 result_ev = ev
-    return result_ev, calls, comp_calls
+    return result_ev, calls, comp_calls, rounds
 
 
 def run_verify(task, ws, answer_file):
@@ -207,6 +219,11 @@ def run_verify(task, ws, answer_file):
 def insert_row(row):
     con = sqlite3.connect(DB_PATH)
     con.execute(SCHEMA)
+    # migrate pre-existing tables that lack newer columns
+    try:
+        con.execute("ALTER TABLE runs ADD COLUMN tool_rounds INTEGER")
+    except sqlite3.OperationalError:
+        pass  # column already present
     cols = ", ".join(row)
     q = f"INSERT OR REPLACE INTO runs ({cols}) VALUES ({','.join('?' * len(row))})"
     con.execute(q, list(row.values()))
@@ -234,6 +251,7 @@ def run_one(comp, task, rep, args, cver):
            "cache_read_tokens": None, "num_turns": None,
            "api_duration_ms": None, "wall_ms": None, "setup_ms": 0,
            "tool_calls": None, "competitor_tool_calls": None,
+           "tool_rounds": None,
            "verify_detail": None, "error": None}
     try:
         build_workspace(task, ws)
@@ -297,8 +315,9 @@ def run_one(comp, task, rep, args, cver):
         row["wall_ms"] = int((time.monotonic() - w0) * 1000)
         (art / "stderr.log").write_text(stderr or "")
 
-        result_ev, calls, comp_calls = parse_stream(transcript, comp)
-        row.update(tool_calls=calls, competitor_tool_calls=comp_calls)
+        result_ev, calls, comp_calls, rounds = parse_stream(transcript, comp)
+        row.update(tool_calls=calls, competitor_tool_calls=comp_calls,
+                   tool_rounds=rounds)
         if result_ev is None:
             row.update(status="claude_error",
                        error=f"no result event (rc={p.returncode}); "
