@@ -366,12 +366,21 @@ def cmd_run(args):
     # completion), so after any interruption — Ctrl-C, kill, power loss —
     # relaunching the same command skips completed (competitor, task, rep)
     # triples and redoes only what is missing. --rerun forces everything.
+    env0 = build_env(Path("/tmp"), {})
+    cver = claude_version(env0)
+    # resume is CAMPAIGN-AWARE: only runs recorded under the SAME
+    # claude_version count as "done". A new Claude Code release therefore
+    # re-measures every cell from scratch instead of silently inheriting the
+    # previous version's runs — which is what let earlier campaigns (2.1.170/
+    # 172/173) bleed into a 2.1.177 board and bias the medians. Aggregation
+    # must likewise scope to one claude_version (see leaderboard.py).
     done_keys = set()
     if DB_PATH.exists() and not args.rerun:
         con = sqlite3.connect(DB_PATH)
         try:
             done_keys = {tuple(r) for r in con.execute(
-                "SELECT competitor, task, rep FROM runs WHERE status='ok'")}
+                "SELECT competitor, task, rep FROM runs "
+                "WHERE status='ok' AND claude_version=?", (cver,))}
         except sqlite3.OperationalError:
             pass
         con.close()
@@ -382,12 +391,10 @@ def cmd_run(args):
     est = n * CFG["est_cost_per_run_usd"]
     print(f"plan: {len(comp_names)} competitor(s) x {len(task_names)} task(s) "
           f"x {args.reps} rep(s) = {len(plan)} runs; "
-          f"{len(plan) - n} already done (resume), {n} to run, "
+          f"{len(plan) - n} already done @ {cver} (resume), {n} to run, "
           f"rough estimate ~${est:.2f}")
     if args.budget_usd:
         print(f"hard budget: ${args.budget_usd:.2f}")
-    env0 = build_env(Path("/tmp"), {})
-    cver = claude_version(env0)
     print(f"model={args.model}  claude={cver}\n")
 
     spent = 0.0
@@ -407,6 +414,91 @@ def cmd_run(args):
               f"turns={r['num_turns']} "
               f"wall={(r['wall_ms'] or 0) / 1000:.0f}s "
               f"(total ${spent:.2f})", flush=True)
+
+
+def _control_turns(task_id, cver, comp_name="control"):
+    """num_turns of every OK run for this (competitor, task) at this CC
+    version — the campaign-scoped sample the stabilization rule grows."""
+    con = sqlite3.connect(DB_PATH)
+    con.execute(SCHEMA)
+    rows = con.execute(
+        "SELECT num_turns FROM runs WHERE competitor=? AND task=? "
+        "AND status='ok' AND claude_version=? AND num_turns IS NOT NULL",
+        (comp_name, task_id, cver)).fetchall()
+    con.close()
+    return [r[0] for r in rows]
+
+
+def _is_stable(turns, nmin, tol):
+    """Mean of num_turns is 'stable' once we have >= nmin samples and the
+    standard error of the mean is within `tol` of the mean (relative). A
+    zero-variance task converges immediately at nmin."""
+    import statistics
+    n = len(turns)
+    if n < nmin:
+        return False, None
+    m = statistics.mean(turns)
+    if m == 0:
+        return True, 0.0
+    sd = statistics.pstdev(turns)
+    rel_sem = (sd / (n ** 0.5)) / m
+    return rel_sem <= tol, rel_sem
+
+
+def cmd_stabilize(args):
+    """Run the control baseline for each task in increments, stopping each
+    task as soon as the mean number of turns stabilizes (rel. SEM <= --tol)
+    or --nmax reps are reached. Campaign-scoped to the current CC version."""
+    tasks = load_tasks()
+    comps = load_competitors()
+    comp = comps[args.competitors if args.competitors not in (None, "all")
+                 else "control"]
+    task_names = select(args.tasks, tasks, "task")
+    env0 = build_env(Path("/tmp"), {})
+    cver = claude_version(env0)
+    print(f"stabilize: {comp['name']} @ {cver}  model={args.model}\n"
+          f"  criterion: nmin={args.nmin} nmax={args.nmax} "
+          f"rel_SEM<={args.tol}\n")
+    if args.budget_usd:
+        print(f"hard budget: ${args.budget_usd:.2f}\n")
+    spent = 0.0
+    summary = []
+    for t in task_names:
+        turns = _control_turns(t, cver, comp["name"])
+        # rep index must be globally unique for this (comp,task); count ALL
+        # recorded runs (any version) so a fresh campaign never reuses an id
+        con = sqlite3.connect(DB_PATH)
+        con.execute(SCHEMA)
+        rep = (con.execute("SELECT COUNT(*) FROM runs WHERE competitor=? "
+                           "AND task=?", (comp["name"], t)).fetchone()[0]) + 1
+        con.close()
+        stable, rel = _is_stable(turns, args.nmin, args.tol)
+        while not stable and len(turns) < args.nmax:
+            if args.budget_usd and spent >= args.budget_usd:
+                print(f"  budget exhausted (${spent:.2f}) — stopping")
+                break
+            r = run_one(comp, tasks[t], rep, args, cver)
+            rep += 1
+            spent += r.get("total_cost_usd") or 0.0
+            if r["status"] == "ok" and r.get("num_turns") is not None:
+                turns.append(r["num_turns"])
+            stable, rel = _is_stable(turns, args.nmin, args.tol)
+            import statistics as _st
+            m = _st.mean(turns) if turns else 0
+            print(f"  {t:<22} n={len(turns):>2} mean={m:>5.1f} "
+                  f"rel_SEM={('%.3f' % rel) if rel is not None else '  -- '} "
+                  f"{'STABLE' if stable else '':<7} "
+                  f"last={r['status']}/{r.get('num_turns')} "
+                  f"(${spent:.2f})", flush=True)
+        import statistics as _st
+        m = _st.mean(turns) if turns else 0
+        summary.append((t, len(turns), m, rel, stable))
+        print(f"  -> {t}: {'CONVERGED' if stable else 'NOT converged (cap)'} "
+              f"n={len(turns)} mean={m:.1f}\n", flush=True)
+    print("=== stabilization summary (control @ %s) ===" % cver)
+    for t, n, m, rel, st in summary:
+        print(f"  {t:<22} n={n:>2} mean_turns={m:>5.1f} "
+              f"{'stable' if st else 'CAPPED'}")
 
 
 def cmd_list(_args):
@@ -469,11 +561,27 @@ def main():
         p.add_argument("--keep-workspaces", action="store_true")
         p.add_argument("--rerun", action="store_true",
                        help="ignore completed runs instead of resuming")
+    ps = sub.add_parser("stabilize",
+                        help="run a competitor (default control) per task "
+                             "until its mean num_turns stabilizes")
+    ps.add_argument("-c", "--competitors", default="control")
+    ps.add_argument("-t", "--tasks", default="all")
+    ps.add_argument("--model", default=CFG["model"])
+    ps.add_argument("--nmin", type=int, default=5,
+                    help="minimum reps before declaring stability")
+    ps.add_argument("--nmax", type=int, default=30,
+                    help="hard cap on reps per task")
+    ps.add_argument("--tol", type=float, default=0.05,
+                    help="stop when relative SEM of the mean <= tol")
+    ps.add_argument("--budget-usd", type=float, default=None)
+    ps.add_argument("--keep-workspaces", action="store_true")
     args = ap.parse_args()
     if args.cmd == "list":
         cmd_list(args)
     elif args.cmd == "selftest":
         cmd_selftest(args)
+    elif args.cmd == "stabilize":
+        cmd_stabilize(args)
     else:
         cmd_run(args)
 

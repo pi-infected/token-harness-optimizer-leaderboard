@@ -51,3 +51,6 @@ reports/
 
 # generated research dataset (derived from transcripts; rebuild with research/build_dataset.py)
 research/dataset/
+
+# tokenade — legacy per-project embedding model cache (now global)
+.fastembed_cache/

@@ -1357,6 +1357,448 @@ beta_ui = true
         "database_name": "ledger_prod"}, indent=1))
 
 
+# ========================================================================
+# LONG multi-turn code tasks (added to give the suite enough high-turn work
+# for a stable turn-count study). Each is verified by an objective test suite
+# (frozen against tampering) so scoring is method-agnostic and impartial.
+# ========================================================================
+
+# ----------------------------------------------------------- migration-py-xl
+def gen_migration_xl():
+    """Like migration-py but ~2x the surface: 24 modules, so a file-by-file
+    agent runs many more turns. Behaviour-preserving, tests must stay green."""
+    rng = random.Random(SEED + 21)
+    root = OUT / "migration-py-xl"
+    if root.exists():
+        shutil.rmtree(root)
+    write(root / "MIGRATION.md", '''\
+# Migration: `legacy_http.fetch` → `net.http_get`
+
+`webtools/legacy_http.py` is deprecated and will be deleted. Every module
+under `webtools/app/` must stop importing it.
+
+Replace:
+
+```python
+from webtools.legacy_http import fetch
+data = fetch(url, 30, 2)            # positional: url, timeout, retries
+```
+
+with:
+
+```python
+from webtools.net import http_get
+data = http_get(url, timeout=30, retries=2)   # keyword-only
+```
+
+Semantics are identical. Do not change `webtools/legacy_http.py` or
+`webtools/net.py` themselves, and do not change any behavior. The test
+suite must keep passing:
+
+    python3 -m unittest discover -s tests -t .
+''')
+    write(root / "webtools" / "__init__.py", "")
+    sim = '''\
+def _simulate(url: str) -> dict:
+    """Deterministic offline stand-in for a network round-trip."""
+    return {"url": url, "status": 200, "body": f"payload:{len(url)}"}
+'''
+    write(root / "webtools" / "legacy_http.py", sim + '''\
+
+
+def fetch(url, timeout, retries):
+    """DEPRECATED — use webtools.net.http_get instead."""
+    assert timeout > 0 and retries >= 0
+    return _simulate(url)
+''')
+    write(root / "webtools" / "net.py", sim + '''\
+
+
+def http_get(url, *, timeout, retries):
+    assert timeout > 0 and retries >= 0
+    return _simulate(url)
+''')
+    write(root / "webtools" / "app" / "__init__.py", "")
+    names = ["catalog", "pricing", "stock", "users", "orders", "billing",
+             "shipping", "reviews", "search", "alerts", "feeds", "geo",
+             "payments", "invoices", "refunds", "carts", "wishlists",
+             "coupons", "taxes", "vendors", "returns", "sessions", "tokens",
+             "audit"]
+    for n in names:
+        t, r = rng.choice([10, 20, 30]), rng.choice([0, 1, 2, 3])
+        write(root / "webtools" / "app" / f"{n}.py", f'''\
+from webtools.legacy_http import fetch
+
+BASE = "https://api.example.com/{n}"
+
+
+def load_{n}(item_id):
+    return fetch(f"{{BASE}}/{{item_id}}", {t}, {r})
+
+
+def {n}_status():
+    return load_{n}("status")["status"]
+''')
+    write(root / "tests" / "__init__.py", "")
+    tests = ["import unittest", ""]
+    for n in names:
+        tests.append(f"from webtools.app.{n} import load_{n}, {n}_status")
+    tests += ["", "", "class TestApp(unittest.TestCase):"]
+    for n in names:
+        tests += [f"    def test_{n}(self):",
+                  f"        d = load_{n}(7)",
+                  f"        self.assertEqual(d['status'], 200)",
+                  f"        self.assertTrue(d['url'].endswith('/7'))",
+                  f"        self.assertEqual({n}_status(), 200)",
+                  ""]
+    write(root / "tests" / "test_app.py", "\n".join(tests))
+    frozen = ["webtools/legacy_http.py", "webtools/net.py",
+              "tests/test_app.py"]
+    write(TRUTH / "code-migration-py-xl.json", json.dumps({
+        "modules": names,
+        "frozen_hashes": {f: sha(root / f) for f in frozen}}, indent=1))
+
+
+# --------------------------------------------------------------- testfix-py
+def gen_testfix():
+    """A small pure-python library shipped with 7 planted bugs; a frozen test
+    suite encodes the correct behaviour. The agent must make every test pass
+    by fixing the library only (tests are hash-frozen)."""
+    root = OUT / "testfix-py"
+    if root.exists():
+        shutil.rmtree(root)
+    # buggy implementation — 7 of 10 functions are wrong
+    write(root / "numkit.py", '''\
+"""Small numeric / string utilities. Some functions are buggy: the test
+suite under tests/ defines the correct behaviour. Fix this file only."""
+
+
+def is_even(n):
+    return n % 2 == 1                      # BUG
+
+
+def clamp(x, lo, hi):
+    return max(hi, min(lo, x))             # BUG
+
+
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+
+def factorial(n):
+    r = 0                                  # BUG
+    for i in range(1, n + 1):
+        r *= i
+    return r
+
+
+def digit_sum(n):
+    return sum(int(c) for c in str(n))     # BUG (negatives)
+
+
+def count_vowels(s):
+    return sum(1 for c in s if c in "aeiou")   # BUG (case)
+
+
+def is_palindrome(s):
+    return s == s[::-1]                    # BUG (case / non-alnum)
+
+
+def fizzbuzz(n):
+    if n % 15 == 0:
+        return "FizzBuzz"
+    if n % 3 == 0:
+        return "Fizz"
+    if n % 5 == 0:
+        return "Buzz"
+    return str(n)
+
+
+def fib(n):
+    a, b = 0, 1
+    for _ in range(n):                     # BUG (off by one)
+        a, b = b, a + b
+    return b
+
+
+def reverse_words(s):
+    return " ".join(reversed(s.split()))
+''')
+    write(root / "README.md", '''\
+# numkit — fix the failing tests
+
+`numkit.py` has several bugs. The test suite under `tests/` defines the
+correct behaviour for every function. Make the whole suite pass:
+
+    python3 -m unittest discover -s tests -t .
+
+Fix `numkit.py` only — do not edit the tests. In your final reply, list the
+functions you changed.
+''')
+    write(root / "tests" / "__init__.py", "")
+    write(root / "tests" / "test_numkit.py", '''\
+import unittest
+from numkit import (is_even, clamp, gcd, factorial, digit_sum, count_vowels,
+                    is_palindrome, fizzbuzz, fib, reverse_words)
+
+
+class TestNumkit(unittest.TestCase):
+    def test_is_even(self):
+        self.assertTrue(is_even(4))
+        self.assertFalse(is_even(3))
+        self.assertTrue(is_even(0))
+
+    def test_clamp(self):
+        self.assertEqual(clamp(5, 0, 10), 5)
+        self.assertEqual(clamp(-3, 0, 10), 0)
+        self.assertEqual(clamp(99, 0, 10), 10)
+
+    def test_gcd(self):
+        self.assertEqual(gcd(12, 18), 6)
+        self.assertEqual(gcd(17, 5), 1)
+
+    def test_factorial(self):
+        self.assertEqual(factorial(0), 1)
+        self.assertEqual(factorial(5), 120)
+
+    def test_digit_sum(self):
+        self.assertEqual(digit_sum(1234), 10)
+        self.assertEqual(digit_sum(-72), 9)
+
+    def test_count_vowels(self):
+        self.assertEqual(count_vowels("Hello World"), 3)
+        self.assertEqual(count_vowels("AEIOU"), 5)
+
+    def test_is_palindrome(self):
+        self.assertTrue(is_palindrome("A man, a plan, a canal: Panama"))
+        self.assertFalse(is_palindrome("hello"))
+
+    def test_fizzbuzz(self):
+        self.assertEqual(fizzbuzz(3), "Fizz")
+        self.assertEqual(fizzbuzz(5), "Buzz")
+        self.assertEqual(fizzbuzz(15), "FizzBuzz")
+        self.assertEqual(fizzbuzz(7), "7")
+
+    def test_fib(self):
+        self.assertEqual([fib(i) for i in range(7)], [0, 1, 1, 2, 3, 5, 8])
+
+    def test_reverse_words(self):
+        self.assertEqual(reverse_words("the quick brown"), "brown quick the")
+
+
+if __name__ == "__main__":
+    unittest.main()
+''')
+    write(TRUTH / "code-testfix-py.json", json.dumps({
+        "n_tests": 10,
+        "frozen_hashes": {"tests/test_numkit.py":
+                          sha(root / "tests" / "test_numkit.py")}}, indent=1))
+
+
+# ------------------------------------------------------------- implement-py
+def gen_implement():
+    """Implement a spec'd module from scratch against a HIDDEN test suite
+    (kept in TRUTH, copied in only at verify time — the agent never sees it)."""
+    root = OUT / "implement-py"
+    if root.exists():
+        shutil.rmtree(root)
+    write(root / "textkit.py", '''\
+"""Implement the functions described in SPEC.md. Stubs below raise until done."""
+
+
+def slugify(text, max_len=64):
+    raise NotImplementedError
+
+
+def word_count(text):
+    raise NotImplementedError
+
+
+def truncate(text, n):
+    raise NotImplementedError
+
+
+def title_case(text):
+    raise NotImplementedError
+''')
+    write(root / "SPEC.md", '''\
+# Implement `textkit.py`
+
+Implement these four functions in `textkit.py` (all REQUIRED):
+
+## `slugify(text, max_len=64)`
+1. Lowercase the input.
+2. Every maximal run of characters not in `[a-z0-9]` becomes a single `-`.
+3. No leading/trailing `-`.
+4. If longer than `max_len`, cut to `max_len`, then strip any trailing `-`.
+5. If the result is empty, return `"n-a"`.
+6. Non-string input raises `TypeError`.
+
+## `word_count(text)`
+Number of whitespace-separated tokens (0 for empty/whitespace-only).
+
+## `truncate(text, n)`
+If `len(text) <= n` return it unchanged; otherwise return the first `n-1`
+characters followed by `"\\u2026"` (the … ellipsis). Assume `n >= 1`.
+
+## `title_case(text)`
+Capitalize the first letter of each whitespace-separated word, lowercasing the
+rest; collapse runs of whitespace to a single space. `"hELLO   wORLD"` →
+`"Hello World"`.
+
+There is a sanity test in `tests/`; a fuller hidden suite is used for grading.
+Run: `python3 -m unittest discover -s tests -t .`
+''')
+    write(root / "tests" / "__init__.py", "")
+    write(root / "tests" / "test_sanity.py", '''\
+import unittest
+from textkit import slugify, word_count, truncate, title_case
+
+
+class TestSanity(unittest.TestCase):
+    def test_basic(self):
+        self.assertEqual(slugify("Hello, World!"), "hello-world")
+        self.assertEqual(word_count("a b c"), 3)
+        self.assertEqual(truncate("hello", 10), "hello")
+        self.assertEqual(title_case("hELLO wORLD"), "Hello World")
+
+
+if __name__ == "__main__":
+    unittest.main()
+''')
+    write(TRUTH / "implement_hidden_test.py", '''\
+import unittest
+from textkit import slugify, word_count, truncate, title_case
+
+
+class Hidden(unittest.TestCase):
+    def test_slugify(self):
+        self.assertEqual(slugify("Hello, World!"), "hello-world")
+        self.assertEqual(slugify("  --A  &  B--  "), "a-b")
+        self.assertEqual(slugify("a" * 80), "a" * 64)
+        self.assertEqual(slugify("aaa bbb", 4), "aaa")
+        self.assertEqual(slugify("!!!"), "n-a")
+        with self.assertRaises(TypeError):
+            slugify(42)
+
+    def test_word_count(self):
+        self.assertEqual(word_count("the quick brown fox"), 4)
+        self.assertEqual(word_count("   "), 0)
+        self.assertEqual(word_count(""), 0)
+
+    def test_truncate(self):
+        self.assertEqual(truncate("hello", 10), "hello")
+        self.assertEqual(truncate("hello world", 6), "hello\\u2026")
+        self.assertEqual(truncate("abc", 3), "abc")
+
+    def test_title_case(self):
+        self.assertEqual(title_case("hELLO   wORLD"), "Hello World")
+        self.assertEqual(title_case("the quick brown"), "The Quick Brown")
+
+
+if __name__ == "__main__":
+    unittest.main()
+''')
+
+
+# -------------------------------------------------------- refactor-split-py
+def gen_refactor_split():
+    """One fat module must be split into a package (one submodule per public
+    class) with __init__ re-exporting the same names; tests stay green."""
+    root = OUT / "refactor-split-py"
+    if root.exists():
+        shutil.rmtree(root)
+    write(root / "shapes.py", '''\
+"""A single fat module holding several shape classes plus a helper. Split it
+into a `shapes/` package (one submodule per class) — see REFACTOR.md."""
+import math
+
+
+class Circle:
+    def __init__(self, r):
+        self.r = r
+
+    def area(self):
+        return math.pi * self.r ** 2
+
+
+class Rectangle:
+    def __init__(self, w, h):
+        self.w, self.h = w, h
+
+    def area(self):
+        return self.w * self.h
+
+
+class Square(Rectangle):
+    def __init__(self, s):
+        super().__init__(s, s)
+
+
+class Triangle:
+    def __init__(self, base, height):
+        self.base, self.height = base, height
+
+    def area(self):
+        return 0.5 * self.base * self.height
+
+
+def total_area(shapes):
+    return sum(s.area() for s in shapes)
+''')
+    write(root / "REFACTOR.md", '''\
+# Refactor: split `shapes.py` into a `shapes/` package
+
+`shapes.py` is too big. Convert it into a package directory `shapes/` with one
+module per public class:
+
+- `shapes/circle.py`     → `Circle`
+- `shapes/rectangle.py`  → `Rectangle`
+- `shapes/square.py`     → `Square` (still subclasses `Rectangle`)
+- `shapes/triangle.py`   → `Triangle`
+- `shapes/helpers.py`    → `total_area`
+- `shapes/__init__.py`   → re-exports all five names, so
+  `from shapes import Circle, Rectangle, Square, Triangle, total_area`
+  keeps working unchanged.
+
+Then remove the old top-level `shapes.py`. Behaviour must not change and the
+test suite must keep passing:
+
+    python3 -m unittest discover -s tests -t .
+''')
+    write(root / "tests" / "__init__.py", "")
+    write(root / "tests" / "test_shapes.py", '''\
+import math
+import unittest
+from shapes import Circle, Rectangle, Square, Triangle, total_area
+
+
+class TestShapes(unittest.TestCase):
+    def test_areas(self):
+        self.assertAlmostEqual(Circle(2).area(), math.pi * 4)
+        self.assertEqual(Rectangle(3, 4).area(), 12)
+        self.assertEqual(Square(5).area(), 25)
+        self.assertEqual(Triangle(6, 4).area(), 12.0)
+
+    def test_total(self):
+        self.assertEqual(total_area([Rectangle(2, 3), Square(4)]), 22)
+
+    def test_square_is_rectangle(self):
+        self.assertIsInstance(Square(2), Rectangle)
+
+
+if __name__ == "__main__":
+    unittest.main()
+''')
+    write(TRUTH / "code-refactor-split-py.json", json.dumps({
+        "expected_modules": ["circle", "rectangle", "square", "triangle",
+                             "helpers"],
+        "frozen_hashes": {"tests/test_shapes.py":
+                          sha(root / "tests" / "test_shapes.py")}}, indent=1))
+
+
 def main():
     OUT.mkdir(exist_ok=True)
     TRUTH.mkdir(exist_ok=True)
@@ -1376,6 +1818,10 @@ def main():
     gen_events_csv()
     gen_html_docs()
     gen_tiny_config()
+    gen_migration_xl()
+    gen_testfix()
+    gen_implement()
+    gen_refactor_split()
     print(f"fixtures written to {OUT}")
     print(f"ground truth written to {TRUTH}  (never copied into workspaces)")
 

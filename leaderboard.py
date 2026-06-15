@@ -16,7 +16,9 @@ Methodology:
 """
 import json
 import math
+import os
 import random
+import re
 import sqlite3
 import statistics as st
 import sys
@@ -29,19 +31,44 @@ BOOT = 10_000
 SEED = 1234
 
 
-def rows():
+def _vkey(v):
+    """Sortable key for a claude_version string like '2.1.177 (Claude Code)'."""
+    nums = re.findall(r"\d+", v or "")
+    return tuple(int(x) for x in nums[:3]) if nums else (0,)
+
+
+def rows(campaign=None):
+    """Read OK runs for ONE campaign (= one claude_version). Mixing harness
+    versions is the contamination that biased earlier boards (2.1.170/172/173
+    bleeding into a 2.1.177 ranking): session cost and turn counts shift with
+    the harness, so a ratio is only meaningful within a single version.
+
+    campaign: explicit claude_version (or substring like '2.1.177'); falls back
+    to env THOL_CAMPAIGN; otherwise the LATEST version present in the DB."""
     con = sqlite3.connect(DB)
     con.row_factory = sqlite3.Row
+    versions = [r[0] for r in con.execute(
+        "SELECT DISTINCT claude_version FROM runs WHERE status='ok' "
+        "AND claude_version IS NOT NULL")]
+    campaign = campaign or os.environ.get("THOL_CAMPAIGN")
+    if campaign:
+        match = [v for v in versions if campaign in (v or "")]
+        campaign = match[0] if match else campaign
+    elif versions:
+        campaign = max(versions, key=_vkey)
     # 'learned-hook' and 'tokenade-forced' are THIS repo's own research arms
     # (RESEARCH.md), not surveyed third-party tools — kept out of the public board.
     out = [dict(r) for r in con.execute(
         "SELECT * FROM runs WHERE status='ok' AND score IS NOT NULL "
-        "AND competitor NOT IN ('learned-hook','tokenade-forced')")]
+        "AND claude_version=? "
+        "AND competitor NOT IN ('learned-hook','tokenade-forced')",
+        (campaign,))]
     bad = [dict(r) for r in con.execute(
         "SELECT competitor, task, status, COUNT(*) n FROM runs "
-        "WHERE status!='ok' GROUP BY competitor, task, status")]
+        "WHERE status!='ok' AND claude_version=? "
+        "GROUP BY competitor, task, status", (campaign,))]
     con.close()
-    return out, bad
+    return out, bad, campaign
 
 
 def boot_ratio(comp_costs, ctrl_costs, rng):
@@ -186,11 +213,13 @@ def compute(ok, bad):
 
 def render_md(d):
     L = ["# THOL leaderboard\n", ""]
+    L.append(f"> Campaign: **{d.get('campaign')}** — all rows below are scoped "
+             "to this single Claude Code version (set `THOL_CAMPAIGN` to pick "
+             "another). Ratios are only comparable within one harness version.\n")
     if len(d["claude_versions"]) > 1:
-        L.append("> **WARNING — mixed Claude Code versions in the data: "
-                 f"{d['claude_versions']}.** Session cost varies across "
-                 "harness versions; ratios are only valid within a single "
-                 "version. Re-run outdated rows before publishing.\n")
+        L.append("> **WARNING — more than one Claude Code version slipped past "
+                 f"the campaign filter: {d['claude_versions']}.** This should "
+                 "not happen; investigate before publishing.\n")
 
     # ---- ranking (inserted at top after title)
     rank_lines = ["## Ranking (geometric mean cost ratio vs control, "
@@ -259,8 +288,11 @@ def render_md(d):
 def main():
     if not DB.exists():
         sys.exit("no results.sqlite yet — run runner.py first")
-    ok, bad = rows()
+    ok, bad, campaign = rows()
+    if not ok:
+        sys.exit(f"no OK runs for campaign {campaign!r} — check THOL_CAMPAIGN")
     d = compute(ok, bad)
+    d["campaign"] = campaign
     md = render_md(d)
     (ROOT / "leaderboard.md").write_text(md)
     payload = json.dumps(d, indent=1)
