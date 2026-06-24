@@ -74,9 +74,10 @@
      in end-to-end USD, geometric-mean-aggregated across tasks (so no single task dominates). <b>Positive = cheaper,
      negative = more expensive; 0% = no difference</b>, with <b>control</b> (vanilla Claude Code) sat at the 0% line.
      <b>Adoption</b> = share of runs in which the agent actually invoked the optimizer's tools — a tool the agent
-     never calls cannot save anything. It's shown as <b>N/A</b> for tools the agent doesn't explicitly call:
-     hook-based ones (tokenade, rtk) act automatically, and prompt/context ones (lean-ctx, claude-token-efficient)
-     are just text. Every raw per-run measurement is in <code>results.json</code> for your own analysis.</p>
+     never calls cannot save anything. It's shown as <b>N/A</b> for tools the agent doesn't explicitly call: rtk acts
+     via an automatic hook, and prompt/context ones (lean-ctx, claude-token-efficient) are just text. (tokenade also
+     has a hook, but it additionally exposes CLI functions — map, skeleton, query, exec… — the agent calls by hand,
+     so its adoption counts those.) Every raw per-run measurement is in <code>results.json</code> for your own analysis.</p>
 
   <h2>Method &amp; reproduction</h2>
   <p class="sub">Each run is one fully isolated headless Claude Code session (throwaway <code>HOME</code>, throwaway

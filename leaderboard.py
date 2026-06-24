@@ -50,10 +50,12 @@ TOKEN_BANDS = [(0, 200_000, "0–200k"),
                (400_000, 1_000_000, "400k–1M")]
 
 # Adoption (= did the agent explicitly invoke the tool?) is undefined for tools
-# the agent never calls: hook-based ones act automatically (tokenade, rtk) and
-# prompt/context ones are just text (claude-token-efficient, lean-ctx). Shown
-# as N/A rather than a misleading 0.
-ADOPTION_NA = {"tokenade", "rtk", "claude-token-efficient", "lean-ctx"}
+# the agent never calls: rtk acts via an automatic hook, and prompt/context ones
+# (lean-ctx, claude-token-efficient) are just text. Shown as N/A rather than a
+# misleading 0. NOTE: tokenade is NOT here — although it has a hook, it also
+# exposes explicit CLI functions (map/skeleton/query/exec/…) the agent calls by
+# hand, so its adoption count is meaningful.
+ADOPTION_NA = {"rtk", "claude-token-efficient", "lean-ctx"}
 
 # A "generous system prompt" only makes sense for tools the agent explicitly
 # calls — it teaches the model which function to reach for. Pointless for a

@@ -267,8 +267,7 @@
  "adoption_na": [
   "claude-token-efficient",
   "lean-ctx",
-  "rtk",
-  "tokenade"
+  "rtk"
  ],
  "token_bands": [
   {
