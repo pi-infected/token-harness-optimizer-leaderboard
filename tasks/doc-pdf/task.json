@@ -1,1 +1,0 @@
-{"id":"doc-pdf","kind":"noncode","max_turns":12,"success_threshold":1.0,"timeout_s":600,"title":"Factual questions about a long internal PDF document","workspace":{"fixture":"doc-pdf"}}

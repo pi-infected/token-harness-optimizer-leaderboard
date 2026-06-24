@@ -18,7 +18,7 @@ Column → source mapping (all means are over a competitor's successful runs):
   runs           = repetitions of that (tool, task) cell
 Tasks included: only those in tasks/ (trivially-short tasks — control < ~5
 turns on average — are excluded). Headline = tasks where control burns
-> 200k total tokens. No outlier trimming.
+> 200k total tokens.
 """
 from leaderboard import rows, compute
 
