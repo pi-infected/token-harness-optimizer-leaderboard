@@ -74,8 +74,9 @@
      in end-to-end USD, geometric-mean-aggregated across tasks (so no single task dominates). <b>Positive = cheaper,
      negative = more expensive; 0% = no difference</b>, with <b>control</b> (vanilla Claude Code) sat at the 0% line.
      <b>Adoption</b> = share of runs in which the agent actually invoked the optimizer's tools — a tool the agent
-     never calls cannot save anything (note: hook-based tools like tokenade act without an explicit tool call, so
-     their adoption reads low). Every raw per-run measurement is in <code>results.json</code> for your own analysis.</p>
+     never calls cannot save anything. It's shown as <b>N/A</b> for tools the agent doesn't explicitly call:
+     hook-based ones (tokenade, rtk) act automatically, and prompt/context ones (lean-ctx, claude-token-efficient)
+     are just text. Every raw per-run measurement is in <code>results.json</code> for your own analysis.</p>
 
   <h2>Method &amp; reproduction</h2>
   <p class="sub">Each run is one fully isolated headless Claude Code session (throwaway <code>HOME</code>, throwaway
@@ -87,9 +88,10 @@
      average: they're too trivial to separate the tools (every tool lands on the same near-zero cost — only fixed
      overhead shows) and they don't resemble real agent work. The board scores only the substantive tasks that
      remain.
-     <b>Aggregation.</b> Costs are aggregated as a geometric mean of per-task ratios, so no single task dominates.
-     Every successful run is used as-is and all raw per-run data is published for re-analysis; bootstrap 95%
-     confidence intervals for the headline figures are in <code>results.json</code>.</p>
+     <b>Aggregation.</b> Costs are aggregated as a geometric mean of per-task ratios — the standard way to average
+     ratios (it avoids the upward bias of an arithmetic mean), and a cost-weighted total of all sessions agrees with
+     it to within a point. Every successful run is used as-is and all raw per-run data is published for re-analysis;
+     bootstrap 95% confidence intervals for the headline figures are in <code>results.json</code>.</p>
 
   <div id="detail"></div>
 
@@ -123,6 +125,10 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
   document.getElementById("banner").innerHTML = (minRep < 3)
     ? `<div class="banner">⚠️ <b>Preliminary.</b> Some cells have fewer than 3 repetitions
         (currently ${minRep}–${maxRep}); figures will firm up as the campaign completes.</div>` : "";
+  // adoption is N/A for hook/prompt tools the agent never explicitly calls
+  const naSet = new Set(d.adoption_na||[]);
+  const adoptCell = (name, adoption, n) =>
+    name==="control" ? "—" : naSet.has(name) ? "N/A" : `${adoption}/${n}`;
 
   // ===== HEADLINE: long sessions (control > 200k tokens), cost reduction % =====
   const hrows = (d.headline||[]).map((e,i)=>{
@@ -134,7 +140,7 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
       <td class="num">${i+1}</td>
       <td><b>${e.competitor}</b>${isCtrl?' <span class="pill">baseline</span>':(c.version?` <span class="pill">${c.version}</span>`:"")}</td>
       <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}</td>
-      <td class="num">${isCtrl?"—":e.adoption+"/"+e.n_runs}</td>
+      <td class="num">${adoptCell(e.competitor, e.adoption, e.n_runs)}</td>
       <td class="num">${kTok(t.input)}</td>
       <td class="num">${kTok(t.output)}</td>
       <td class="num">${kTok(t.cache)}</td>
@@ -167,7 +173,7 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
         <td class="num">${i+1}</td>
         <td>${e.base} <span class="pill">+GSP</span></td>
         <td class="num ratio ${redClass(p)}">${pct(p)}${delta}</td>
-        <td class="num">${e.adoption}/${e.n_runs}</td>
+        <td class="num">${adoptCell(e.base, e.adoption, e.n_runs)}</td>
         <td class="num">${kTok(t.input)}</td>
         <td class="num">${kTok(t.output)}</td>
         <td class="num">${kTok(t.cache)}</td>
@@ -219,7 +225,7 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
       return `<tr><td>${t}</td>
         <td class="num">${p.n}</td>
         <td class="num ratio ${isCtrl?'':redClass(red)}">${isCtrl?"—":(p.ratio==null?"—":pct(red))}</td>
-        <td class="num">${isCtrl?"—":p.adoption+"/"+p.n}</td>
+        <td class="num">${adoptCell(name, p.adoption, p.n)}</td>
         <td class="num">${kTok(p.mean_input_tokens)}</td>
         <td class="num">${kTok(p.mean_output_tokens)}</td>
         <td class="num">${kTok(p.mean_cache_tokens)}</td></tr>`;

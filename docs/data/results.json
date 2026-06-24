@@ -194,20 +194,6 @@
  ],
  "headline_gsp": [
   {
-   "competitor": "lean-ctx-gsp",
-   "base": "lean-ctx",
-   "cost_reduction_pct": 11.5,
-   "delta_vs_base_pp": 2.9,
-   "adoption": 0,
-   "n_runs": 18,
-   "tasks_compared": 6,
-   "tokens": {
-    "input": 19548,
-    "output": 4510,
-    "cache": 290376
-   }
-  },
-  {
    "competitor": "code-review-graph-gsp",
    "base": "code-review-graph",
    "cost_reduction_pct": 4.0,
@@ -276,21 +262,13 @@
     "output": 6163,
     "cache": 328346
    }
-  },
-  {
-   "competitor": "rtk-gsp",
-   "base": "rtk",
-   "cost_reduction_pct": -23.1,
-   "delta_vs_base_pp": -12.3,
-   "adoption": 0,
-   "n_runs": 18,
-   "tasks_compared": 6,
-   "tokens": {
-    "input": 26884,
-    "output": 7962,
-    "cache": 475653
-   }
   }
+ ],
+ "adoption_na": [
+  "claude-token-efficient",
+  "lean-ctx",
+  "rtk",
+  "tokenade"
  ],
  "token_bands": [
   {

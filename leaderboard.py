@@ -49,6 +49,18 @@ TOKEN_BANDS = [(0, 200_000, "0–200k"),
                (200_000, 400_000, "200k–400k"),
                (400_000, 1_000_000, "400k–1M")]
 
+# Adoption (= did the agent explicitly invoke the tool?) is undefined for tools
+# the agent never calls: hook-based ones act automatically (tokenade, rtk) and
+# prompt/context ones are just text (claude-token-efficient, lean-ctx). Shown
+# as N/A rather than a misleading 0.
+ADOPTION_NA = {"tokenade", "rtk", "claude-token-efficient", "lean-ctx"}
+
+# A "generous system prompt" only makes sense for tools the agent explicitly
+# calls — it teaches the model which function to reach for. Pointless for a
+# hook (rtk: nothing to call) or a pure prompt (lean-ctx), so those GSP arms
+# are excluded from the GSP comparison table.
+NO_GSP = {"rtk", "lean-ctx"}
+
 
 def _vkey(v):
     """Sortable key for a claude_version string like '2.1.177 (Claude Code)'."""
@@ -339,6 +351,8 @@ def compute(ok, gsp, bad):
     headline_gsp = []
     for gc in sorted({c for c, _ in by_gsp}):
         base = gc[:-4] if gc.endswith("-gsp") else gc
+        if base in NO_GSP:
+            continue
         rs, nrun, adopt = [], 0, 0
         for t in big:
             gr = by_gsp.get((gc, t), [])
@@ -372,6 +386,7 @@ def compute(ok, gsp, bad):
         "headline_n_tasks": len(big),
         "headline": headline,
         "headline_gsp": headline_gsp,
+        "adoption_na": sorted(ADOPTION_NA),
         "token_bands": bands,
         # control's per-task token breakdown (the baseline shown in the detail)
         "control_per_task": {t: {
