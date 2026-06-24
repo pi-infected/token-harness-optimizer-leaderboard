@@ -95,7 +95,7 @@ function ratioClass(r, floor){ if(r==null) return "r-warn";
 
 fetch("data/results.json").then(r=>r.json()).then(d=>{
   // repo link (best-effort; adjust if hosted elsewhere)
-  document.getElementById("repolink").href = "https://github.com/";
+  document.getElementById("repolink").href = "https://github.com/pi-infected/token-harness-optimizer-leaderboard";
   // median control CV as the noise floor reference
   const cvs = Object.values(d.control_noise_floor||{}).map(v=>v.cv).filter(v=>v!=null).sort((a,b)=>a-b);
   const floor = cvs.length? cvs[Math.floor(cvs.length/2)] : 0.08;
