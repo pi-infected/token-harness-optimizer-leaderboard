@@ -70,10 +70,10 @@
   <h2>How to read this</h2>
   <p class="sub"><b>Cost reduction</b> = how much cheaper an optimizer makes a session versus vanilla Claude Code,
      in end-to-end USD, geometric-mean-aggregated across tasks (so no single task dominates). <b>Positive = cheaper,
-     negative = more expensive; 0% = no difference.</b> The <b>[95% CI]</b> is a bootstrap confidence interval — if
-     it crosses 0% the effect isn't yet statistically distinguishable from noise. <b>Adoption</b> = share of runs in
-     which the agent actually invoked the optimizer's tools — a tool the agent never calls cannot save anything
-     (note: hook-based tools like tokenade act without an explicit tool call, so their adoption reads low).</p>
+     negative = more expensive; 0% = no difference</b>, with <b>control</b> (vanilla Claude Code) sat at the 0% line.
+     <b>Adoption</b> = share of runs in which the agent actually invoked the optimizer's tools — a tool the agent
+     never calls cannot save anything (note: hook-based tools like tokenade act without an explicit tool call, so
+     their adoption reads low). Every raw per-run measurement is in <code>results.json</code> for your own analysis.</p>
 
   <h2>Method &amp; reproduction</h2>
   <p class="sub">Each run is one fully isolated headless Claude Code session (throwaway <code>HOME</code>, throwaway
@@ -125,12 +125,11 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
     const isCtrl = e.competitor==="control";
     const c = d.competitors[e.competitor]||{};
     const p = e.cost_reduction_pct;
-    const ci = (e.ci_lo_pct!=null) ? ` <span class="pill">[${pct(e.ci_lo_pct)}, ${pct(e.ci_hi_pct)}]</span>` : "";
     const t = e.tokens||{};
     return `<tr${isCtrl?' style="opacity:.85"':''}>
       <td class="num">${i+1}</td>
       <td><b>${e.competitor}</b>${isCtrl?' <span class="pill">baseline</span>':(c.version?` <span class="pill">${c.version}</span>`:"")}</td>
-      <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}${ci}</td>
+      <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}</td>
       <td class="num">${isCtrl?"—":e.adoption+"/"+e.n_runs}</td>
       <td class="num">${kTok(t.input)}</td>
       <td class="num">${kTok(t.output)}</td>
@@ -141,7 +140,7 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
     <h2 style="margin-top:6px">Cost reduction on long sessions (&gt; ${(d.headline_min_tokens/1000)|0}k tokens)</h2>
     <div class="card"><table>
       <thead><tr><th class="num">#</th><th>Optimizer</th>
-        <th class="num">cost reduction [95% CI]</th><th class="num">adoption</th>
+        <th class="num">cost reduction</th><th class="num">adoption</th>
         <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
       <tbody>${hrows}</tbody>
     </table></div>
@@ -179,9 +178,8 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
     const trows=(d.tasks||[]).map(t=>{
       const p=pt[t]; if(!p) return "";
       const red = isCtrl ? null : redOfRatio(p.ratio);
-      const ci = (!isCtrl && p.ci_lo!=null) ? ` <span class="pill">[${pct(redOfRatio(p.ci_hi))}, ${pct(redOfRatio(p.ci_lo))}]</span>` : "";
       return `<tr><td>${t}</td>
-        <td class="num ratio ${isCtrl?'':redClass(red)}">${isCtrl?"—":(p.ratio==null?"—":pct(red)+ci)}</td>
+        <td class="num ratio ${isCtrl?'':redClass(red)}">${isCtrl?"—":(p.ratio==null?"—":pct(red))}</td>
         <td class="num">${isCtrl?"—":p.adoption+"/"+p.n}</td>
         <td class="num">${kTok(p.mean_input_tokens)}</td>
         <td class="num">${kTok(p.mean_output_tokens)}</td>
