@@ -96,8 +96,14 @@ def rows(campaign=None):
         "SELECT competitor, task, status, COUNT(*) n FROM runs "
         "WHERE status!='ok' AND claude_version=? "
         "GROUP BY competitor, task, status", (campaign,))]
+    # The '*-gsp' arms (generous system prompt) — kept separate so the GSP
+    # comparison table can show that the verbose prompt raised cost.
+    gsp = [dict(r) for r in con.execute(
+        "SELECT * FROM runs WHERE status='ok' AND score IS NOT NULL "
+        "AND claude_version=? AND competitor LIKE '%-gsp'",
+        (campaign,)) if r["task"] in keep]
     con.close()
-    return out, bad, campaign
+    return out, gsp, bad, campaign
 
 
 def boot_ratio(comp_costs, ctrl_costs, rng):
@@ -136,7 +142,7 @@ def boot_aggregate(pairs, rng):
     return draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws))]
 
 
-def compute(ok, bad):
+def compute(ok, gsp, bad):
     """Single source of truth: returns a structured dict consumed by both the
     markdown renderer and the JSON export. The RNG is advanced in a fixed
     order (competitors sorted, tasks sorted) so results are reproducible."""
@@ -249,12 +255,12 @@ def compute(ok, bad):
 
     # mean input / output / cache tokens for ANY competitor (control included)
     # over a set of tasks — averages the per-task means so tasks weigh equally.
-    def mean_tokens(comp, task_list):
+    def mean_tokens(comp, task_list, src=by):
         # "input" = cache_creation (new input processed), "output" = output,
         # "cache" = cache_read (input reused from cache). See per_task above.
         ins, outs, cas = [], [], []
         for t in task_list:
-            rs = by.get((comp, t), [])
+            rs = src.get((comp, t), [])
             if not rs:
                 continue
             ins.append(st.mean([r["cache_creation_tokens"] or 0 for r in rs]))
@@ -323,6 +329,39 @@ def compute(ok, bad):
         })
     headline.sort(key=lambda e: e["cost_ratio"])
 
+    # ---- GSP comparison: same headline computation, but for the "+GSP"
+    # (generous system prompt) arms, with the delta vs the same tool WITHOUT
+    # the prompt. Shows that the verbose prompt raised cost. base→headline%.
+    by_gsp = defaultdict(list)
+    for r in gsp:
+        by_gsp[(r["competitor"], r["task"])].append(r)
+    base_red = {e["competitor"]: e["cost_reduction_pct"] for e in headline}
+    headline_gsp = []
+    for gc in sorted({c for c, _ in by_gsp}):
+        base = gc[:-4] if gc.endswith("-gsp") else gc
+        rs, nrun, adopt = [], 0, 0
+        for t in big:
+            gr = by_gsp.get((gc, t), [])
+            gcosts = [r["total_cost_usd"] for r in gr
+                      if r["success"] and r["total_cost_usd"] is not None]
+            nrun += len(gr)
+            adopt += sum(1 for r in gr if (r["competitor_tool_calls"] or 0) > 0)
+            if gcosts and ctrl_succ_costs.get(t):
+                rs.append(st.mean(gcosts) / st.mean(ctrl_succ_costs[t]))
+        if not rs:
+            continue
+        red = round((1 - math.exp(st.mean(list(map(math.log, rs))))) * 100, 1)
+        headline_gsp.append({
+            "competitor": gc, "base": base,
+            "cost_reduction_pct": red,
+            # delta in percentage points vs the same tool without GSP (None if
+            # the base tool wasn't comparable on these long tasks)
+            "delta_vs_base_pp": (round(red - base_red[base], 1) if base in base_red else None),
+            "adoption": adopt, "n_runs": nrun, "tasks_compared": len(rs),
+            "tokens": mean_tokens(gc, big, by_gsp),
+        })
+    headline_gsp.sort(key=lambda e: -e["cost_reduction_pct"])
+
     return {
         "params": {"bootstrap_draws": BOOT, "seed": SEED, "ci": "95%"},
         "model": sorted({r.get("model") for r in ok if r.get("model")}),
@@ -332,6 +371,7 @@ def compute(ok, bad):
         "headline_min_tokens": HEADLINE_MIN,
         "headline_n_tasks": len(big),
         "headline": headline,
+        "headline_gsp": headline_gsp,
         "token_bands": bands,
         # control's per-task token breakdown (the baseline shown in the detail)
         "control_per_task": {t: {
@@ -425,10 +465,10 @@ def render_md(d):
 def main():
     if not DB.exists():
         sys.exit("no results.sqlite yet — run runner.py first")
-    ok, bad, campaign = rows()
+    ok, gsp, bad, campaign = rows()
     if not ok:
         sys.exit(f"no OK runs for campaign {campaign!r} — check THOL_CAMPAIGN")
-    d = compute(ok, bad)
+    d = compute(ok, gsp, bad)
     d["campaign"] = campaign
     md = render_md(d)
     (ROOT / "leaderboard.md").write_text(md)

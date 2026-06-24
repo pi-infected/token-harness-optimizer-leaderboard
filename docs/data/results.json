@@ -192,6 +192,106 @@
    }
   }
  ],
+ "headline_gsp": [
+  {
+   "competitor": "lean-ctx-gsp",
+   "base": "lean-ctx",
+   "cost_reduction_pct": 11.5,
+   "delta_vs_base_pp": 2.9,
+   "adoption": 0,
+   "n_runs": 18,
+   "tasks_compared": 6,
+   "tokens": {
+    "input": 19548,
+    "output": 4510,
+    "cache": 290376
+   }
+  },
+  {
+   "competitor": "code-review-graph-gsp",
+   "base": "code-review-graph",
+   "cost_reduction_pct": 4.0,
+   "delta_vs_base_pp": 4.6,
+   "adoption": 0,
+   "n_runs": 18,
+   "tasks_compared": 6,
+   "tokens": {
+    "input": 20880,
+    "output": 5292,
+    "cache": 325248
+   }
+  },
+  {
+   "competitor": "squeez-gsp",
+   "base": "squeez",
+   "cost_reduction_pct": -2.0,
+   "delta_vs_base_pp": -1.4,
+   "adoption": 4,
+   "n_runs": 18,
+   "tasks_compared": 6,
+   "tokens": {
+    "input": 20437,
+    "output": 5783,
+    "cache": 373299
+   }
+  },
+  {
+   "competitor": "codegraph-gsp",
+   "base": "codegraph",
+   "cost_reduction_pct": -3.2,
+   "delta_vs_base_pp": -1.2,
+   "adoption": 1,
+   "n_runs": 18,
+   "tasks_compared": 6,
+   "tokens": {
+    "input": 21685,
+    "output": 5937,
+    "cache": 362598
+   }
+  },
+  {
+   "competitor": "serena-gsp",
+   "base": "serena",
+   "cost_reduction_pct": -4.3,
+   "delta_vs_base_pp": -3.9,
+   "adoption": 0,
+   "n_runs": 18,
+   "tasks_compared": 6,
+   "tokens": {
+    "input": 21180,
+    "output": 5578,
+    "cache": 354560
+   }
+  },
+  {
+   "competitor": "token-optimizer-mcp-gsp",
+   "base": "token-optimizer-mcp",
+   "cost_reduction_pct": -5.0,
+   "delta_vs_base_pp": -3.3,
+   "adoption": 1,
+   "n_runs": 18,
+   "tasks_compared": 6,
+   "tokens": {
+    "input": 22455,
+    "output": 6163,
+    "cache": 328346
+   }
+  },
+  {
+   "competitor": "rtk-gsp",
+   "base": "rtk",
+   "cost_reduction_pct": -23.1,
+   "delta_vs_base_pp": -12.3,
+   "adoption": 0,
+   "n_runs": 18,
+   "tasks_compared": 6,
+   "tokens": {
+    "input": 26884,
+    "output": 7962,
+    "cache": 475653
+   }
+  }
+ ],
  "token_bands": [
   {
    "label": "0\u2013200k",

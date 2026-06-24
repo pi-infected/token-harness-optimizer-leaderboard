@@ -40,8 +40,8 @@
   <p class="sub">An open, reproducible, <b>end-to-end</b> benchmark of tools that claim to cut the
      token cost of coding agents. We measure the only thing that matters:
      <b>did the task succeed, and what did the whole session actually cost</b> — with and without each optimizer.
-     <b>Every run uses the Claude Sonnet model</b>, repeated <span id="repsline">many</span> times per task on a single
-     pinned Claude Code version.</p>
+     <b>Every run uses the Claude Sonnet model</b>, <b>10 runs per task per tool</b> on a single pinned Claude Code
+     version.</p>
 
   <div id="banner"></div>
   <div id="headline">Loading results…</div>
@@ -52,6 +52,8 @@
      aren't representative — every tool lands on the same near-zero cost there, so only fixed overhead shows.
      All runs use the <b>Claude Sonnet</b> model. With more budget we'd like to push this to multi-million-token
      sessions; for now this is the regime we can afford to measure, and we add new tools in batches as budget allows.</p>
+
+  <div id="gsp"></div>
 
   <h2>What we found so far</h2>
   <p class="sub"><b>Used as documented, most of these tools don't beat plain Claude Code — several make it
@@ -123,8 +125,6 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
   document.getElementById("banner").innerHTML = (minRep < 3)
     ? `<div class="banner">⚠️ <b>Preliminary.</b> Some cells have fewer than 3 repetitions
         (currently ${minRep}–${maxRep}); figures will firm up as the campaign completes.</div>` : "";
-  const repsEl = document.getElementById("repsline");
-  if(repsEl) repsEl.textContent = (minRep===maxRep)? `${minRep}` : `${minRep}–${maxRep}`;
 
   // ===== HEADLINE: long sessions (control > 200k tokens), cost reduction % =====
   const hrows = (d.headline||[]).map((e,i)=>{
@@ -152,11 +152,42 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
     </table></div>
     <p class="meta">Model <code>${(d.model||[]).join(", ")}</code> ·
       Claude Code <code>${(d.claude_versions||[]).join(", ")}</code> ·
-      ${d.headline_n_tasks} long task(s), ${(minRep===maxRep)?minRep:minRep+"–"+maxRep} runs each ·
+      ${d.headline_n_tasks} long task(s), 10 runs each ·
       higher % = cheaper.
       <b>Every figure here is a mean</b> — cost reduction is averaged across tasks, the token columns are mean
       tokens per run. <b>The one exception is adoption</b>, which is a count: the number of runs (out of the total)
       in which the agent actually called the tool.</p>`;
+
+  // ===== GSP: same table for the "generous system prompt" arms, Δ vs base =====
+  const gsp = d.headline_gsp||[];
+  if(gsp.length){
+    const grows = gsp.map((e,i)=>{
+      const p = e.cost_reduction_pct, dl = e.delta_vs_base_pp;
+      const delta = (dl==null)? "" : ` <span class="pill" style="color:${dl>0?'var(--good)':'var(--bad)'}">${pct(dl).replace('%','pp')} vs base</span>`;
+      const t = e.tokens||{};
+      return `<tr>
+        <td class="num">${i+1}</td>
+        <td>${e.base} <span class="pill">+GSP</span></td>
+        <td class="num ratio ${redClass(p)}">${pct(p)}${delta}</td>
+        <td class="num">${e.adoption}/${e.n_runs}</td>
+        <td class="num">${kTok(t.input)}</td>
+        <td class="num">${kTok(t.output)}</td>
+        <td class="num">${kTok(t.cache)}</td>
+      </tr>`;
+    }).join("");
+    document.getElementById("gsp").innerHTML = `
+      <h2>With a "generous system prompt" (GSP)</h2>
+      <p class="sub">The same long sessions, but each tool runs with a verbose, per-tool system prompt that tells the
+         agent exactly which of its functions to use when. <b>The pill is the change vs the same tool without the
+         prompt</b> (percentage points of cost reduction). It mostly makes things <b>worse</b> — the prompt is billed
+         every turn and the tools still don't pay for themselves. (Tools without a GSP arm are omitted.)</p>
+      <div class="card"><table>
+        <thead><tr><th class="num">#</th><th>Optimizer</th>
+          <th class="num">mean cost reduction</th><th class="num">adoption</th>
+          <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
+        <tbody>${grows}</tbody>
+      </table></div>`;
+  }
 
   // ===== DETAIL: per session-size band (with token breakdown + control) =====
   const bandsHtml = (d.token_bands||[]).map(b=>{
