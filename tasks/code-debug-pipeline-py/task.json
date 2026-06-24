@@ -1,0 +1,12 @@
+{
+  "id": "code-debug-pipeline-py",
+  "title": "Debug a red sales-ETL pipeline (9 bugs across 6 stages, 200-row golden)",
+  "kind": "code",
+  "workspace": {
+    "fixture": "pipeline-debug"
+  },
+  "max_turns": 80,
+  "timeout_s": 2400,
+  "success_threshold": 1.0,
+  "baseline_score": 0.3
+}

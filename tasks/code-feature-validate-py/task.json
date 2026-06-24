@@ -1,0 +1,12 @@
+{
+  "id": "code-feature-validate-py",
+  "title": "Implement a validators module + wire it into 8 handlers",
+  "kind": "code",
+  "workspace": {
+    "fixture": "validate-feature"
+  },
+  "max_turns": 60,
+  "timeout_s": 1800,
+  "success_threshold": 1.0,
+  "baseline_score": 0.3
+}

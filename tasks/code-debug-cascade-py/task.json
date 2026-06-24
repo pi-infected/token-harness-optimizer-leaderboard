@@ -1,0 +1,12 @@
+{
+  "id": "code-debug-cascade-py",
+  "title": "Debug a large red accounting suite (10 bugs across 10 modules)",
+  "kind": "code",
+  "workspace": {
+    "fixture": "cascade-debug"
+  },
+  "max_turns": 80,
+  "timeout_s": 2400,
+  "success_threshold": 1.0,
+  "baseline_score": 0.3
+}

@@ -54,3 +54,12 @@ research/dataset/
 
 # tokenade — legacy per-project embedding model cache (now global)
 .fastembed_cache/
+
+# trivially-short tasks (control <5 turns avg) — kept locally, excluded from the public board
+_excluded_tasks/
+
+# tokenade-internal R&D arms + research — kept locally, off the public board
+_excluded_internal/
+
+# Pages deploy workflow needs a workflow-scoped token to push; use branch-deploy instead (Settings > Pages > /docs). Kept in _excluded_internal/.
+.github/workflows/

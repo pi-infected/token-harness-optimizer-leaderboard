@@ -1,9 +1,0 @@
-{
-  "id": "code-debug-cilog",
-  "title": "Root-cause a CI failure from a noisy log",
-  "kind": "code",
-  "workspace": {"fixture": "ci-log"},
-  "max_turns": 15,
-  "timeout_s": 600,
-  "success_threshold": 1.0
-}

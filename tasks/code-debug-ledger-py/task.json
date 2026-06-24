@@ -1,0 +1,12 @@
+{
+  "id": "code-debug-ledger-py",
+  "title": "Debug a red accounting test-suite (5 bugs across 5 modules)",
+  "kind": "code",
+  "workspace": {
+    "fixture": "ledger-debug"
+  },
+  "max_turns": 60,
+  "timeout_s": 1800,
+  "success_threshold": 1.0,
+  "baseline_score": 0.3
+}

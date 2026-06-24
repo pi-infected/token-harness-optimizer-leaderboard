@@ -1,1 +1,0 @@
-{"id":"doc-digest-zh","kind":"noncode","max_turns":12,"success_threshold":1.0,"timeout_s":600,"title":"Questions factuelles sur un long document interne (chinois/Han, UTF-8)","workspace":{"fixture":"longdoc-zh"}}

@@ -1,1 +1,0 @@
-{"id":"doc-digest-fr","kind":"noncode","max_turns":12,"success_threshold":1.0,"timeout_s":600,"title":"Questions factuelles sur un long document interne (français/UTF-8)","workspace":{"fixture":"longdoc-fr"}}

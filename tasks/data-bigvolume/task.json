@@ -1,9 +1,0 @@
-{
-  "id": "data-bigvolume",
-  "title": "Aggregate questions over a 150k-row CSV",
-  "kind": "noncode",
-  "workspace": {"fixture": "events-csv"},
-  "max_turns": 20,
-  "timeout_s": 900,
-  "success_threshold": 1.0
-}

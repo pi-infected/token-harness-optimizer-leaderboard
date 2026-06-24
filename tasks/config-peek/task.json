@@ -1,9 +1,0 @@
-{
-  "id": "config-peek",
-  "title": "Read two values from a tiny config file",
-  "kind": "noncode",
-  "workspace": {"fixture": "tiny-config"},
-  "max_turns": 6,
-  "timeout_s": 300,
-  "success_threshold": 1.0
-}

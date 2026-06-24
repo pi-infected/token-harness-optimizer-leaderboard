@@ -31,6 +31,25 @@ BOOT = 10_000
 SEED = 1234
 
 
+def active_tasks():
+    """The benchmark scores ONLY tasks whose definition is present in tasks/.
+    Trivially-short tasks — where vanilla Claude Code (control) finishes in
+    under ~5 turns on average — were moved out of tasks/ (into a local,
+    git-ignored folder): on those, every tool lands on the same near-zero cost,
+    so only fixed overhead shows and nobody can win. They're also unlike real
+    agent work. Moving the task dir out is what removes it here — single source
+    of truth, no hard-coded exclusion list."""
+    return {p.name for p in (ROOT / "tasks").iterdir()
+            if p.is_dir() and (p / "task.json").exists()}
+
+
+# Token-usage bands (control's TOTAL tokens for a task — input+output+cache),
+# so the board can be read per cost regime: where do real sessions land?
+TOKEN_BANDS = [(0, 200_000, "0–200k"),
+               (200_000, 400_000, "200k–400k"),
+               (400_000, 1_000_000, "400k–1M")]
+
+
 def _vkey(v):
     """Sortable key for a claude_version string like '2.1.177 (Claude Code)'."""
     nums = re.findall(r"\d+", v or "")
@@ -56,13 +75,23 @@ def rows(campaign=None):
         campaign = match[0] if match else campaign
     elif versions:
         campaign = max(versions, key=_vkey)
-    # 'learned-hook' and 'tokenade-forced' are THIS repo's own research arms
-    # (RESEARCH.md), not surveyed third-party tools — kept out of the public board.
+    # Filters:
+    #  * tasks — only those still present in tasks/ (see active_tasks): the
+    #    trivially-short tasks (control < ~5 turns) were moved out, which
+    #    removes them from every aggregate here.
+    #  * '*-gsp' arms — the "generous system prompt" experiment (a verbose
+    #    per-tool prompt teaching the agent which CLI/MCP function to use when).
+    #    It made costs WORSE (overhead, ~no extra adoption), so it's reported in
+    #    the methodology, not mixed into the headline tool ranking.
+    #  * 'learned-hook' / 'tokenade-forced' — defensive exclusion of legacy
+    #    internal experiment arms, should they ever reappear in a results DB.
+    keep = active_tasks()
     out = [dict(r) for r in con.execute(
         "SELECT * FROM runs WHERE status='ok' AND score IS NOT NULL "
         "AND claude_version=? "
-        "AND competitor NOT IN ('learned-hook','tokenade-forced')",
-        (campaign,))]
+        "AND competitor NOT IN ('learned-hook','tokenade-forced') "
+        "AND competitor NOT LIKE '%-gsp'",
+        (campaign,)) if r["task"] in keep]
     bad = [dict(r) for r in con.execute(
         "SELECT competitor, task, status, COUNT(*) n FROM runs "
         "WHERE status!='ok' AND claude_version=? "
@@ -198,11 +227,40 @@ def compute(ok, bad):
                  "n_runs": nr, "tasks_compared": 0}
                 for c, agg, lo, hi, ns, nr, nt in summary if agg is None]
 
+    # ---- token-usage bands: group tasks by how many TOTAL tokens vanilla
+    # Claude Code (control) burns on them, so the board can be read per cost
+    # regime (where do real sessions actually land?). Total = input + output +
+    # cache_creation + cache_read, averaged over control's runs of that task.
+    def ctrl_tokens(t):
+        rs = [r for r in by.get(("control", t), [])]
+        vals = [(r["input_tokens"] or 0) + (r["output_tokens"] or 0)
+                + (r["cache_creation_tokens"] or 0) + (r["cache_read_tokens"] or 0)
+                for r in rs]
+        return st.mean(vals) if vals else 0
+    task_tokens = {t: ctrl_tokens(t) for t in tasks}
+    bands = []
+    for lo_b, hi_b, label in TOKEN_BANDS:
+        bt = sorted(t for t in tasks if lo_b <= task_tokens[t] < hi_b)
+        # per-competitor aggregate (geomean of per-task ratios) over band tasks
+        rank = []
+        for c, cd in competitors.items():
+            rs = [cd["per_task"][t]["ratio"] for t in bt
+                  if t in cd["per_task"] and cd["per_task"][t].get("ratio")]
+            if rs:
+                rank.append({"competitor": c,
+                             "aggregate_cost_ratio": math.exp(st.mean(list(map(math.log, rs)))),
+                             "tasks_compared": len(rs)})
+        rank.sort(key=lambda e: e["aggregate_cost_ratio"])
+        bands.append({"label": label, "lo": lo_b, "hi": hi_b,
+                      "tasks": bt, "n_tasks": len(bt), "ranking": rank})
+
     return {
         "params": {"bootstrap_draws": BOOT, "seed": SEED, "ci": "95%"},
         "model": sorted({r.get("model") for r in ok if r.get("model")}),
         "claude_versions": sorted({r["claude_version"] for r in ok}),
         "tasks": tasks,
+        "task_control_tokens": {t: round(task_tokens[t]) for t in tasks},
+        "token_bands": bands,
         "control_noise_floor": noise,
         "competitors": competitors,
         "ranking": ranking,
