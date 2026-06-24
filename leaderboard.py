@@ -193,11 +193,16 @@ def compute(ok, bad):
                 lo, hi = boot_ratio(costs, ctrl_succ_costs[t], rng)
                 ratios.append(ratio)
                 compared_pairs.append((costs, ctrl_succ_costs[t]))
+            tok = lambda k: (st.mean([r[k] or 0 for r in runs]) if runs else 0)
             per_task[t] = {
                 "n": len(runs), "successes": len(succ),
                 "mean_cost": (st.mean(costs) if costs else None),
                 "ratio": ratio, "ci_lo": lo, "ci_hi": hi,
                 "adoption": len(adopted), "mean_wall_s": wall,
+                # mean token breakdown for this competitor on this task
+                "mean_input_tokens": round(tok("input_tokens")),
+                "mean_output_tokens": round(tok("output_tokens")),
+                "mean_cache_tokens": round(tok("cache_creation_tokens") + tok("cache_read_tokens")),
                 # raw measurements for full transparency / re-analysis
                 "costs": costs,
                 "scores": [r["score"] for r in runs],
@@ -254,12 +259,41 @@ def compute(ok, bad):
         bands.append({"label": label, "lo": lo_b, "hi": hi_b,
                       "tasks": bt, "n_tasks": len(bt), "ranking": rank})
 
+    # ---- HEADLINE ranking: long sessions only (control > 200k tokens). Most
+    # real agent work is long, so this is the representative figure; reported as
+    # a plain "cost reduction %" (= 100·(1 − ratio)) for a non-technical reader.
+    HEADLINE_MIN = 200_000
+    big = sorted(t for t in tasks if task_tokens[t] >= HEADLINE_MIN)
+    headline = []
+    for c, cd in competitors.items():
+        rs = [cd["per_task"][t]["ratio"] for t in big
+              if t in cd["per_task"] and cd["per_task"][t].get("ratio")]
+        pairs_big = [(cd["per_task"][t]["costs"], ctrl_succ_costs[t]) for t in big
+                     if t in cd["per_task"] and cd["per_task"][t]["costs"] and ctrl_succ_costs.get(t)]
+        if not rs:
+            continue
+        ratio = math.exp(st.mean(list(map(math.log, rs))))
+        lo, hi = boot_aggregate(pairs_big, rng)
+        adopt = sum(cd["per_task"][t]["adoption"] for t in big if t in cd["per_task"])
+        nrun = sum(cd["per_task"][t]["n"] for t in big if t in cd["per_task"])
+        headline.append({
+            "competitor": c, "cost_ratio": ratio,
+            "cost_reduction_pct": round((1 - ratio) * 100, 1),
+            "ci_lo_pct": (round((1 - hi) * 100, 1) if hi is not None else None),
+            "ci_hi_pct": (round((1 - lo) * 100, 1) if lo is not None else None),
+            "adoption": adopt, "n_runs": nrun, "tasks_compared": len(rs),
+        })
+    headline.sort(key=lambda e: e["cost_ratio"])
+
     return {
         "params": {"bootstrap_draws": BOOT, "seed": SEED, "ci": "95%"},
         "model": sorted({r.get("model") for r in ok if r.get("model")}),
         "claude_versions": sorted({r["claude_version"] for r in ok}),
         "tasks": tasks,
         "task_control_tokens": {t: round(task_tokens[t]) for t in tasks},
+        "headline_min_tokens": HEADLINE_MIN,
+        "headline_n_tasks": len(big),
+        "headline": headline,
         "token_bands": bands,
         "control_noise_floor": noise,
         "competitors": competitors,

@@ -42,7 +42,14 @@
      <b>did the task succeed, and what did the whole session actually cost</b> — with and without each optimizer.</p>
 
   <div id="banner"></div>
-  <div id="content">Loading results…</div>
+  <div id="headline">Loading results…</div>
+  <p class="sub" style="margin-top:14px"><b>What this table shows.</b> How much each tool changes the cost of a
+     coding session versus plain Claude Code, on <b>long sessions only</b> — tasks where vanilla Claude Code burns
+     more than <b>200,000 tokens</b>. A <b>positive number means cheaper</b>; negative means more expensive.
+     <b>Why long sessions:</b> most real work with a coding agent is long and multi-step; short throwaway tasks
+     aren't representative — every tool lands on the same near-zero cost there, so only fixed overhead shows.
+     All runs use the <b>Claude Sonnet</b> model. With more budget we'd like to push this to multi-million-token
+     sessions; for now this is the regime we can afford to measure, and we add new tools in batches as budget allows.</p>
 
   <h2>What we found so far</h2>
   <p class="sub"><b>Used as documented, most of these tools don't beat plain Claude Code — several make it
@@ -58,11 +65,15 @@
      above) — never on the short ones. New tools are added over time as token budget allows; this benchmark is
      expensive to run, so the board grows in batches rather than all at once.</p>
 
+  <div id="detail"></div>
+
   <h2>How to read this</h2>
-  <p class="sub"><b>Cost ratio vs control</b> = mean end-to-end USD of an optimizer's successful runs ÷ the same for
-     vanilla Claude Code, geometric-mean-aggregated across tasks. <b>Lower is better; 1.00 = no difference.</b>
-     A ratio is only a real effect if it sits outside the control's own noise floor. <b>Adoption</b> = share of
-     runs in which the agent actually invoked the optimizer's tools — a tool the agent never calls cannot save anything.</p>
+  <p class="sub"><b>Cost reduction</b> = how much cheaper an optimizer makes a session versus vanilla Claude Code,
+     in end-to-end USD, geometric-mean-aggregated across tasks (so no single task dominates). <b>Positive = cheaper,
+     negative = more expensive; 0% = no difference.</b> The <b>[95% CI]</b> is a bootstrap confidence interval — if
+     it crosses 0% the effect isn't yet statistically distinguishable from noise. <b>Adoption</b> = share of runs in
+     which the agent actually invoked the optimizer's tools — a tool the agent never calls cannot save anything
+     (note: hook-based tools like tokenade act without an explicit tool call, so their adoption reads low).</p>
 
   <h2>Method &amp; reproduction</h2>
   <p class="sub">Each run is one fully isolated headless Claude Code session (throwaway <code>HOME</code>, throwaway
@@ -90,102 +101,98 @@
 
 <script>
 const fmt2 = x => (x==null? "—" : x.toFixed(2));
-function ratioClass(r, floor){ if(r==null) return "r-warn";
-  if(r < 1-floor) return "r-good"; if(r > 1+floor) return "r-bad"; return "r-warn"; }
+// signed percent, human-readable: +20% / −11%
+const pct = x => (x==null? "—" : (x>=0?"+":"−")+Math.abs(x).toFixed(0)+"%");
+// colour by cost reduction %: clearly cheaper = green, clearly dearer = red
+function redClass(p){ if(p==null) return "r-warn"; if(p>2) return "r-good"; if(p<-2) return "r-bad"; return "r-warn"; }
+const redOfRatio = r => r==null? null : (1-r)*100;
+const kTok = n => n==null? "—" : (n>=1e6? (n/1e6).toFixed(1)+"M" : n>=1e3? Math.round(n/1e3)+"k" : ""+n);
 
 fetch("data/results.json").then(r=>r.json()).then(d=>{
-  // repo link (best-effort; adjust if hosted elsewhere)
   document.getElementById("repolink").href = "https://github.com/pi-infected/token-harness-optimizer-leaderboard";
-  // median control CV as the noise floor reference
-  const cvs = Object.values(d.control_noise_floor||{}).map(v=>v.cv).filter(v=>v!=null).sort((a,b)=>a-b);
-  const floor = cvs.length? cvs[Math.floor(cvs.length/2)] : 0.08;
 
   // preliminary if any compared cell has fewer than 3 reps
   let maxRep=0, minRep=99;
   for(const c of Object.values(d.competitors||{}))
     for(const pt of Object.values(c.per_task||{})){ maxRep=Math.max(maxRep,pt.n); minRep=Math.min(minRep,pt.n); }
-  const prelim = minRep < 3;
-  document.getElementById("banner").innerHTML = prelim
-    ? `<div class="banner">⚠️ <b>Preliminary.</b> The campaign is still running — some cells have fewer than 3
-        repetitions (currently ${minRep}–${maxRep}). Rankings and confidence intervals will firm up on completion.</div>`
-    : "";
+  document.getElementById("banner").innerHTML = (minRep < 3)
+    ? `<div class="banner">⚠️ <b>Preliminary.</b> Some cells have fewer than 3 repetitions
+        (currently ${minRep}–${maxRep}); figures will firm up as the campaign completes.</div>` : "";
 
-  // ranking table
-  const rows = (d.ranking||[]).map(e=>{
+  // ===== HEADLINE: long sessions (control > 200k tokens), cost reduction % =====
+  const hrows = (d.headline||[]).map((e,i)=>{
     const c = d.competitors[e.competitor]||{};
-    let adopt=0, runs=0;
-    for(const pt of Object.values(c.per_task||{})){ adopt+=pt.adoption||0; runs+=pt.n||0; }
-    const r = e.aggregate_cost_ratio;
-    const rank = e.rank==null? "—" : e.rank;
-    const lo=e.aggregate_ci_lo, hi=e.aggregate_ci_hi;
-    const ci = (lo!=null) ? ` <span class="pill">[${lo.toFixed(2)}, ${hi.toFixed(2)}]</span>` : "";
-    const sig = (lo!=null && lo>1) ? "more expensive" : (hi!=null && hi<1) ? "cheaper" : "≈ control (n.s.)";
+    const p = e.cost_reduction_pct;
+    const ci = (e.ci_lo_pct!=null) ? ` <span class="pill">[${pct(e.ci_lo_pct)}, ${pct(e.ci_hi_pct)}]</span>` : "";
     return `<tr>
-      <td class="num">${rank}</td>
-      <td>${e.competitor}${c.version?` <span class="pill">${c.version}</span>`:""}</td>
-      <td class="num ratio ${ratioClass(r,floor)}">${r==null?"n/a":fmt2(r)}${ci}</td>
-      <td>${r==null?"—":sig}</td>
-      <td class="num">${e.n_success}/${e.n_runs}</td>
-      <td class="num">${adopt}/${runs}</td>
+      <td class="num">${i+1}</td>
+      <td><b>${e.competitor}</b>${c.version?` <span class="pill">${c.version}</span>`:""}</td>
+      <td class="num ratio ${redClass(p)}">${pct(p)}${ci}</td>
+      <td class="num">${e.adoption}/${e.n_runs}</td>
     </tr>`;
   }).join("");
-  // per-task detail (expandable), in ranking order
-  const perTask = (d.ranking||[]).filter(e=>e.rank!=null).map(e=>{
-    const cd=d.competitors[e.competitor]||{};
-    const trows=(d.tasks||[]).map(t=>{
-      const p=cd.per_task?.[t]; if(!p) return "";
-      const ci = p.ci_lo!=null ? ` <span class="pill">[${p.ci_lo.toFixed(2)}, ${p.ci_hi.toFixed(2)}]</span>` : "";
-      const rr = p.ratio==null ? "—" : `${p.ratio.toFixed(2)}${ci}`;
-      return `<tr><td>${t}</td><td class="num ratio ${ratioClass(p.ratio,floor)}">${rr}</td><td class="num">${p.adoption}/${p.n}</td></tr>`;
-    }).join("");
-    return `<details><summary>${e.competitor} — ${fmt2(e.aggregate_cost_ratio)}× aggregate, adoption ${
-      Object.values(cd.per_task||{}).reduce((s,p)=>s+(p.adoption||0),0)}/${
-      Object.values(cd.per_task||{}).reduce((s,p)=>s+(p.n||0),0)}</summary>
-      <div class="card" style="margin:8px 0"><table>
-        <thead><tr><th>task</th><th class="num">cost ratio [95% CI]</th><th class="num">adoption</th></tr></thead>
-        <tbody>${trows}</tbody></table></div></details>`;
-  }).join("");
+  document.getElementById("headline").innerHTML = `
+    <h2 style="margin-top:6px">Cost reduction on long sessions (&gt; ${(d.headline_min_tokens/1000)|0}k tokens)</h2>
+    <div class="card"><table>
+      <thead><tr><th class="num">#</th><th>Optimizer</th>
+        <th class="num">cost reduction [95% CI]</th><th class="num">adoption</th></tr></thead>
+      <tbody>${hrows}</tbody>
+    </table></div>
+    <p class="meta">Model <code>${(d.model||[]).join(", ")}</code> ·
+      Claude Code <code>${(d.claude_versions||[]).join(", ")}</code> ·
+      ${d.headline_n_tasks} long task(s), each run many times ·
+      higher % = cheaper · <b>adoption</b> = share of runs where the agent actually called the tool.</p>`;
 
-  // token-usage bands: how each tool does per session-size regime (control's
-  // total tokens for the task). Shows where the value actually comes from.
+  // ===== DETAIL: per session-size band + per-task token breakdown =====
   const bandsHtml = (d.token_bands||[]).map(b=>{
     if(!b.n_tasks) return "";
-    const rr = b.ranking.map((e,i)=>
-      `<tr><td class="num">${i+1}</td><td>${e.competitor}</td>
-       <td class="num ratio ${ratioClass(e.aggregate_cost_ratio,floor)}">${fmt2(e.aggregate_cost_ratio)}×</td></tr>`).join("");
+    const rr = b.ranking.map((e,i)=>{
+      const p = redOfRatio(e.aggregate_cost_ratio);
+      return `<tr><td class="num">${i+1}</td><td>${e.competitor}</td>
+       <td class="num ratio ${redClass(p)}">${pct(p)}</td></tr>`;}).join("");
     return `<div class="card" style="flex:1;min-width:230px">
       <h3 style="margin:2px 0 6px">${b.label} tokens <span class="pill">${b.n_tasks} task${b.n_tasks>1?"s":""}</span></h3>
-      <table><thead><tr><th class="num">#</th><th>Optimizer</th><th class="num">cost ratio</th></tr></thead>
+      <table><thead><tr><th class="num">#</th><th>Optimizer</th><th class="num">cost reduction</th></tr></thead>
       <tbody>${rr}</tbody></table></div>`;
   }).join("");
 
-  document.getElementById("content").innerHTML = `
-    <h2 style="margin-top:6px">Ranking — cost per solved task vs control (lower is better)</h2>
-    <div class="card"><table>
-      <thead><tr><th class="num">#</th><th>Optimizer</th>
-        <th class="num">cost ratio [95% CI]</th><th>vs control</th>
-        <th class="num">success</th><th class="num">adoption</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>
+  const order = (d.headline||[]).map(e=>e.competitor);
+  const perTask = order.map(name=>{
+    const cd=d.competitors[name]||{};
+    const trows=(d.tasks||[]).map(t=>{
+      const p=cd.per_task?.[t]; if(!p) return "";
+      const red = redOfRatio(p.ratio);
+      const ci = p.ci_lo!=null ? ` <span class="pill">[${pct(redOfRatio(p.ci_hi))}, ${pct(redOfRatio(p.ci_lo))}]</span>` : "";
+      return `<tr><td>${t}</td>
+        <td class="num ratio ${redClass(red)}">${p.ratio==null?"—":pct(red)+ci}</td>
+        <td class="num">${p.adoption}/${p.n}</td>
+        <td class="num">${kTok(p.mean_input_tokens)}</td>
+        <td class="num">${kTok(p.mean_output_tokens)}</td>
+        <td class="num">${kTok(p.mean_cache_tokens)}</td></tr>`;
+    }).join("");
+    const he = (d.headline||[]).find(e=>e.competitor===name);
+    return `<details><summary>${name} — ${he?pct(he.cost_reduction_pct):"—"} on long sessions</summary>
+      <div class="card" style="margin:8px 0"><table>
+        <thead><tr><th>task</th><th class="num">cost reduction</th><th class="num">adoption</th>
+          <th class="num">input</th><th class="num">output</th><th class="num">cache</th></tr></thead>
+        <tbody>${trows}</tbody></table></div></details>`;
+  }).join("");
+
+  document.getElementById("detail").innerHTML = `
     <h2>By session size — where does the value come from?</h2>
-    <p class="sub">The same ranking, split by how many <b>total tokens vanilla Claude Code burns</b> on a task
-       (input + output + cache). Optimizers do little on small sessions (the fixed prompt/overhead isn't amortised);
-       the savings show up as sessions get long. This is also where real agent work lives.</p>
+    <p class="sub">The full board split by how many <b>total tokens vanilla Claude Code burns</b> on a task
+       (input + output + cache). Optimizers do little on small sessions; the savings show up as sessions get long.</p>
     <div style="display:flex;gap:12px;flex-wrap:wrap">${bandsHtml}</div>
-    <p class="meta">Model: <code>${(d.model||[]).join(", ")}</code> ·
-      Claude Code: <code>${(d.claude_versions||[]).join(", ")}</code> ·
-      control noise floor (median CV): <b>${(floor*100).toFixed(0)}%</b> ·
-      bootstrap ${d.params?.bootstrap_draws?.toLocaleString?.()||""} draws, ${d.params?.ci||"95%"} CI.</p>
     <h2>Per-task detail</h2>
-    <p class="sub">Expand an optimizer to see its cost ratio (with 95% bootstrap CI) and
-       adoption on each task. Green = below control, red = above, beyond the noise floor.</p>
+    <p class="sub">Expand a tool for its cost reduction and adoption on each task, plus the mean
+       <b>input / output / cache</b> tokens it used — so you can see exactly how big each session is.</p>
     ${perTask}`;
 
   document.getElementById("foot").innerHTML =
     `Generated from <code>results.json</code> (every raw per-run measurement is in that file). ` +
-    `Tasks compared: ${ (d.tasks||[]).length }. THOL is open-source and re-runnable end to end.`;
+    `Long-session tasks: ${d.headline_n_tasks} of ${ (d.tasks||[]).length } total. THOL is open-source and re-runnable end to end.`;
 }).catch(e=>{
-  document.getElementById("content").innerHTML =
+  document.getElementById("headline").innerHTML =
     `<div class="banner">Could not load <code>data/results.json</code> yet. ${e}</div>`;
 });
 </script>

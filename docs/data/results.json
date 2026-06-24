@@ -38,6 +38,100 @@
   "report-pdf": 191514,
   "seo-audit": 187305
  },
+ "headline_min_tokens": 200000,
+ "headline_n_tasks": 6,
+ "headline": [
+  {
+   "competitor": "tokenade",
+   "cost_ratio": 0.8021736063147922,
+   "cost_reduction_pct": 19.8,
+   "ci_lo_pct": 5.6,
+   "ci_hi_pct": 34.4,
+   "adoption": 14,
+   "n_runs": 54,
+   "tasks_compared": 6
+  },
+  {
+   "competitor": "lean-ctx",
+   "cost_ratio": 0.9142190683435719,
+   "cost_reduction_pct": 8.6,
+   "ci_lo_pct": -8.0,
+   "ci_hi_pct": 24.3,
+   "adoption": 0,
+   "n_runs": 54,
+   "tasks_compared": 6
+  },
+  {
+   "competitor": "claude-token-efficient",
+   "cost_ratio": 0.9815539311422611,
+   "cost_reduction_pct": 1.8,
+   "ci_lo_pct": -10.5,
+   "ci_hi_pct": 12.7,
+   "adoption": 0,
+   "n_runs": 54,
+   "tasks_compared": 6
+  },
+  {
+   "competitor": "serena",
+   "cost_ratio": 1.0037188169447706,
+   "cost_reduction_pct": -0.4,
+   "ci_lo_pct": -16.0,
+   "ci_hi_pct": 11.7,
+   "adoption": 0,
+   "n_runs": 54,
+   "tasks_compared": 6
+  },
+  {
+   "competitor": "squeez",
+   "cost_ratio": 1.0058345033531093,
+   "cost_reduction_pct": -0.6,
+   "ci_lo_pct": -16.8,
+   "ci_hi_pct": 14.1,
+   "adoption": 1,
+   "n_runs": 54,
+   "tasks_compared": 6
+  },
+  {
+   "competitor": "code-review-graph",
+   "cost_ratio": 1.0058734993243479,
+   "cost_reduction_pct": -0.6,
+   "ci_lo_pct": -16.5,
+   "ci_hi_pct": 14.8,
+   "adoption": 0,
+   "n_runs": 54,
+   "tasks_compared": 6
+  },
+  {
+   "competitor": "token-optimizer-mcp",
+   "cost_ratio": 1.016910834149826,
+   "cost_reduction_pct": -1.7,
+   "ci_lo_pct": -14.4,
+   "ci_hi_pct": 9.0,
+   "adoption": 0,
+   "n_runs": 54,
+   "tasks_compared": 6
+  },
+  {
+   "competitor": "codegraph",
+   "cost_ratio": 1.0200032136494785,
+   "cost_reduction_pct": -2.0,
+   "ci_lo_pct": -15.8,
+   "ci_hi_pct": 10.1,
+   "adoption": 1,
+   "n_runs": 54,
+   "tasks_compared": 6
+  },
+  {
+   "competitor": "rtk",
+   "cost_ratio": 1.1076116213493308,
+   "cost_reduction_pct": -10.8,
+   "ci_lo_pct": -31.3,
+   "ci_hi_pct": 3.7,
+   "adoption": 0,
+   "n_runs": 54,
+   "tasks_compared": 6
+  }
+ ],
  "token_bands": [
   {
    "label": "0\u2013200k",
@@ -441,6 +535,9 @@
      "ci_hi": 1.0869125189894189,
      "adoption": 0,
      "mean_wall_s": 19.12811111111111,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 711,
+     "mean_cache_tokens": 126342,
      "costs": [
       0.09783059999999999,
       0.0938574,
@@ -495,6 +592,9 @@
      "ci_hi": 1.4312676896579777,
      "adoption": 0,
      "mean_wall_s": 152.0451111111111,
+     "mean_input_tokens": 16,
+     "mean_output_tokens": 9568,
+     "mean_cache_tokens": 542285,
      "costs": [
       1.0184457,
       0.363849,
@@ -549,6 +649,9 @@
      "ci_hi": 1.5455175857165109,
      "adoption": 0,
      "mean_wall_s": 141.10944444444445,
+     "mean_input_tokens": 12,
+     "mean_output_tokens": 8390,
+     "mean_cache_tokens": 377891,
      "costs": [
       0.1807218,
       0.2177751,
@@ -603,6 +706,9 @@
      "ci_hi": 1.2224110438523028,
      "adoption": 0,
      "mean_wall_s": 97.47055555555556,
+     "mean_input_tokens": 13,
+     "mean_output_tokens": 6235,
+     "mean_cache_tokens": 424320,
      "costs": [
       0.397902,
       0.4341054,
@@ -657,6 +763,9 @@
      "ci_hi": 1.0887673727168528,
      "adoption": 0,
      "mean_wall_s": 41.55822222222222,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 2171,
+     "mean_cache_tokens": 217155,
      "costs": [
       0.1573566,
       0.12702660000000002,
@@ -711,6 +820,9 @@
      "ci_hi": 1.1041646095450537,
      "adoption": 0,
      "mean_wall_s": 63.912333333333336,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 4408,
+     "mean_cache_tokens": 271964,
      "costs": [
       0.310218,
       0.2700399,
@@ -765,6 +877,9 @@
      "ci_hi": 1.050323350543155,
      "adoption": 0,
      "mean_wall_s": 33.32333333333334,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 1680,
+     "mean_cache_tokens": 146431,
      "costs": [
       0.1329015,
       0.12350100000000001,
@@ -819,6 +934,9 @@
      "ci_hi": 1.1947964270448352,
      "adoption": 0,
      "mean_wall_s": 30.896333333333335,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 1616,
+     "mean_cache_tokens": 152586,
      "costs": [
       0.1331154,
       0.1354284,
@@ -873,6 +991,9 @@
      "ci_hi": 1.0911822902040356,
      "adoption": 0,
      "mean_wall_s": 68.56188888888889,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 3079,
+     "mean_cache_tokens": 266477,
      "costs": [
       0.21453179999999997,
       0.22873680000000002,
@@ -927,6 +1048,9 @@
      "ci_hi": 1.1607996539896372,
      "adoption": 0,
      "mean_wall_s": 31.979777777777777,
+     "mean_input_tokens": 5,
+     "mean_output_tokens": 1529,
+     "mean_cache_tokens": 98353,
      "costs": [
       0.1174038,
       0.10629119999999999,
@@ -981,6 +1105,9 @@
      "ci_hi": 0.9946292204908012,
      "adoption": 0,
      "mean_wall_s": 93.384875,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 6552,
+     "mean_cache_tokens": 153497,
      "costs": [
       0.21592469999999997,
       0.2100645,
@@ -1031,6 +1158,9 @@
      "ci_hi": 0.9823926218061386,
      "adoption": 0,
      "mean_wall_s": 112.685125,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 6454,
+     "mean_cache_tokens": 149036,
      "costs": [
       0.2438286,
       0.2277192,
@@ -1092,6 +1222,9 @@
      "ci_hi": 1.138225611780546,
      "adoption": 0,
      "mean_wall_s": 21.554111111111112,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 768,
+     "mean_cache_tokens": 126065,
      "costs": [
       0.09754679999999999,
       0.10215989999999998,
@@ -1146,6 +1279,9 @@
      "ci_hi": 1.615730450204527,
      "adoption": 0,
      "mean_wall_s": 187.79044444444446,
+     "mean_input_tokens": 16,
+     "mean_output_tokens": 11804,
+     "mean_cache_tokens": 606263,
      "costs": [
       0.372,
       0.3331098,
@@ -1200,6 +1336,9 @@
      "ci_hi": 1.1713953867443068,
      "adoption": 0,
      "mean_wall_s": 102.75177777777778,
+     "mean_input_tokens": 59,
+     "mean_output_tokens": 5644,
+     "mean_cache_tokens": 304790,
      "costs": [
       0.4779129,
       0.4996056,
@@ -1254,6 +1393,9 @@
      "ci_hi": 1.4256152926868297,
      "adoption": 0,
      "mean_wall_s": 131.203,
+     "mean_input_tokens": 13,
+     "mean_output_tokens": 8099,
+     "mean_cache_tokens": 456687,
      "costs": [
       0.3992772,
       0.2402013,
@@ -1308,6 +1450,9 @@
      "ci_hi": 1.148738328557619,
      "adoption": 0,
      "mean_wall_s": 51.034333333333336,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 2479,
+     "mean_cache_tokens": 213359,
      "costs": [
       0.150945,
       0.1986684,
@@ -1362,6 +1507,9 @@
      "ci_hi": 1.123445813970931,
      "adoption": 0,
      "mean_wall_s": 60.83211111111111,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 4826,
+     "mean_cache_tokens": 237339,
      "costs": [
       0.2284056,
       0.2152152,
@@ -1416,6 +1564,9 @@
      "ci_hi": 1.0754934061311845,
      "adoption": 0,
      "mean_wall_s": 31.770222222222223,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 1716,
+     "mean_cache_tokens": 146170,
      "costs": [
       0.13837470000000002,
       0.138594,
@@ -1470,6 +1621,9 @@
      "ci_hi": 1.2275266522467916,
      "adoption": 0,
      "mean_wall_s": 36.609,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 1702,
+     "mean_cache_tokens": 148833,
      "costs": [
       0.140937,
       0.1502814,
@@ -1524,6 +1678,9 @@
      "ci_hi": 1.2862079565965174,
      "adoption": 0,
      "mean_wall_s": 74.21755555555555,
+     "mean_input_tokens": 11,
+     "mean_output_tokens": 3444,
+     "mean_cache_tokens": 294125,
      "costs": [
       0.2260893,
       0.42855810000000005,
@@ -1578,6 +1735,9 @@
      "ci_hi": 1.2113835879742003,
      "adoption": 0,
      "mean_wall_s": 30.035333333333334,
+     "mean_input_tokens": 5,
+     "mean_output_tokens": 1489,
+     "mean_cache_tokens": 108254,
      "costs": [
       0.11146499999999998,
       0.11931480000000001,
@@ -1632,6 +1792,9 @@
      "ci_hi": 1.2351949223160583,
      "adoption": 0,
      "mean_wall_s": 120.51722222222222,
+     "mean_input_tokens": 8,
+     "mean_output_tokens": 8032,
+     "mean_cache_tokens": 208729,
      "costs": [
       0.2726763,
       0.34928459999999995,
@@ -1686,6 +1849,9 @@
      "ci_hi": 1.1101620035573252,
      "adoption": 0,
      "mean_wall_s": 133.69622222222222,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 7803,
+     "mean_cache_tokens": 166848,
      "costs": [
       0.273231,
       0.255186,
@@ -1751,6 +1917,9 @@
      "ci_hi": 1.1243018028205956,
      "adoption": 0,
      "mean_wall_s": 26.157555555555557,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 715,
+     "mean_cache_tokens": 126492,
      "costs": [
       0.10260419999999999,
       0.0978915,
@@ -1805,6 +1974,9 @@
      "ci_hi": 1.1923556023238395,
      "adoption": 0,
      "mean_wall_s": 126.21622222222221,
+     "mean_input_tokens": 16,
+     "mean_output_tokens": 7411,
+     "mean_cache_tokens": 542755,
      "costs": [
       0.3605727,
       0.394347,
@@ -1859,6 +2031,9 @@
      "ci_hi": 1.7354744145544945,
      "adoption": 0,
      "mean_wall_s": 158.81955555555555,
+     "mean_input_tokens": 12,
+     "mean_output_tokens": 9598,
+     "mean_cache_tokens": 387964,
      "costs": [
       0.2225997,
       0.28098059999999997,
@@ -1913,6 +2088,9 @@
      "ci_hi": 1.2703859568363116,
      "adoption": 0,
      "mean_wall_s": 105.09955555555555,
+     "mean_input_tokens": 14,
+     "mean_output_tokens": 6175,
+     "mean_cache_tokens": 464077,
      "costs": [
       0.4168683000000001,
       0.3857825999999999,
@@ -1967,6 +2145,9 @@
      "ci_hi": 1.280275518161031,
      "adoption": 0,
      "mean_wall_s": 54.74311111111111,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 2703,
+     "mean_cache_tokens": 244046,
      "costs": [
       0.1840716,
       0.14972370000000002,
@@ -2021,6 +2202,9 @@
      "ci_hi": 1.159763856704985,
      "adoption": 0,
      "mean_wall_s": 67.52088888888889,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 5025,
+     "mean_cache_tokens": 247188,
      "costs": [
       0.27027239999999997,
       0.23422020000000002,
@@ -2075,6 +2259,9 @@
      "ci_hi": 1.0876518114020421,
      "adoption": 0,
      "mean_wall_s": 34.912333333333336,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 1717,
+     "mean_cache_tokens": 137370,
      "costs": [
       0.132465,
       0.1300422,
@@ -2129,6 +2316,9 @@
      "ci_hi": 2.1876104245660533,
      "adoption": 0,
      "mean_wall_s": 39.92777777777778,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 2066,
+     "mean_cache_tokens": 158961,
      "costs": [
       0.1406079,
       0.14505810000000002,
@@ -2183,6 +2373,9 @@
      "ci_hi": 1.1274466933011935,
      "adoption": 1,
      "mean_wall_s": 70.61388888888888,
+     "mean_input_tokens": 11,
+     "mean_output_tokens": 2924,
+     "mean_cache_tokens": 282979,
      "costs": [
       0.2993427000000001,
       0.24121169999999995,
@@ -2237,6 +2430,9 @@
      "ci_hi": 1.1912039291920957,
      "adoption": 0,
      "mean_wall_s": 29.943444444444445,
+     "mean_input_tokens": 5,
+     "mean_output_tokens": 1435,
+     "mean_cache_tokens": 97848,
      "costs": [
       0.1090332,
       0.12257249999999999,
@@ -2291,6 +2487,9 @@
      "ci_hi": 1.3301333754340572,
      "adoption": 0,
      "mean_wall_s": 122.601,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 8369,
+     "mean_cache_tokens": 236004,
      "costs": [
       0.2894853,
       0.2391873,
@@ -2345,6 +2544,9 @@
      "ci_hi": 1.1080958671395245,
      "adoption": 0,
      "mean_wall_s": 134.69175,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 7380,
+     "mean_cache_tokens": 172179,
      "costs": [
       0.2655186,
       0.2586657,
@@ -2406,6 +2608,9 @@
      "ci_hi": 1.0953930033215926,
      "adoption": 0,
      "mean_wall_s": 21.297333333333334,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 729,
+     "mean_cache_tokens": 122648,
      "costs": [
       0.1002729,
       0.0972249,
@@ -2460,6 +2665,9 @@
      "ci_hi": 1.5398938269755793,
      "adoption": 0,
      "mean_wall_s": 157.48722222222221,
+     "mean_input_tokens": 18,
+     "mean_output_tokens": 9622,
+     "mean_cache_tokens": 645458,
      "costs": [
       0.33686279999999996,
       0.39598169999999994,
@@ -2514,6 +2722,9 @@
      "ci_hi": 0.9326747845751152,
      "adoption": 0,
      "mean_wall_s": 76.27255555555556,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 4575,
+     "mean_cache_tokens": 220579,
      "costs": [
       0.37779870000000004,
       0.1843068,
@@ -2568,6 +2779,9 @@
      "ci_hi": 1.3658687993004806,
      "adoption": 0,
      "mean_wall_s": 111.73433333333334,
+     "mean_input_tokens": 14,
+     "mean_output_tokens": 7045,
+     "mean_cache_tokens": 479846,
      "costs": [
       0.43640580000000007,
       0.3940023,
@@ -2622,6 +2836,9 @@
      "ci_hi": 1.084707691313243,
      "adoption": 0,
      "mean_wall_s": 43.01433333333333,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 2159,
+     "mean_cache_tokens": 209210,
      "costs": [
       0.1568133,
       0.1655547,
@@ -2676,6 +2893,9 @@
      "ci_hi": 0.9593476776387004,
      "adoption": 0,
      "mean_wall_s": 58.05244444444445,
+     "mean_input_tokens": 8,
+     "mean_output_tokens": 4115,
+     "mean_cache_tokens": 210985,
      "costs": [
       0.209376,
       0.22561259999999997,
@@ -2730,6 +2950,9 @@
      "ci_hi": 1.08383217532792,
      "adoption": 0,
      "mean_wall_s": 33.37911111111111,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 1733,
+     "mean_cache_tokens": 145947,
      "costs": [
       0.1364541,
       0.1288164,
@@ -2784,6 +3007,9 @@
      "ci_hi": 2.134060070012669,
      "adoption": 0,
      "mean_wall_s": 35.95366666666666,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 2000,
+     "mean_cache_tokens": 153212,
      "costs": [
       0.1193931,
       0.1197696,
@@ -2838,6 +3064,9 @@
      "ci_hi": 1.077539532808481,
      "adoption": 0,
      "mean_wall_s": 71.20555555555555,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 3047,
+     "mean_cache_tokens": 255950,
      "costs": [
       0.201984,
       0.2395485,
@@ -2892,6 +3121,9 @@
      "ci_hi": 1.6025888675648856,
      "adoption": 0,
      "mean_wall_s": 37.672333333333334,
+     "mean_input_tokens": 5,
+     "mean_output_tokens": 1780,
+     "mean_cache_tokens": 118522,
      "costs": [
       0.1172532,
       0.3084417,
@@ -2946,6 +3178,9 @@
      "ci_hi": 1.215902887386724,
      "adoption": 0,
      "mean_wall_s": 111.44222222222223,
+     "mean_input_tokens": 8,
+     "mean_output_tokens": 7509,
+     "mean_cache_tokens": 212680,
      "costs": [
       0.2479908,
       0.38764260000000006,
@@ -3000,6 +3235,9 @@
      "ci_hi": 1.0783281661244106,
      "adoption": 0,
      "mean_wall_s": 130.503125,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 7614,
+     "mean_cache_tokens": 144074,
      "costs": [
       0.2546355,
       0.27393449999999997,
@@ -3061,6 +3299,9 @@
      "ci_hi": 1.0661547882480327,
      "adoption": 0,
      "mean_wall_s": 19.733444444444444,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 700,
+     "mean_cache_tokens": 122021,
      "costs": [
       0.09479939999999999,
       0.09772679999999999,
@@ -3115,6 +3356,9 @@
      "ci_hi": 1.7440410597138452,
      "adoption": 0,
      "mean_wall_s": 215.71355555555556,
+     "mean_input_tokens": 15,
+     "mean_output_tokens": 13963,
+     "mean_cache_tokens": 554761,
      "costs": [
       0.29548710000000006,
       0.37795740000000005,
@@ -3169,6 +3413,9 @@
      "ci_hi": 2.121315493755319,
      "adoption": 0,
      "mean_wall_s": 204.24344444444444,
+     "mean_input_tokens": 18,
+     "mean_output_tokens": 12058,
+     "mean_cache_tokens": 608021,
      "costs": [
       0.6904298999999999,
       0.5685534,
@@ -3223,6 +3470,9 @@
      "ci_hi": 1.2814698457169118,
      "adoption": 0,
      "mean_wall_s": 122.56933333333333,
+     "mean_input_tokens": 13,
+     "mean_output_tokens": 7286,
+     "mean_cache_tokens": 413041,
      "costs": [
       0.3421968000000001,
       0.3047561999999999,
@@ -3277,6 +3527,9 @@
      "ci_hi": 1.2223216037499154,
      "adoption": 0,
      "mean_wall_s": 46.287,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 2429,
+     "mean_cache_tokens": 227391,
      "costs": [
       0.1732842,
       0.14569049999999997,
@@ -3331,6 +3584,9 @@
      "ci_hi": 1.2144897316794148,
      "adoption": 0,
      "mean_wall_s": 70.65522222222222,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 5566,
+     "mean_cache_tokens": 272082,
      "costs": [
       0.24928559999999997,
       0.31919459999999994,
@@ -3385,6 +3641,9 @@
      "ci_hi": 1.0711063139634531,
      "adoption": 0,
      "mean_wall_s": 31.475,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 1734,
+     "mean_cache_tokens": 150219,
      "costs": [
       0.1392882,
       0.140076,
@@ -3439,6 +3698,9 @@
      "ci_hi": 2.104836559747345,
      "adoption": 0,
      "mean_wall_s": 37.272999999999996,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 2651,
+     "mean_cache_tokens": 159942,
      "costs": [
       0.3125051999999999,
       0.11587259999999999,
@@ -3493,6 +3755,9 @@
      "ci_hi": 1.0857123297574773,
      "adoption": 0,
      "mean_wall_s": 86.084,
+     "mean_input_tokens": 32,
+     "mean_output_tokens": 4317,
+     "mean_cache_tokens": 280118,
      "costs": [
       0.23626439999999999,
       0.2150967,
@@ -3547,6 +3812,9 @@
      "ci_hi": 2.1679102733635807,
      "adoption": 0,
      "mean_wall_s": 47.92,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 2438,
+     "mean_cache_tokens": 243594,
      "costs": [
       0.3371952,
       0.3415077,
@@ -3601,6 +3869,9 @@
      "ci_hi": 1.1127575807077221,
      "adoption": 0,
      "mean_wall_s": 104.26111111111112,
+     "mean_input_tokens": 8,
+     "mean_output_tokens": 7172,
+     "mean_cache_tokens": 196049,
      "costs": [
       0.2082579,
       0.2626929,
@@ -3655,6 +3926,9 @@
      "ci_hi": 1.2054698970922821,
      "adoption": 0,
      "mean_wall_s": 139.79975,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 8936,
+     "mean_cache_tokens": 196284,
      "costs": [
       0.2608083,
       0.2643069,
@@ -3716,6 +3990,9 @@
      "ci_hi": 1.0729369247642524,
      "adoption": 0,
      "mean_wall_s": 23.681,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 720,
+     "mean_cache_tokens": 121956,
      "costs": [
       0.0995049,
       0.0952596,
@@ -3770,6 +4047,9 @@
      "ci_hi": 1.797662796941297,
      "adoption": 0,
      "mean_wall_s": 212.98344444444444,
+     "mean_input_tokens": 16,
+     "mean_output_tokens": 13779,
+     "mean_cache_tokens": 627813,
      "costs": [
       1.2105335999999998,
       0.28764480000000003,
@@ -3824,6 +4104,9 @@
      "ci_hi": 1.3784515146960081,
      "adoption": 0,
      "mean_wall_s": 121.92366666666666,
+     "mean_input_tokens": 11,
+     "mean_output_tokens": 7741,
+     "mean_cache_tokens": 318321,
      "costs": [
       0.5362302000000001,
       0.20495100000000002,
@@ -3878,6 +4161,9 @@
      "ci_hi": 1.1999455167293458,
      "adoption": 0,
      "mean_wall_s": 95.81277777777778,
+     "mean_input_tokens": 13,
+     "mean_output_tokens": 5773,
+     "mean_cache_tokens": 422957,
      "costs": [
       0.41085779999999994,
       0.424539,
@@ -3932,6 +4218,9 @@
      "ci_hi": 1.192321267500686,
      "adoption": 0,
      "mean_wall_s": 50.114444444444445,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 2415,
+     "mean_cache_tokens": 218950,
      "costs": [
       0.1317486,
       0.1338291,
@@ -3986,6 +4275,9 @@
      "ci_hi": 1.0747557490957507,
      "adoption": 0,
      "mean_wall_s": 62.571777777777775,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 4761,
+     "mean_cache_tokens": 220318,
      "costs": [
       0.20927910000000002,
       0.2094996,
@@ -4040,6 +4332,9 @@
      "ci_hi": 1.0401451406983775,
      "adoption": 0,
      "mean_wall_s": 34.67055555555556,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 1672,
+     "mean_cache_tokens": 139626,
      "costs": [
       0.1356324,
       0.12897150000000002,
@@ -4094,6 +4389,9 @@
      "ci_hi": 1.199147315082569,
      "adoption": 0,
      "mean_wall_s": 32.00711111111111,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 1556,
+     "mean_cache_tokens": 153265,
      "costs": [
       0.13717590000000002,
       0.14703929999999998,
@@ -4148,6 +4446,9 @@
      "ci_hi": 1.1254811427908695,
      "adoption": 0,
      "mean_wall_s": 68.48366666666666,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 3044,
+     "mean_cache_tokens": 267278,
      "costs": [
       0.21814979999999998,
       0.22109760000000003,
@@ -4202,6 +4503,9 @@
      "ci_hi": 1.217506460265859,
      "adoption": 0,
      "mean_wall_s": 33.17755555555556,
+     "mean_input_tokens": 5,
+     "mean_output_tokens": 1514,
+     "mean_cache_tokens": 100045,
      "costs": [
       0.1094064,
       0.13736310000000002,
@@ -4256,6 +4560,9 @@
      "ci_hi": 1.1900446295447642,
      "adoption": 0,
      "mean_wall_s": 111.34022222222222,
+     "mean_input_tokens": 8,
+     "mean_output_tokens": 7944,
+     "mean_cache_tokens": 198339,
      "costs": [
       0.23492069999999998,
       0.24627900000000003,
@@ -4310,6 +4617,9 @@
      "ci_hi": 1.1668547145362607,
      "adoption": 0,
      "mean_wall_s": 155.287,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 8786,
+     "mean_cache_tokens": 157886,
      "costs": [
       0.2676525,
       0.265833,
@@ -4371,6 +4681,9 @@
      "ci_hi": 1.1746683706523093,
      "adoption": 0,
      "mean_wall_s": 23.451666666666668,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 761,
+     "mean_cache_tokens": 148174,
      "costs": [
       0.10310699999999999,
       0.1039599,
@@ -4425,6 +4738,9 @@
      "ci_hi": 1.0752333596172345,
      "adoption": 0,
      "mean_wall_s": 132.75666666666666,
+     "mean_input_tokens": 16,
+     "mean_output_tokens": 8095,
+     "mean_cache_tokens": 457187,
      "costs": [
       0.3189849,
       0.4636728,
@@ -4479,6 +4795,9 @@
      "ci_hi": 1.1537498034429579,
      "adoption": 0,
      "mean_wall_s": 99.70211111111111,
+     "mean_input_tokens": 14,
+     "mean_output_tokens": 5608,
+     "mean_cache_tokens": 358288,
      "costs": [
       0.2599284,
       0.2605458,
@@ -4533,6 +4852,9 @@
      "ci_hi": 1.3162801399687558,
      "adoption": 0,
      "mean_wall_s": 117.10222222222222,
+     "mean_input_tokens": 17,
+     "mean_output_tokens": 6356,
+     "mean_cache_tokens": 531248,
      "costs": [
       0.35263740000000005,
       0.35982929999999996,
@@ -4587,6 +4909,9 @@
      "ci_hi": 1.1564430025476076,
      "adoption": 0,
      "mean_wall_s": 48.113,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 2094,
+     "mean_cache_tokens": 224928,
      "costs": [
       0.14077919999999997,
       0.10854899999999999,
@@ -4641,6 +4966,9 @@
      "ci_hi": 1.3248285104082393,
      "adoption": 0,
      "mean_wall_s": 84.9071111111111,
+     "mean_input_tokens": 26,
+     "mean_output_tokens": 5592,
+     "mean_cache_tokens": 368143,
      "costs": [
       0.3217646999999999,
       0.2564643,
@@ -4695,6 +5023,9 @@
      "ci_hi": 1.380211662123834,
      "adoption": 0,
      "mean_wall_s": 45.76477777777778,
+     "mean_input_tokens": 54,
+     "mean_output_tokens": 2109,
+     "mean_cache_tokens": 222687,
      "costs": [
       0.1470366,
       0.1641252,
@@ -4749,6 +5080,9 @@
      "ci_hi": 1.4104855257887037,
      "adoption": 0,
      "mean_wall_s": 41.55888888888889,
+     "mean_input_tokens": 9,
+     "mean_output_tokens": 1643,
+     "mean_cache_tokens": 212842,
      "costs": [
       0.1386621,
       0.1397178,
@@ -4803,6 +5137,9 @@
      "ci_hi": 1.4713483612008278,
      "adoption": 1,
      "mean_wall_s": 125.003,
+     "mean_input_tokens": 53,
+     "mean_output_tokens": 5702,
+     "mean_cache_tokens": 510465,
      "costs": [
       0.33026535,
       0.23107350000000004,
@@ -4857,6 +5194,9 @@
      "ci_hi": 2.098354252161562,
      "adoption": 0,
      "mean_wall_s": 43.480555555555554,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 1951,
+     "mean_cache_tokens": 169963,
      "costs": [
       0.39509040000000006,
       0.21841259999999996,
@@ -4911,6 +5251,9 @@
      "ci_hi": 1.1432557039130766,
      "adoption": 0,
      "mean_wall_s": 103.37844444444444,
+     "mean_input_tokens": 8,
+     "mean_output_tokens": 6625,
+     "mean_cache_tokens": 204880,
      "costs": [
       0.20015040000000003,
       0.2416776,
@@ -4965,6 +5308,9 @@
      "ci_hi": 1.5180341845485268,
      "adoption": 0,
      "mean_wall_s": 153.886125,
+     "mean_input_tokens": 11,
+     "mean_output_tokens": 8985,
+     "mean_cache_tokens": 272668,
      "costs": [
       0.25880939999999997,
       0.37442790000000004,
@@ -5026,6 +5372,9 @@
      "ci_hi": 1.1069605485964968,
      "adoption": 0,
      "mean_wall_s": 21.087888888888887,
+     "mean_input_tokens": 6,
+     "mean_output_tokens": 710,
+     "mean_cache_tokens": 123281,
      "costs": [
       0.1028505,
       0.10210949999999999,
@@ -5080,6 +5429,9 @@
      "ci_hi": 1.290473427073136,
      "adoption": 0,
      "mean_wall_s": 152.30322222222222,
+     "mean_input_tokens": 15,
+     "mean_output_tokens": 9532,
+     "mean_cache_tokens": 494028,
      "costs": [
       0.3576141,
       0.388227,
@@ -5134,6 +5486,9 @@
      "ci_hi": 1.6482411773762211,
      "adoption": 0,
      "mean_wall_s": 158.626,
+     "mean_input_tokens": 12,
+     "mean_output_tokens": 9720,
+     "mean_cache_tokens": 382576,
      "costs": [
       0.2108967,
       0.5248143000000001,
@@ -5188,6 +5543,9 @@
      "ci_hi": 1.248068606467252,
      "adoption": 0,
      "mean_wall_s": 105.08433333333333,
+     "mean_input_tokens": 12,
+     "mean_output_tokens": 6218,
+     "mean_cache_tokens": 424770,
      "costs": [
       0.2558517,
       0.3880353,
@@ -5242,6 +5600,9 @@
      "ci_hi": 1.2516743418734508,
      "adoption": 0,
      "mean_wall_s": 54.43988888888889,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 2454,
+     "mean_cache_tokens": 230874,
      "costs": [
       0.182595,
       0.16551120000000002,
@@ -5296,6 +5657,9 @@
      "ci_hi": 1.1702931449446563,
      "adoption": 0,
      "mean_wall_s": 68.837,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 5009,
+     "mean_cache_tokens": 266620,
      "costs": [
       0.21469860000000002,
       0.212832,
@@ -5350,6 +5714,9 @@
      "ci_hi": 1.0832990214885725,
      "adoption": 0,
      "mean_wall_s": 33.64822222222222,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 1694,
+     "mean_cache_tokens": 146460,
      "costs": [
       0.137346,
       0.1363644,
@@ -5404,6 +5771,9 @@
      "ci_hi": 1.8242741013088604,
      "adoption": 0,
      "mean_wall_s": 37.13144444444444,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 2085,
+     "mean_cache_tokens": 151330,
      "costs": [
       0.15817350000000002,
       0.13874249999999996,
@@ -5458,6 +5828,9 @@
      "ci_hi": 1.1225704346113343,
      "adoption": 0,
      "mean_wall_s": 74.08888888888889,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 3199,
+     "mean_cache_tokens": 262851,
      "costs": [
       0.20810910000000002,
       0.2887929,
@@ -5512,6 +5885,9 @@
      "ci_hi": 1.1978654604913002,
      "adoption": 0,
      "mean_wall_s": 33.315444444444445,
+     "mean_input_tokens": 5,
+     "mean_output_tokens": 1700,
+     "mean_cache_tokens": 93600,
      "costs": [
       0.1318722,
       0.1262679,
@@ -5566,6 +5942,9 @@
      "ci_hi": 1.1820450596987913,
      "adoption": 0,
      "mean_wall_s": 110.38511111111112,
+     "mean_input_tokens": 8,
+     "mean_output_tokens": 7610,
+     "mean_cache_tokens": 190203,
      "costs": [
       0.2337294,
       0.23089859999999998,
@@ -5620,6 +5999,9 @@
      "ci_hi": 1.4607530204506478,
      "adoption": 0,
      "mean_wall_s": 154.58225,
+     "mean_input_tokens": 11,
+     "mean_output_tokens": 9739,
+     "mean_cache_tokens": 211398,
      "costs": [
       0.25321499999999997,
       0.2874096,
@@ -5681,6 +6063,9 @@
      "ci_hi": 1.1694660648981932,
      "adoption": 9,
      "mean_wall_s": 23.946555555555555,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 809,
+     "mean_cache_tokens": 138140,
      "costs": [
       0.11253840000000002,
       0.10415999999999999,
@@ -5735,6 +6120,9 @@
      "ci_hi": 1.366700920988275,
      "adoption": 4,
      "mean_wall_s": 171.5857777777778,
+     "mean_input_tokens": 13,
+     "mean_output_tokens": 10357,
+     "mean_cache_tokens": 377996,
      "costs": [
       0.350442,
       0.34716030000000003,
@@ -5789,6 +6177,9 @@
      "ci_hi": 0.7443879511880589,
      "adoption": 1,
      "mean_wall_s": 54.823,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 3201,
+     "mean_cache_tokens": 194266,
      "costs": [
       0.1790493,
       0.1790133,
@@ -5843,6 +6234,9 @@
      "ci_hi": 0.9142257171117271,
      "adoption": 0,
      "mean_wall_s": 85.10266666666666,
+     "mean_input_tokens": 13,
+     "mean_output_tokens": 4786,
+     "mean_cache_tokens": 309053,
      "costs": [
       0.2606703,
       0.29271389999999997,
@@ -5897,6 +6291,9 @@
      "ci_hi": 1.0393702356001344,
      "adoption": 0,
      "mean_wall_s": 47.70733333333334,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 1815,
+     "mean_cache_tokens": 205065,
      "costs": [
       0.1349898,
       0.16592220000000002,
@@ -5951,6 +6348,9 @@
      "ci_hi": 0.9201828201657609,
      "adoption": 0,
      "mean_wall_s": 49.367333333333335,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 3757,
+     "mean_cache_tokens": 200507,
      "costs": [
       0.2137404,
       0.2130078,
@@ -6005,6 +6405,9 @@
      "ci_hi": 1.020585158429513,
      "adoption": 0,
      "mean_wall_s": 34.20988888888889,
+     "mean_input_tokens": 8,
+     "mean_output_tokens": 1611,
+     "mean_cache_tokens": 134921,
      "costs": [
       0.1290414,
       0.1239969,
@@ -6059,6 +6462,9 @@
      "ci_hi": 1.151053748483495,
      "adoption": 9,
      "mean_wall_s": 31.24111111111111,
+     "mean_input_tokens": 7,
+     "mean_output_tokens": 1597,
+     "mean_cache_tokens": 150347,
      "costs": [
       0.1393725,
       0.15717479999999998,
@@ -6113,6 +6519,9 @@
      "ci_hi": 1.0465754740193072,
      "adoption": 9,
      "mean_wall_s": 69.617,
+     "mean_input_tokens": 10,
+     "mean_output_tokens": 2977,
+     "mean_cache_tokens": 238604,
      "costs": [
       0.2194545,
       0.20394390000000004,
@@ -6167,6 +6576,9 @@
      "ci_hi": 1.2845268565883003,
      "adoption": 3,
      "mean_wall_s": 35.15977777777778,
+     "mean_input_tokens": 5,
+     "mean_output_tokens": 1644,
+     "mean_cache_tokens": 113561,
      "costs": [
       0.1262724,
       0.1365147,
@@ -6221,6 +6633,9 @@
      "ci_hi": 1.1940580530976364,
      "adoption": 6,
      "mean_wall_s": 119.08222222222223,
+     "mean_input_tokens": 8,
+     "mean_output_tokens": 7616,
+     "mean_cache_tokens": 190577,
      "costs": [
       0.24403500000000003,
       0.216879,
@@ -6275,6 +6690,9 @@
      "ci_hi": 1.2206322702129313,
      "adoption": 8,
      "mean_wall_s": 147.41475,
+     "mean_input_tokens": 8,
+     "mean_output_tokens": 8239,
+     "mean_cache_tokens": 179406,
      "costs": [
       0.4453925,
       0.3261198,
