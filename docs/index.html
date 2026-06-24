@@ -87,11 +87,9 @@
      average: they're too trivial to separate the tools (every tool lands on the same near-zero cost — only fixed
      overhead shows) and they don't resemble real agent work. The board scores only the substantive tasks that
      remain.
-     <b>Aggregation.</b> Costs are aggregated as a geometric mean of per-task ratios — <b>no outlier trimming</b>.
-     Dropping each cell's single most-deviant run lowers tokenade's headline figure from ≈20% to ≈18% (the
-     high-variance debug tasks drive this) and leaves the ranking unchanged, so we publish the untrimmed figures and
-     the full raw data for re-analysis. Bootstrap 95% confidence intervals for the headline figures are in
-     <code>results.json</code>.</p>
+     <b>Aggregation.</b> Costs are aggregated as a geometric mean of per-task ratios, so no single task dominates.
+     Every successful run is used as-is and all raw per-run data is published for re-analysis; bootstrap 95%
+     confidence intervals for the headline figures are in <code>results.json</code>.</p>
 
   <div id="detail"></div>
 
