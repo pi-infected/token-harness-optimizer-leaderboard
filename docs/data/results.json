@@ -148,49 +148,104 @@
    "n_tasks": 6,
    "ranking": [
     {
+     "competitor": "control",
+     "aggregate_cost_ratio": 1.0,
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 6,
+      "output": 3504,
+      "cache": 143962
+     }
+    },
+    {
      "competitor": "claude-token-efficient",
      "aggregate_cost_ratio": 0.9693966536283807,
-     "tasks_compared": 6
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 6,
+      "output": 3090,
+      "cache": 137708
+     }
     },
     {
      "competitor": "serena",
      "aggregate_cost_ratio": 1.0327032792826185,
-     "tasks_compared": 6
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 7,
+      "output": 3699,
+      "cache": 145186
+     }
     },
     {
      "competitor": "tokenade",
      "aggregate_cost_ratio": 1.0360380011258001,
-     "tasks_compared": 6
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 7,
+      "output": 3586,
+      "cache": 151159
+     }
     },
     {
      "competitor": "code-review-graph",
      "aggregate_cost_ratio": 1.0425982978474586,
-     "tasks_compared": 6
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 7,
+      "output": 3585,
+      "cache": 150816
+     }
     },
     {
      "competitor": "token-optimizer-mcp",
      "aggregate_cost_ratio": 1.0850263688604973,
-     "tasks_compared": 6
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 7,
+      "output": 3923,
+      "cache": 152712
+     }
     },
     {
      "competitor": "lean-ctx",
      "aggregate_cost_ratio": 1.0981898401832688,
-     "tasks_compared": 6
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 7,
+      "output": 3561,
+      "cache": 149514
+     }
     },
     {
      "competitor": "codegraph",
      "aggregate_cost_ratio": 1.099537030662286,
-     "tasks_compared": 6
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 7,
+      "output": 3614,
+      "cache": 154809
+     }
     },
     {
      "competitor": "rtk",
      "aggregate_cost_ratio": 1.1763669844104772,
-     "tasks_compared": 6
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 8,
+      "output": 3938,
+      "cache": 178018
+     }
     },
     {
      "competitor": "squeez",
      "aggregate_cost_ratio": 1.2203898648556388,
-     "tasks_compared": 6
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 16,
+      "output": 3679,
+      "cache": 205202
+     }
     }
    ]
   },
@@ -206,49 +261,104 @@
    "n_tasks": 3,
    "ranking": [
     {
+     "competitor": "control",
+     "aggregate_cost_ratio": 1.0,
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 14,
+      "output": 3528,
+      "cache": 284037
+     }
+    },
+    {
      "competitor": "tokenade",
      "aggregate_cost_ratio": 0.8792268064371621,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 10,
+      "output": 2850,
+      "cache": 214725
+     }
     },
     {
      "competitor": "lean-ctx",
      "aggregate_cost_ratio": 0.9104167143990289,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 9,
+      "output": 3107,
+      "cache": 225382
+     }
     },
     {
      "competitor": "claude-token-efficient",
      "aggregate_cost_ratio": 0.9468108831499262,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 10,
+      "output": 3219,
+      "cache": 251866
+     }
     },
     {
      "competitor": "serena",
      "aggregate_cost_ratio": 0.9651322519630021,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 9,
+      "output": 3407,
+      "cache": 235516
+     }
     },
     {
      "competitor": "code-review-graph",
      "aggregate_cost_ratio": 0.9958270832159256,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 10,
+      "output": 3583,
+      "cache": 248274
+     }
     },
     {
      "competitor": "rtk",
      "aggregate_cost_ratio": 1.0009040385136783,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 17,
+      "output": 4104,
+      "cache": 259864
+     }
     },
     {
      "competitor": "token-optimizer-mcp",
      "aggregate_cost_ratio": 1.003817932853152,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 10,
+      "output": 3554,
+      "cache": 253448
+     }
     },
     {
      "competitor": "codegraph",
      "aggregate_cost_ratio": 1.01703612586498,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 10,
+      "output": 3551,
+      "cache": 258071
+     }
     },
     {
      "competitor": "squeez",
      "aggregate_cost_ratio": 1.1074108274087924,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 30,
+      "output": 4463,
+      "cache": 367845
+     }
     }
    ]
   },
@@ -264,53 +374,182 @@
    "n_tasks": 3,
    "ranking": [
     {
+     "competitor": "control",
+     "aggregate_cost_ratio": 1.0,
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 14,
+      "output": 7983,
+      "cache": 452244
+     }
+    },
+    {
      "competitor": "tokenade",
      "aggregate_cost_ratio": 0.7318731525891763,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 12,
+      "output": 6114,
+      "cache": 293772
+     }
     },
     {
      "competitor": "squeez",
      "aggregate_cost_ratio": 0.9135751819429643,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 16,
+      "output": 6687,
+      "cache": 448908
+     }
     },
     {
      "competitor": "lean-ctx",
      "aggregate_cost_ratio": 0.9180373028132534,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 13,
+      "output": 7080,
+      "cache": 448628
+     }
     },
     {
      "competitor": "code-review-graph",
      "aggregate_cost_ratio": 1.0160212688487646,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 29,
+      "output": 8516,
+      "cache": 455913
+     }
     },
     {
      "competitor": "claude-token-efficient",
      "aggregate_cost_ratio": 1.0175718687723048,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 14,
+      "output": 8065,
+      "cache": 448165
+     }
     },
     {
      "competitor": "codegraph",
      "aggregate_cost_ratio": 1.02297895757676,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 14,
+      "output": 7728,
+      "cache": 464932
+     }
     },
     {
      "competitor": "token-optimizer-mcp",
      "aggregate_cost_ratio": 1.0301745075145754,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 13,
+      "output": 8490,
+      "cache": 433791
+     }
     },
     {
      "competitor": "serena",
      "aggregate_cost_ratio": 1.0438480958852365,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 14,
+      "output": 9098,
+      "cache": 456364
+     }
     },
     {
      "competitor": "rtk",
      "aggregate_cost_ratio": 1.2256954278752545,
-     "tasks_compared": 3
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 15,
+      "output": 11102,
+      "cache": 525274
+     }
     }
    ]
   }
  ],
+ "control_per_task": {
+  "code-bugfix-py": {
+   "n": 9,
+   "mean_input_tokens": 6,
+   "mean_output_tokens": 690,
+   "mean_cache_tokens": 122343
+  },
+  "code-debug-cascade-py": {
+   "n": 9,
+   "mean_input_tokens": 16,
+   "mean_output_tokens": 10043,
+   "mean_cache_tokens": 545015
+  },
+  "code-debug-ledger-py": {
+   "n": 9,
+   "mean_input_tokens": 14,
+   "mean_output_tokens": 8009,
+   "mean_cache_tokens": 409196
+  },
+  "code-debug-pipeline-py": {
+   "n": 9,
+   "mean_input_tokens": 13,
+   "mean_output_tokens": 5898,
+   "mean_cache_tokens": 402520
+  },
+  "code-feature-js": {
+   "n": 9,
+   "mean_input_tokens": 10,
+   "mean_output_tokens": 2399,
+   "mean_cache_tokens": 225463
+  },
+  "code-feature-validate-py": {
+   "n": 9,
+   "mean_input_tokens": 11,
+   "mean_output_tokens": 4508,
+   "mean_cache_tokens": 299884
+  },
+  "code-iterate-tests": {
+   "n": 9,
+   "mean_input_tokens": 7,
+   "mean_output_tokens": 1719,
+   "mean_cache_tokens": 145153
+  },
+  "code-migration-py": {
+   "n": 9,
+   "mean_input_tokens": 6,
+   "mean_output_tokens": 1319,
+   "mean_cache_tokens": 137583
+  },
+  "code-overview-cobra": {
+   "n": 9,
+   "mean_input_tokens": 21,
+   "mean_output_tokens": 3677,
+   "mean_cache_tokens": 326763
+  },
+  "log-needle-zh": {
+   "n": 9,
+   "mean_input_tokens": 5,
+   "mean_output_tokens": 1445,
+   "mean_cache_tokens": 95738
+  },
+  "report-pdf": {
+   "n": 9,
+   "mean_input_tokens": 8,
+   "mean_output_tokens": 8055,
+   "mean_cache_tokens": 183451
+  },
+  "seo-audit": {
+   "n": 8,
+   "mean_input_tokens": 7,
+   "mean_output_tokens": 7796,
+   "mean_cache_tokens": 179501
+  }
+ },
  "control_noise_floor": {
   "code-bugfix-py": {
    "n": 9,

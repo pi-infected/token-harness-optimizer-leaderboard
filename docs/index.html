@@ -143,35 +143,47 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
       ${d.headline_n_tasks} long task(s), each run many times ·
       higher % = cheaper · <b>adoption</b> = share of runs where the agent actually called the tool.</p>`;
 
-  // ===== DETAIL: per session-size band + per-task token breakdown =====
+  // ===== DETAIL: per session-size band (with token breakdown + control) =====
   const bandsHtml = (d.token_bands||[]).map(b=>{
     if(!b.n_tasks) return "";
     const rr = b.ranking.map((e,i)=>{
+      const isCtrl = e.competitor==="control";
       const p = redOfRatio(e.aggregate_cost_ratio);
-      return `<tr><td class="num">${i+1}</td><td>${e.competitor}</td>
-       <td class="num ratio ${redClass(p)}">${pct(p)}</td></tr>`;}).join("");
-    return `<div class="card" style="flex:1;min-width:230px">
-      <h3 style="margin:2px 0 6px">${b.label} tokens <span class="pill">${b.n_tasks} task${b.n_tasks>1?"s":""}</span></h3>
-      <table><thead><tr><th class="num">#</th><th>Optimizer</th><th class="num">cost reduction</th></tr></thead>
+      const t = e.tokens||{};
+      return `<tr${isCtrl?' style="opacity:.85"':''}>
+        <td class="num">${isCtrl?"–":i}</td>
+        <td>${e.competitor}${isCtrl?' <span class="pill">baseline</span>':''}</td>
+        <td class="num ratio ${isCtrl?'':redClass(p)}">${isCtrl?"—":pct(p)}</td>
+        <td class="num">${kTok(t.input)}</td>
+        <td class="num">${kTok(t.output)}</td>
+        <td class="num">${kTok(t.cache)}</td></tr>`;}).join("");
+    return `<div class="card" style="margin:10px 0">
+      <h3 style="margin:6px 14px">${b.label} tokens <span class="pill">${b.n_tasks} task${b.n_tasks>1?"s":""}</span></h3>
+      <table><thead><tr><th class="num">#</th><th>Optimizer</th><th class="num">cost reduction</th>
+        <th class="num">input</th><th class="num">output</th><th class="num">cache</th></tr></thead>
       <tbody>${rr}</tbody></table></div>`;
   }).join("");
 
-  const order = (d.headline||[]).map(e=>e.competitor);
+  // per-task detail: control first (the baseline), then each tool by rank
+  const order = ["control", ...(d.headline||[]).map(e=>e.competitor)];
   const perTask = order.map(name=>{
-    const cd=d.competitors[name]||{};
+    const isCtrl = name==="control";
+    const pt = isCtrl ? (d.control_per_task||{}) : (d.competitors[name]?.per_task||{});
     const trows=(d.tasks||[]).map(t=>{
-      const p=cd.per_task?.[t]; if(!p) return "";
-      const red = redOfRatio(p.ratio);
-      const ci = p.ci_lo!=null ? ` <span class="pill">[${pct(redOfRatio(p.ci_hi))}, ${pct(redOfRatio(p.ci_lo))}]</span>` : "";
+      const p=pt[t]; if(!p) return "";
+      const red = isCtrl ? null : redOfRatio(p.ratio);
+      const ci = (!isCtrl && p.ci_lo!=null) ? ` <span class="pill">[${pct(redOfRatio(p.ci_hi))}, ${pct(redOfRatio(p.ci_lo))}]</span>` : "";
       return `<tr><td>${t}</td>
-        <td class="num ratio ${redClass(red)}">${p.ratio==null?"—":pct(red)+ci}</td>
-        <td class="num">${p.adoption}/${p.n}</td>
+        <td class="num ratio ${isCtrl?'':redClass(red)}">${isCtrl?"—":(p.ratio==null?"—":pct(red)+ci)}</td>
+        <td class="num">${isCtrl?"—":p.adoption+"/"+p.n}</td>
         <td class="num">${kTok(p.mean_input_tokens)}</td>
         <td class="num">${kTok(p.mean_output_tokens)}</td>
         <td class="num">${kTok(p.mean_cache_tokens)}</td></tr>`;
     }).join("");
     const he = (d.headline||[]).find(e=>e.competitor===name);
-    return `<details><summary>${name} — ${he?pct(he.cost_reduction_pct):"—"} on long sessions</summary>
+    const label = isCtrl ? "control — baseline (vanilla Claude Code)"
+                         : `${name} — ${he?pct(he.cost_reduction_pct):"—"} on long sessions`;
+    return `<details${isCtrl?' open':''}><summary>${label}</summary>
       <div class="card" style="margin:8px 0"><table>
         <thead><tr><th>task</th><th class="num">cost reduction</th><th class="num">adoption</th>
           <th class="num">input</th><th class="num">output</th><th class="num">cache</th></tr></thead>
@@ -181,8 +193,10 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
   document.getElementById("detail").innerHTML = `
     <h2>By session size — where does the value come from?</h2>
     <p class="sub">The full board split by how many <b>total tokens vanilla Claude Code burns</b> on a task
-       (input + output + cache). Optimizers do little on small sessions; the savings show up as sessions get long.</p>
-    <div style="display:flex;gap:12px;flex-wrap:wrap">${bandsHtml}</div>
+       (input + output + cache). Each band shows the mean <b>input / output / cache</b> tokens per session, with
+       <b>control</b> (plain Claude Code) as the baseline. Optimizers do little on small sessions; the savings show
+       up as sessions get long — and it's mostly <b>cache</b> tokens that move.</p>
+    ${bandsHtml}
     <h2>Per-task detail</h2>
     <p class="sub">Expand a tool for its cost reduction and adoption on each task, plus the mean
        <b>input / output / cache</b> tokens it used — so you can see exactly how big each session is.</p>

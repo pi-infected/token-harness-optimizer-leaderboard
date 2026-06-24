@@ -243,19 +243,41 @@ def compute(ok, bad):
                 for r in rs]
         return st.mean(vals) if vals else 0
     task_tokens = {t: ctrl_tokens(t) for t in tasks}
+
+    # mean input / output / cache tokens for ANY competitor (control included)
+    # over a set of tasks — averages the per-task means so tasks weigh equally.
+    def mean_tokens(comp, task_list):
+        ins, outs, cas = [], [], []
+        for t in task_list:
+            rs = by.get((comp, t), [])
+            if not rs:
+                continue
+            ins.append(st.mean([r["input_tokens"] or 0 for r in rs]))
+            outs.append(st.mean([r["output_tokens"] or 0 for r in rs]))
+            cas.append(st.mean([(r["cache_creation_tokens"] or 0) + (r["cache_read_tokens"] or 0) for r in rs]))
+        return {"input": round(st.mean(ins)) if ins else 0,
+                "output": round(st.mean(outs)) if outs else 0,
+                "cache": round(st.mean(cas)) if cas else 0}
+
     bands = []
     for lo_b, hi_b, label in TOKEN_BANDS:
         bt = sorted(t for t in tasks if lo_b <= task_tokens[t] < hi_b)
-        # per-competitor aggregate (geomean of per-task ratios) over band tasks
         rank = []
+        # control first — the baseline (0% reduction) + its absolute token cost.
+        if any(by.get(("control", t)) for t in bt):
+            rank.append({"competitor": "control", "aggregate_cost_ratio": 1.0,
+                         "tasks_compared": len([t for t in bt if by.get(("control", t))]),
+                         "tokens": mean_tokens("control", bt)})
         for c, cd in competitors.items():
             rs = [cd["per_task"][t]["ratio"] for t in bt
                   if t in cd["per_task"] and cd["per_task"][t].get("ratio")]
             if rs:
                 rank.append({"competitor": c,
                              "aggregate_cost_ratio": math.exp(st.mean(list(map(math.log, rs)))),
-                             "tasks_compared": len(rs)})
-        rank.sort(key=lambda e: e["aggregate_cost_ratio"])
+                             "tasks_compared": len(rs),
+                             "tokens": mean_tokens(c, bt)})
+        # keep control pinned at the top (baseline), then cheapest-first
+        rank.sort(key=lambda e: (e["competitor"] != "control", e["aggregate_cost_ratio"]))
         bands.append({"label": label, "lo": lo_b, "hi": hi_b,
                       "tasks": bt, "n_tasks": len(bt), "ranking": rank})
 
@@ -295,6 +317,13 @@ def compute(ok, bad):
         "headline_n_tasks": len(big),
         "headline": headline,
         "token_bands": bands,
+        # control's per-task token breakdown (the baseline shown in the detail)
+        "control_per_task": {t: {
+            "n": len(by.get(("control", t), [])),
+            "mean_input_tokens": mean_tokens("control", [t])["input"],
+            "mean_output_tokens": mean_tokens("control", [t])["output"],
+            "mean_cache_tokens": mean_tokens("control", [t])["cache"],
+        } for t in tasks if by.get(("control", t))},
         "control_noise_floor": noise,
         "competitors": competitors,
         "ranking": ranking,
