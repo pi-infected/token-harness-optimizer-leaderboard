@@ -101,12 +101,13 @@
 
 <script>
 const fmt2 = x => (x==null? "—" : x.toFixed(2));
-// signed percent, human-readable: +20% / −11%
-const pct = x => (x==null? "—" : (x>=0?"+":"−")+Math.abs(x).toFixed(0)+"%");
+// signed percent, 2 decimals: +19.80% / −10.80%
+const pct = x => (x==null? "—" : (x>=0?"+":"−")+Math.abs(x).toFixed(2)+"%");
 // colour by cost reduction %: clearly cheaper = green, clearly dearer = red
 function redClass(p){ if(p==null) return "r-warn"; if(p>2) return "r-good"; if(p<-2) return "r-bad"; return "r-warn"; }
 const redOfRatio = r => r==null? null : (1-r)*100;
-const kTok = n => n==null? "—" : (n>=1e6? (n/1e6).toFixed(1)+"M" : n>=1e3? Math.round(n/1e3)+"k" : ""+n);
+// token count, 2 decimals: 235.75k / 1.23M
+const kTok = n => { if(n==null) return "—"; if(n>=1e6) return (n/1e6).toFixed(2)+"M"; if(n>=1e3) return (n/1e3).toFixed(2)+"k"; return ""+n; };
 
 fetch("data/results.json").then(r=>r.json()).then(d=>{
   document.getElementById("repolink").href = "https://github.com/pi-infected/token-harness-optimizer-leaderboard";
@@ -121,21 +122,27 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
 
   // ===== HEADLINE: long sessions (control > 200k tokens), cost reduction % =====
   const hrows = (d.headline||[]).map((e,i)=>{
+    const isCtrl = e.competitor==="control";
     const c = d.competitors[e.competitor]||{};
     const p = e.cost_reduction_pct;
     const ci = (e.ci_lo_pct!=null) ? ` <span class="pill">[${pct(e.ci_lo_pct)}, ${pct(e.ci_hi_pct)}]</span>` : "";
-    return `<tr>
+    const t = e.tokens||{};
+    return `<tr${isCtrl?' style="opacity:.85"':''}>
       <td class="num">${i+1}</td>
-      <td><b>${e.competitor}</b>${c.version?` <span class="pill">${c.version}</span>`:""}</td>
-      <td class="num ratio ${redClass(p)}">${pct(p)}${ci}</td>
-      <td class="num">${e.adoption}/${e.n_runs}</td>
+      <td><b>${e.competitor}</b>${isCtrl?' <span class="pill">baseline</span>':(c.version?` <span class="pill">${c.version}</span>`:"")}</td>
+      <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}${ci}</td>
+      <td class="num">${isCtrl?"—":e.adoption+"/"+e.n_runs}</td>
+      <td class="num">${kTok(t.input)}</td>
+      <td class="num">${kTok(t.output)}</td>
+      <td class="num">${kTok(t.cache)}</td>
     </tr>`;
   }).join("");
   document.getElementById("headline").innerHTML = `
     <h2 style="margin-top:6px">Cost reduction on long sessions (&gt; ${(d.headline_min_tokens/1000)|0}k tokens)</h2>
     <div class="card"><table>
       <thead><tr><th class="num">#</th><th>Optimizer</th>
-        <th class="num">cost reduction [95% CI]</th><th class="num">adoption</th></tr></thead>
+        <th class="num">cost reduction [95% CI]</th><th class="num">adoption</th>
+        <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
       <tbody>${hrows}</tbody>
     </table></div>
     <p class="meta">Model <code>${(d.model||[]).join(", ")}</code> ·
@@ -151,16 +158,16 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
       const p = redOfRatio(e.aggregate_cost_ratio);
       const t = e.tokens||{};
       return `<tr${isCtrl?' style="opacity:.85"':''}>
-        <td class="num">${isCtrl?"–":i}</td>
+        <td class="num">${i+1}</td>
         <td>${e.competitor}${isCtrl?' <span class="pill">baseline</span>':''}</td>
-        <td class="num ratio ${isCtrl?'':redClass(p)}">${isCtrl?"—":pct(p)}</td>
+        <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}</td>
         <td class="num">${kTok(t.input)}</td>
         <td class="num">${kTok(t.output)}</td>
         <td class="num">${kTok(t.cache)}</td></tr>`;}).join("");
     return `<div class="card" style="margin:10px 0">
       <h3 style="margin:6px 14px">${b.label} tokens <span class="pill">${b.n_tasks} task${b.n_tasks>1?"s":""}</span></h3>
       <table><thead><tr><th class="num">#</th><th>Optimizer</th><th class="num">cost reduction</th>
-        <th class="num">input</th><th class="num">output</th><th class="num">cache</th></tr></thead>
+        <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
       <tbody>${rr}</tbody></table></div>`;
   }).join("");
 
@@ -186,7 +193,7 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
     return `<details${isCtrl?' open':''}><summary>${label}</summary>
       <div class="card" style="margin:8px 0"><table>
         <thead><tr><th>task</th><th class="num">cost reduction</th><th class="num">adoption</th>
-          <th class="num">input</th><th class="num">output</th><th class="num">cache</th></tr></thead>
+          <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
         <tbody>${trows}</tbody></table></div></details>`;
   }).join("");
 

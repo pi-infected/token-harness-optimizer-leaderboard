@@ -199,10 +199,13 @@ def compute(ok, bad):
                 "mean_cost": (st.mean(costs) if costs else None),
                 "ratio": ratio, "ci_lo": lo, "ci_hi": hi,
                 "adoption": len(adopted), "mean_wall_s": wall,
-                # mean token breakdown for this competitor on this task
-                "mean_input_tokens": round(tok("input_tokens")),
+                # Token breakdown, labelled for a lay reader (Anthropic's cache
+                # accounting under the hood): "input token" = cache_creation
+                # (the new input actually processed), "output token" = output,
+                # "cache token" = cache_read (input reused from cache).
+                "mean_input_tokens": round(tok("cache_creation_tokens")),
                 "mean_output_tokens": round(tok("output_tokens")),
-                "mean_cache_tokens": round(tok("cache_creation_tokens") + tok("cache_read_tokens")),
+                "mean_cache_tokens": round(tok("cache_read_tokens")),
                 # raw measurements for full transparency / re-analysis
                 "costs": costs,
                 "scores": [r["score"] for r in runs],
@@ -247,14 +250,16 @@ def compute(ok, bad):
     # mean input / output / cache tokens for ANY competitor (control included)
     # over a set of tasks — averages the per-task means so tasks weigh equally.
     def mean_tokens(comp, task_list):
+        # "input" = cache_creation (new input processed), "output" = output,
+        # "cache" = cache_read (input reused from cache). See per_task above.
         ins, outs, cas = [], [], []
         for t in task_list:
             rs = by.get((comp, t), [])
             if not rs:
                 continue
-            ins.append(st.mean([r["input_tokens"] or 0 for r in rs]))
+            ins.append(st.mean([r["cache_creation_tokens"] or 0 for r in rs]))
             outs.append(st.mean([r["output_tokens"] or 0 for r in rs]))
-            cas.append(st.mean([(r["cache_creation_tokens"] or 0) + (r["cache_read_tokens"] or 0) for r in rs]))
+            cas.append(st.mean([r["cache_read_tokens"] or 0 for r in rs]))
         return {"input": round(st.mean(ins)) if ins else 0,
                 "output": round(st.mean(outs)) if outs else 0,
                 "cache": round(st.mean(cas)) if cas else 0}
@@ -276,8 +281,9 @@ def compute(ok, bad):
                              "aggregate_cost_ratio": math.exp(st.mean(list(map(math.log, rs)))),
                              "tasks_compared": len(rs),
                              "tokens": mean_tokens(c, bt)})
-        # keep control pinned at the top (baseline), then cheapest-first
-        rank.sort(key=lambda e: (e["competitor"] != "control", e["aggregate_cost_ratio"]))
+        # cheapest-first; control (ratio 1.0 = 0% reduction) sorts into place
+        # at the zero line, so the reader sees who actually beats the baseline.
+        rank.sort(key=lambda e: e["aggregate_cost_ratio"])
         bands.append({"label": label, "lo": lo_b, "hi": hi_b,
                       "tasks": bt, "n_tasks": len(bt), "ranking": rank})
 
@@ -304,6 +310,16 @@ def compute(ok, bad):
             "ci_lo_pct": (round((1 - hi) * 100, 1) if hi is not None else None),
             "ci_hi_pct": (round((1 - lo) * 100, 1) if lo is not None else None),
             "adoption": adopt, "n_runs": nrun, "tasks_compared": len(rs),
+            "tokens": mean_tokens(c, big),
+        })
+    # control row — the baseline (0% reduction), sorted in at the zero line.
+    if any(by.get(("control", t)) for t in big):
+        headline.append({
+            "competitor": "control", "cost_ratio": 1.0, "cost_reduction_pct": 0.0,
+            "ci_lo_pct": None, "ci_hi_pct": None, "adoption": None,
+            "n_runs": sum(len(by.get(("control", t), [])) for t in big),
+            "tasks_compared": len([t for t in big if by.get(("control", t))]),
+            "tokens": mean_tokens("control", big),
         })
     headline.sort(key=lambda e: e["cost_ratio"])
 
