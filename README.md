@@ -316,11 +316,12 @@ run on a single version (check with `SELECT DISTINCT claude_version FROM runs`).
 
 Used as documented, today's optimizers mostly don't beat plain Claude Code end to
 end — several make it more expensive. The bottleneck is **adoption**: the agent
-doesn't call an optimizer's tools often enough to pay back their overhead, and a
-verbose "use this tool when…" system prompt only adds cost without buying adoption.
-Where any tool helps, it's on **long, expensive sessions** (see the token-band split
-on the site), never on short ones — which is also why trivially-short tasks (control
-< ~5 turns) are excluded. New tools are added as token budget allows.
+doesn't call an optimizer's tools often enough to pay back their overhead. A verbose
+"use this tool when…" system prompt *can* raise adoption for some tools, but cost
+still goes up — the tools don't pay for themselves even when used, and the prompt is
+billed every turn. Where any tool helps, it's on **long, expensive sessions** (see the
+token-band split on the site), never on short ones — which is also why trivially-short
+tasks (control < ~5 turns) are excluded. New tools are added as token budget allows.
 
 ## License & contributing
 

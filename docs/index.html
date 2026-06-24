@@ -39,7 +39,9 @@
   <h1>THOL — Token-Harness Optimizer Leaderboard</h1>
   <p class="sub">An open, reproducible, <b>end-to-end</b> benchmark of tools that claim to cut the
      token cost of coding agents. We measure the only thing that matters:
-     <b>did the task succeed, and what did the whole session actually cost</b> — with and without each optimizer.</p>
+     <b>did the task succeed, and what did the whole session actually cost</b> — with and without each optimizer.
+     <b>Every run uses the Claude Sonnet model</b>, repeated <span id="repsline">many</span> times per task on a single
+     pinned Claude Code version.</p>
 
   <div id="banner"></div>
   <div id="headline">Loading results…</div>
@@ -58,14 +60,12 @@
      prompt the agent ignores is pure cost.</p>
   <p class="sub">We also tried fixing adoption with a <b>generous system prompt</b> — a verbose, per-tool block
      telling the agent exactly which function to reach for in which situation. It made things <b>worse</b>, not
-     better: adoption barely moved, and the extra prompt tokens were paid on every single turn, so cost went
-     <i>up</i>. The overhead never amortised. (Those "+GSP" arms are kept out of the ranking and reported in the
-     method.)</p>
+     better. For some tools adoption <i>did</i> rise (e.g. token-optimizer-mcp 1%→25%, squeez 0.5%→21%), yet cost
+     still went <b>up</b>: the tools don't pay for themselves even when the agent uses them, and the extra prompt is
+     billed on every turn. (Those "+GSP" arms are kept out of the ranking.)</p>
   <p class="sub">Where any tool does help, it's on <b>long, expensive sessions</b> (see the session-size split
      above) — never on the short ones. New tools are added over time as token budget allows; this benchmark is
      expensive to run, so the board grows in batches rather than all at once.</p>
-
-  <div id="detail"></div>
 
   <h2>How to read this</h2>
   <p class="sub"><b>Cost reduction</b> = how much cheaper an optimizer makes a session versus vanilla Claude Code,
@@ -85,9 +85,13 @@
      average: they're too trivial to separate the tools (every tool lands on the same near-zero cost — only fixed
      overhead shows) and they don't resemble real agent work. The board scores only the substantive tasks that
      remain.
-     <b>Aggregation.</b> Costs are aggregated as a geometric mean of per-task ratios with 95% bootstrap confidence
-     intervals — <b>no outlier trimming</b>. We checked dropping each cell's most-deviant run and it barely moved
-     the numbers, so the published figures use every successful run as-is.</p>
+     <b>Aggregation.</b> Costs are aggregated as a geometric mean of per-task ratios — <b>no outlier trimming</b>.
+     Dropping each cell's single most-deviant run lowers tokenade's headline figure from ≈20% to ≈18% (the
+     high-variance debug tasks drive this) and leaves the ranking unchanged, so we publish the untrimmed figures and
+     the full raw data for re-analysis. Bootstrap 95% confidence intervals for the headline figures are in
+     <code>results.json</code>.</p>
+
+  <div id="detail"></div>
 
   <h2>Impartiality</h2>
   <p class="sub">This benchmark is maintained by the author of one of the measured tools (tokenade). The conflict is
@@ -119,6 +123,8 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
   document.getElementById("banner").innerHTML = (minRep < 3)
     ? `<div class="banner">⚠️ <b>Preliminary.</b> Some cells have fewer than 3 repetitions
         (currently ${minRep}–${maxRep}); figures will firm up as the campaign completes.</div>` : "";
+  const repsEl = document.getElementById("repsline");
+  if(repsEl) repsEl.textContent = (minRep===maxRep)? `${minRep}` : `${minRep}–${maxRep}`;
 
   // ===== HEADLINE: long sessions (control > 200k tokens), cost reduction % =====
   const hrows = (d.headline||[]).map((e,i)=>{
@@ -179,6 +185,7 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
       const p=pt[t]; if(!p) return "";
       const red = isCtrl ? null : redOfRatio(p.ratio);
       return `<tr><td>${t}</td>
+        <td class="num">${p.n}</td>
         <td class="num ratio ${isCtrl?'':redClass(red)}">${isCtrl?"—":(p.ratio==null?"—":pct(red))}</td>
         <td class="num">${isCtrl?"—":p.adoption+"/"+p.n}</td>
         <td class="num">${kTok(p.mean_input_tokens)}</td>
@@ -190,7 +197,7 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
                          : `${name} — ${he?pct(he.cost_reduction_pct):"—"} on long sessions`;
     return `<details${isCtrl?' open':''}><summary>${label}</summary>
       <div class="card" style="margin:8px 0"><table>
-        <thead><tr><th>task</th><th class="num">cost reduction</th><th class="num">adoption</th>
+        <thead><tr><th>task</th><th class="num">runs</th><th class="num">cost reduction</th><th class="num">adoption</th>
           <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
         <tbody>${trows}</tbody></table></div></details>`;
   }).join("");
