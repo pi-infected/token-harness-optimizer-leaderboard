@@ -143,17 +143,20 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
     </tr>`;
   }).join("");
   document.getElementById("headline").innerHTML = `
-    <h2 style="margin-top:6px">Cost reduction on long sessions (&gt; ${(d.headline_min_tokens/1000)|0}k tokens)</h2>
+    <h2 style="margin-top:6px">Mean cost reduction on long sessions (&gt; ${(d.headline_min_tokens/1000)|0}k tokens)</h2>
     <div class="card"><table>
       <thead><tr><th class="num">#</th><th>Optimizer</th>
-        <th class="num">cost reduction</th><th class="num">adoption</th>
+        <th class="num">mean cost reduction</th><th class="num">adoption</th>
         <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
       <tbody>${hrows}</tbody>
     </table></div>
     <p class="meta">Model <code>${(d.model||[]).join(", ")}</code> ·
       Claude Code <code>${(d.claude_versions||[]).join(", ")}</code> ·
-      ${d.headline_n_tasks} long task(s), each run many times ·
-      higher % = cheaper · <b>adoption</b> = share of runs where the agent actually called the tool.</p>`;
+      ${d.headline_n_tasks} long task(s), ${(minRep===maxRep)?minRep:minRep+"–"+maxRep} runs each ·
+      higher % = cheaper.
+      <b>Every figure here is a mean</b> — cost reduction is averaged across tasks, the token columns are mean
+      tokens per run. <b>The one exception is adoption</b>, which is a count: the number of runs (out of the total)
+      in which the agent actually called the tool.</p>`;
 
   // ===== DETAIL: per session-size band (with token breakdown + control) =====
   const bandsHtml = (d.token_bands||[]).map(b=>{
@@ -171,7 +174,7 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
         <td class="num">${kTok(t.cache)}</td></tr>`;}).join("");
     return `<div class="card" style="margin:10px 0">
       <h3 style="margin:6px 14px">${b.label} tokens <span class="pill">${b.n_tasks} task${b.n_tasks>1?"s":""}</span></h3>
-      <table><thead><tr><th class="num">#</th><th>Optimizer</th><th class="num">cost reduction</th>
+      <table><thead><tr><th class="num">#</th><th>Optimizer</th><th class="num">mean cost reduction</th>
         <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
       <tbody>${rr}</tbody></table></div>`;
   }).join("");
@@ -197,7 +200,7 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
                          : `${name} — ${he?pct(he.cost_reduction_pct):"—"} on long sessions`;
     return `<details${isCtrl?' open':''}><summary>${label}</summary>
       <div class="card" style="margin:8px 0"><table>
-        <thead><tr><th>task</th><th class="num">runs</th><th class="num">cost reduction</th><th class="num">adoption</th>
+        <thead><tr><th>task</th><th class="num">runs</th><th class="num">mean cost reduction</th><th class="num">adoption</th>
           <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
         <tbody>${trows}</tbody></table></div></details>`;
   }).join("");
