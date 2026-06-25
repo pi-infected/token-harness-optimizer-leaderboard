@@ -32,12 +32,26 @@
   code{background:#0b0d11;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:13px}
   .foot{color:var(--mut);font-size:12px;margin-top:40px;border-top:1px solid var(--line);padding-top:16px}
   details{margin:6px 0} summary{cursor:pointer;color:var(--accent)}
+  .langbar{float:right;display:flex;align-items:center;gap:6px;margin-top:2px}
+  #lang{background:var(--card);color:var(--ink);border:1px solid var(--line);
+        border-radius:6px;padding:4px 8px;font-size:13px}
+  .toollinks{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 0}
+  .toollinks a{border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:14px;background:var(--card)}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="langbar">
+    <select id="lang" aria-label="Language">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="es">Español</option>
+      <option value="de">Deutsch</option>
+      <option value="zh">中文</option>
+    </select>
+  </div>
   <h1>THOL — Token-Harness Optimizer Leaderboard</h1>
-  <p class="sub">An open, reproducible, <b>end-to-end</b> benchmark of tools that claim to cut the
+  <p class="sub" data-i18n="intro">An open, reproducible, <b>end-to-end</b> benchmark of tools that claim to cut the
      token cost of coding agents. We measure the only thing that matters:
      <b>did the task succeed, and what did the whole session actually cost</b> — with and without each optimizer.
      <b>Every run uses the Claude Sonnet model</b>, <b>10 runs per task per tool</b> on a single pinned Claude Code
@@ -45,7 +59,7 @@
 
   <div id="banner"></div>
   <div id="headline">Loading results…</div>
-  <p class="sub" style="margin-top:14px"><b>What this table shows.</b> How much each tool changes the cost of a
+  <p class="sub" style="margin-top:14px" data-i18n="whatShows"><b>What this table shows.</b> How much each tool changes the cost of a
      coding session versus plain Claude Code, on <b>long sessions only</b> — tasks where vanilla Claude Code burns
      more than <b>200,000 tokens</b>. A <b>positive number means cheaper</b>; negative means more expensive.
      <b>Why long sessions:</b> most real work with a coding agent is long and multi-step; short throwaway tasks
@@ -53,42 +67,42 @@
      All runs use the <b>Claude Sonnet</b> model. With more budget we'd like to push this to multi-million-token
      sessions; for now this is the regime we can afford to measure, and we add new tools in batches as budget allows.</p>
 
-  <h2>What we found so far</h2>
-  <p class="sub"><b>Used as documented, most of these tools don't beat plain Claude Code — several make it
+  <h2 data-i18n="foundH2">What we found so far</h2>
+  <p class="sub" data-i18n="foundP1"><b>Used as documented, most of these tools don't beat plain Claude Code — several make it
      more expensive.</b> The dominant reason is <b>adoption</b>: the agent simply doesn't call the optimizer's
      tools often enough for them to pay back their own overhead. A tool that adds a CLI, an MCP server or a
      prompt the agent ignores is pure cost.</p>
-  <p class="sub">Where any tool does help, it's on <b>long, expensive sessions</b> (see the session-size split
+  <p class="sub" data-i18n="foundP2">Where any tool does help, it's on <b>long, expensive sessions</b> (see the session-size split
      below) — never on the short ones. New tools are added over time as token budget allows; this benchmark is
      expensive to run, so the board grows in batches rather than all at once.</p>
 
-  <h2>Why most tools do poorly — despite great compression numbers</h2>
-  <p class="sub">Almost every tool here advertises an impressive reduction (−58%, −90%, even −99%). Those numbers are
+  <h2 data-i18n="whyH2">Why most tools do poorly — despite great compression numbers</h2>
+  <p class="sub" data-i18n="whyIntro">Almost every tool here advertises an impressive reduction (−58%, −90%, even −99%). Those numbers are
      usually <b>real but narrow</b>: they measure <b>one of the tool's own functions in isolation</b> — its compressor
      run on a fixed blob, or its search run on a fixed query — under tightly controlled conditions. That is not how an
      agent behaves on a real task. In real conditions, three things an isolated compression benchmark never sees
      usually erase the saving or reverse it:</p>
   <ol class="sub" style="padding-left:22px">
-    <li><b>Adoption is hard, and mis-adoption backfires.</b> Getting a model to actually call an MCP/CLI tool is
+    <li data-i18n="whyLi1"><b>Adoption is hard, and mis-adoption backfires.</b> Getting a model to actually call an MCP/CLI tool is
         difficult; getting a <i>net win</i> is harder still, because the tool has to be used <b>in the right
         context</b>. When it isn't, the agent gets a poor result, falls back to its normal way of working
         (re-reading, re-searching) — <b>and learns the tool is unhelpful, so it stops calling it</b>. You pay the
         tokens for the failed call <i>and</i> lose future adoption. (We even tried forcing adoption with a verbose
         system prompt — it still cost more; see the GSP experiment below.)</li>
-    <li><b>Lossy output compression makes the agent re-fetch.</b> For tools that compress command/CLI output, if the
+    <li data-i18n="whyLi2"><b>Lossy output compression makes the agent re-fetch.</b> For tools that compress command/CLI output, if the
         compaction drops the bytes the model actually needed, the model simply <b>re-runs the command</b> — often
         bypassing the tool — to recover them. Net result: more turns, more tokens, the opposite of the advertised
         saving.</li>
-    <li><b>Overhead is paid on every turn.</b> Adding an MCP server or a system prompt injects tokens at the
+    <li data-i18n="whyLi3"><b>Overhead is paid on every turn.</b> Adding an MCP server or a system prompt injects tokens at the
         <b>start of every conversation</b>, and they are re-counted on <b>every agent turn</b>. Most of these are
         cache reads, billed at a reduced rate — <b>but still billed</b>. Over a long session this standing cost
         quietly accumulates, and for a tool the agent rarely uses it is pure loss.</li>
   </ol>
-  <p class="sub">Together, this is why a tool can headline "−90% tokens" and still make a real session <b>more
+  <p class="sub" data-i18n="whyOutro">Together, this is why a tool can headline "−90% tokens" and still make a real session <b>more
      expensive</b> end to end — which is exactly what THOL measures.</p>
 
-  <h2>How to read this</h2>
-  <p class="sub"><b>Cost reduction</b> = how much cheaper an optimizer makes a session versus vanilla Claude Code,
+  <h2 data-i18n="readH2">How to read this</h2>
+  <p class="sub" data-i18n="readP"><b>Cost reduction</b> = how much cheaper an optimizer makes a session versus vanilla Claude Code,
      in end-to-end USD, geometric-mean-aggregated across tasks (so no single task dominates). <b>Positive = cheaper,
      negative = more expensive; 0% = no difference</b>, with <b>control</b> (vanilla Claude Code) sat at the 0% line.
      <b>Adoption</b> = share of runs in which the agent actually invoked the optimizer's tools — a tool the agent
@@ -97,13 +111,13 @@
      has a hook, but it additionally exposes CLI functions — map, skeleton, query, exec… — the agent calls by hand,
      so its adoption counts those.) Every raw per-run measurement is in <code>results.json</code> for your own analysis.</p>
 
-  <h2>Method &amp; reproduction</h2>
-  <p class="sub">Each run is one fully isolated headless Claude Code session (throwaway <code>HOME</code>, throwaway
+  <h2 data-i18n="methodH2">Method &amp; reproduction</h2>
+  <p class="sub" data-i18n="methodP1">Each run is one fully isolated headless Claude Code session (throwaway <code>HOME</code>, throwaway
      <code>/tmp</code> workspace, <code>--strict-mcp-config</code>), single pinned model and Claude Code version,
      deterministic fixtures, programmatic verifiers scoring against ground truth never present in the workspace.
      Every step, manifest and verifier is in the repository.
      → <a id="repolink" href="#">Full method &amp; exact reproduction steps in the README</a>.</p>
-  <p class="sub"><b>Task selection.</b> We dropped tasks where vanilla Claude Code finishes in under ~5 turns on
+  <p class="sub" data-i18n="methodP2"><b>Task selection.</b> We dropped tasks where vanilla Claude Code finishes in under ~5 turns on
      average: they're too trivial to separate the tools (every tool lands on the same near-zero cost — only fixed
      overhead shows) and they don't resemble real agent work. The board scores only the substantive tasks that
      remain.
@@ -116,136 +130,176 @@
 
   <div id="gsp"></div>
 
-  <h2>Impartiality</h2>
-  <p class="sub">This benchmark is maintained by the author of one of the measured tools (tokenade). The conflict is
+  <h2 data-i18n="imparH2">Impartiality</h2>
+  <p class="sub" data-i18n="imparP">This benchmark is maintained by the author of one of the measured tools (tokenade). The conflict is
      handled by construction: the harness cannot tell competitors apart, install steps follow each tool's own
      documentation, verifiers are frozen before any run and check task outcomes (not tool behaviour), the control
      is a first-class entry whose variance bounds every claim, and all raw data — including runs unfavourable to
      any tool, tokenade included — is published unedited.</p>
 
+  <h2 data-i18n="toolsH2">Tools benchmarked</h2>
+  <p class="sub" data-i18n="toolsP">Every optimizer measured, linked to its source. <code>tokenade</code> is the tool maintained by this
+     benchmark's author; it is held to the same blind pipeline as every other entry.</p>
+  <div class="toollinks" id="tools"></div>
+
   <div class="foot" id="foot"></div>
 </div>
 
+<script src="i18n.js"></script>
 <script>
+// ---------- i18n engine ----------
+const LANGS = ["en","fr","es","de","zh"];
+const REPO = "https://github.com/pi-infected/token-harness-optimizer-leaderboard";
+function pickLang(){
+  const saved = localStorage.getItem("thol_lang");
+  if(saved && LANGS.includes(saved)) return saved;
+  const nav = (navigator.language||"en").slice(0,2).toLowerCase();
+  return LANGS.includes(nav) ? nav : "en";
+}
+let LANG = pickLang();
+// I18N is provided by i18n.js (overlays for non-English); English is the inline source.
+function t(key, en){ const L=(window.I18N||{})[LANG]; return (L && L[key]!=null) ? L[key] : en; }
+function tf(key, en, vars){ let s=t(key,en); for(const k in vars) s=s.split("{"+k+"}").join(vars[k]); return s; }
+function applyStatic(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    if(el._en==null) el._en = el.innerHTML;          // cache the English source once
+    const tr = (window.I18N||{})[LANG] && I18N[LANG][el.dataset.i18n];
+    el.innerHTML = (LANG==="en" || tr==null) ? el._en : tr;
+  });
+}
+
 const fmt2 = x => (x==null? "—" : x.toFixed(2));
-// signed percent, 2 decimals: +19.80% / −10.80%
 const pct = x => (x==null? "—" : (x>=0?"+":"−")+Math.abs(x).toFixed(2)+"%");
-// colour by cost reduction %: clearly cheaper = green, clearly dearer = red
 function redClass(p){ if(p==null) return "r-warn"; if(p>2) return "r-good"; if(p<-2) return "r-bad"; return "r-warn"; }
 const redOfRatio = r => r==null? null : (1-r)*100;
-// token count, 2 decimals: 235.75k / 1.23M
 const kTok = n => { if(n==null) return "—"; if(n>=1e6) return (n/1e6).toFixed(2)+"M"; if(n>=1e3) return (n/1e3).toFixed(2)+"k"; return ""+n; };
 
-fetch("data/results.json").then(r=>r.json()).then(d=>{
-  document.getElementById("repolink").href = "https://github.com/pi-infected/token-harness-optimizer-leaderboard";
+// tools list (language-neutral names + URLs; tokenade → tokenade.net)
+const TOOLS = [
+  ["claude-context","https://github.com/zilliztech/claude-context"],
+  ["claude-mem","https://github.com/thedotmack/claude-mem"],
+  ["claude-token-efficient","https://github.com/drona23/claude-token-efficient"],
+  ["codegraph","https://github.com/colbymchenry/codegraph"],
+  ["code-review-graph","https://github.com/tirth8205/code-review-graph"],
+  ["lean-ctx","https://github.com/yvgude/lean-ctx"],
+  ["rtk","https://github.com/rtk-ai/rtk"],
+  ["serena","https://github.com/oraios/serena"],
+  ["squeez","https://github.com/claudioemmanuel/squeez"],
+  ["token-optimizer-mcp","https://github.com/ooples/token-optimizer-mcp"],
+  ["tokenade","https://tokenade.net"]
+];
+function renderTools(){
+  document.getElementById("tools").innerHTML = TOOLS.map(([n,u])=>
+    `<a href="${u}" target="_blank" rel="noopener">${n} ↗</a>`).join("");
+}
 
-  // preliminary if any compared cell has fewer than 3 reps
+let RESULTS = null;
+
+function renderTables(d){
+  // preliminary banner if any compared cell has fewer than 3 reps
   let maxRep=0, minRep=99;
   for(const c of Object.values(d.competitors||{}))
     for(const pt of Object.values(c.per_task||{})){ maxRep=Math.max(maxRep,pt.n); minRep=Math.min(minRep,pt.n); }
   document.getElementById("banner").innerHTML = (minRep < 3)
-    ? `<div class="banner">⚠️ <b>Preliminary.</b> Some cells have fewer than 3 repetitions
-        (currently ${minRep}–${maxRep}); figures will firm up as the campaign completes.</div>` : "";
-  // adoption is N/A for hook/prompt tools the agent never explicitly calls
-  const naSet = new Set(d.adoption_na||[]);
-  const adoptCell = (name, adoption, n) =>
-    name==="control" ? "—" : naSet.has(name) ? "N/A" : `${adoption}/${n}`;
+    ? `<div class="banner">⚠️ ${tf("prelimBanner",
+        "<b>Preliminary.</b> Some cells have fewer than 3 repetitions (currently {min}–{max}); figures will firm up as the campaign completes.",
+        {min:minRep,max:maxRep})}</div>` : "";
 
-  // ===== HEADLINE: long sessions (control > 200k tokens), cost reduction % =====
+  const naSet = new Set(d.adoption_na||[]);
+  const naLabel = t("na","N/A");
+  const adoptCell = (name, adoption, n) =>
+    name==="control" ? "—" : naSet.has(name) ? naLabel : `${adoption}/${n}`;
+
+  const TH = `<th class="num">#</th><th>${t("thOpt","Optimizer")}</th>
+      <th class="num">${t("thRed","mean cost reduction")}</th><th class="num">${t("thAdopt","adoption")}</th>
+      <th class="num">${t("thIn","input token")}</th><th class="num">${t("thOut","output token")}</th>
+      <th class="num">${t("thCache","cache token")}</th>`;
+
+  // ===== HEADLINE =====
   const hrows = (d.headline||[]).map((e,i)=>{
     const isCtrl = e.competitor==="control";
     const c = d.competitors[e.competitor]||{};
     const p = e.cost_reduction_pct;
-    const t = e.tokens||{};
+    const tk = e.tokens||{};
     return `<tr${isCtrl?' style="opacity:.85"':''}>
       <td class="num">${i+1}</td>
-      <td><b>${e.competitor}</b>${isCtrl?' <span class="pill">baseline</span>':(c.version?` <span class="pill">${c.version}</span>`:"")}</td>
+      <td><b>${e.competitor}</b>${isCtrl?` <span class="pill">${t("baseline","baseline")}</span>`:(c.version?` <span class="pill">${c.version}</span>`:"")}</td>
       <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}</td>
       <td class="num">${adoptCell(e.competitor, e.adoption, e.n_runs)}</td>
-      <td class="num">${kTok(t.input)}</td>
-      <td class="num">${kTok(t.output)}</td>
-      <td class="num">${kTok(t.cache)}</td>
+      <td class="num">${kTok(tk.input)}</td>
+      <td class="num">${kTok(tk.output)}</td>
+      <td class="num">${kTok(tk.cache)}</td>
     </tr>`;
   }).join("");
   document.getElementById("headline").innerHTML = `
-    <h2 style="margin-top:6px">Mean cost reduction on long sessions (&gt; ${(d.headline_min_tokens/1000)|0}k tokens)</h2>
+    <h2 style="margin-top:6px">${tf("headlineH2","Mean cost reduction on long sessions (&gt; {k}k tokens)",{k:(d.headline_min_tokens/1000)|0})}</h2>
     <div class="card"><table>
-      <thead><tr><th class="num">#</th><th>Optimizer</th>
-        <th class="num">mean cost reduction</th><th class="num">adoption</th>
-        <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
+      <thead><tr>${TH}</tr></thead>
       <tbody>${hrows}</tbody>
     </table></div>
-    <p class="meta">Model <code>${(d.model||[]).join(", ")}</code> ·
-      Claude Code <code>${(d.claude_versions||[]).join(", ")}</code> ·
-      ${d.headline_n_tasks} long task(s), 10 runs each ·
-      higher % = cheaper.
-      <b>Every figure here is a mean</b> — cost reduction is averaged across tasks, the token columns are mean
-      tokens per run. <b>The one exception is adoption</b>, which is a count: the number of runs (out of the total)
-      in which the agent actually called the tool.</p>`;
+    <p class="meta">${tf("headlineMeta",
+      "Model <code>{model}</code> · Claude Code <code>{cc}</code> · {n} long task(s), 10 runs each · higher % = cheaper. <b>Every figure here is a mean</b> — cost reduction is averaged across tasks, the token columns are mean tokens per run. <b>The one exception is adoption</b>, which is a count: the number of runs (out of the total) in which the agent actually called the tool.",
+      {model:(d.model||[]).join(", "), cc:(d.claude_versions||[]).join(", "), n:d.headline_n_tasks})}</p>`;
 
-  // ===== GSP: same table for the "generous system prompt" arms, Δ vs base =====
+  // ===== GSP =====
   const gsp = d.headline_gsp||[];
   if(gsp.length){
     const grows = gsp.map((e,i)=>{
       const p = e.cost_reduction_pct, dl = e.delta_vs_base_pp;
-      const delta = (dl==null)? "" : ` <span class="pill" style="color:${dl>0?'var(--good)':'var(--bad)'}">${pct(dl).replace('%','pp')} vs base</span>`;
-      const t = e.tokens||{};
+      const delta = (dl==null)? "" : ` <span class="pill" style="color:${dl>0?'var(--good)':'var(--bad)'}">${pct(dl).replace('%','pp')} ${t("vsBase","vs base")}</span>`;
+      const tk = e.tokens||{};
       return `<tr>
         <td class="num">${i+1}</td>
         <td>${e.base} <span class="pill">+GSP</span></td>
         <td class="num ratio ${redClass(p)}">${pct(p)}${delta}</td>
         <td class="num">${adoptCell(e.base, e.adoption, e.n_runs)}</td>
-        <td class="num">${kTok(t.input)}</td>
-        <td class="num">${kTok(t.output)}</td>
-        <td class="num">${kTok(t.cache)}</td>
+        <td class="num">${kTok(tk.input)}</td>
+        <td class="num">${kTok(tk.output)}</td>
+        <td class="num">${kTok(tk.cache)}</td>
       </tr>`;
     }).join("");
     document.getElementById("gsp").innerHTML = `
-      <h2>Can a "generous system prompt" (GSP) fix it?</h2>
-      <p class="sub">Following on from reason #1 above: we tried to <b>force adoption</b>. Each tool is re-run on the
-         same long sessions with a verbose, per-tool system prompt telling the agent exactly which of its functions to
-         use when. <b>The pill is the change vs the same tool without the prompt</b> (percentage points of cost
-         reduction). For some tools adoption <i>did</i> rise (e.g. token-optimizer-mcp 1%→25%, squeez 0.5%→21%), yet
-         it mostly made cost <b>worse</b>: the prompt is billed every turn and the tools still don't pay for
-         themselves even when used. (Hook/prompt tools, and tools without a GSP arm, are omitted.)</p>
+      <h2>${t("gspH2",'Can a "generous system prompt" (GSP) fix it?')}</h2>
+      <p class="sub">${t("gspIntro",
+        'Following on from reason #1 above: we tried to <b>force adoption</b>. Each tool is re-run on the same long sessions with a verbose, per-tool system prompt telling the agent exactly which of its functions to use when. <b>The pill is the change vs the same tool without the prompt</b> (percentage points of cost reduction). For some tools adoption <i>did</i> rise (e.g. token-optimizer-mcp 1%→25%, squeez 0.5%→21%), yet it mostly made cost <b>worse</b>: the prompt is billed every turn and the tools still don\'t pay for themselves even when used. (Hook/prompt tools, and tools without a GSP arm, are omitted.)')}</p>
       <div class="card"><table>
-        <thead><tr><th class="num">#</th><th>Optimizer</th>
-          <th class="num">mean cost reduction</th><th class="num">adoption</th>
-          <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
+        <thead><tr>${TH}</tr></thead>
         <tbody>${grows}</tbody>
       </table></div>`;
-  }
+  } else { document.getElementById("gsp").innerHTML = ""; }
 
-  // ===== DETAIL: per session-size band (with token breakdown + control) =====
+  // ===== DETAIL: per session-size band =====
+  const THband = `<th class="num">#</th><th>${t("thOpt","Optimizer")}</th><th class="num">${t("thRed","mean cost reduction")}</th>
+    <th class="num">${t("thIn","input token")}</th><th class="num">${t("thOut","output token")}</th><th class="num">${t("thCache","cache token")}</th>`;
   const bandsHtml = (d.token_bands||[]).map(b=>{
     if(!b.n_tasks) return "";
     const rr = b.ranking.map((e,i)=>{
       const isCtrl = e.competitor==="control";
       const p = redOfRatio(e.aggregate_cost_ratio);
-      const t = e.tokens||{};
+      const tk = e.tokens||{};
       return `<tr${isCtrl?' style="opacity:.85"':''}>
         <td class="num">${i+1}</td>
-        <td>${e.competitor}${isCtrl?' <span class="pill">baseline</span>':''}</td>
+        <td>${e.competitor}${isCtrl?` <span class="pill">${t("baseline","baseline")}</span>`:''}</td>
         <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}</td>
-        <td class="num">${kTok(t.input)}</td>
-        <td class="num">${kTok(t.output)}</td>
-        <td class="num">${kTok(t.cache)}</td></tr>`;}).join("");
+        <td class="num">${kTok(tk.input)}</td>
+        <td class="num">${kTok(tk.output)}</td>
+        <td class="num">${kTok(tk.cache)}</td></tr>`;}).join("");
+    const taskWord = b.n_tasks>1 ? t("tasks","tasks") : t("task","task");
     return `<div class="card" style="margin:10px 0">
-      <h3 style="margin:6px 14px">${b.label} tokens <span class="pill">${b.n_tasks} task${b.n_tasks>1?"s":""}</span></h3>
-      <table><thead><tr><th class="num">#</th><th>Optimizer</th><th class="num">mean cost reduction</th>
-        <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
+      <h3 style="margin:6px 14px">${b.label} tokens <span class="pill">${b.n_tasks} ${taskWord}</span></h3>
+      <table><thead><tr>${THband}</tr></thead>
       <tbody>${rr}</tbody></table></div>`;
   }).join("");
 
-  // per-task detail: control first (the baseline), then each tool by rank
+  // per-task detail: control first, then each tool by rank
   const order = ["control", ...(d.headline||[]).map(e=>e.competitor)];
   const perTask = order.map(name=>{
     const isCtrl = name==="control";
     const pt = isCtrl ? (d.control_per_task||{}) : (d.competitors[name]?.per_task||{});
-    const trows=(d.tasks||[]).map(t=>{
-      const p=pt[t]; if(!p) return "";
+    const trows=(d.tasks||[]).map(tk=>{
+      const p=pt[tk]; if(!p) return "";
       const red = isCtrl ? null : redOfRatio(p.ratio);
-      return `<tr><td>${t}</td>
+      return `<tr><td>${tk}</td>
         <td class="num">${p.n}</td>
         <td class="num ratio ${isCtrl?'':redClass(red)}">${isCtrl?"—":(p.ratio==null?"—":pct(red))}</td>
         <td class="num">${adoptCell(name, p.adoption, p.n)}</td>
@@ -254,33 +308,53 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
         <td class="num">${kTok(p.mean_cache_tokens)}</td></tr>`;
     }).join("");
     const he = (d.headline||[]).find(e=>e.competitor===name);
-    const label = isCtrl ? "control — baseline (vanilla Claude Code)"
-                         : `${name} — ${he?pct(he.cost_reduction_pct):"—"} on long sessions`;
+    const label = isCtrl ? t("ctrlSummary","control — baseline (vanilla Claude Code)")
+                         : tf("toolSummary","{name} — {pct} on long sessions",{name:name, pct:(he?pct(he.cost_reduction_pct):"—")});
     return `<details${isCtrl?' open':''}><summary>${label}</summary>
       <div class="card" style="margin:8px 0"><table>
-        <thead><tr><th>task</th><th class="num">runs</th><th class="num">mean cost reduction</th><th class="num">adoption</th>
-          <th class="num">input token</th><th class="num">output token</th><th class="num">cache token</th></tr></thead>
+        <thead><tr><th>${t("thTask","task")}</th><th class="num">${t("thRuns","runs")}</th><th class="num">${t("thRed","mean cost reduction")}</th><th class="num">${t("thAdopt","adoption")}</th>
+          <th class="num">${t("thIn","input token")}</th><th class="num">${t("thOut","output token")}</th><th class="num">${t("thCache","cache token")}</th></tr></thead>
         <tbody>${trows}</tbody></table></div></details>`;
   }).join("");
 
   document.getElementById("detail").innerHTML = `
-    <h2>By session size — where does the value come from?</h2>
-    <p class="sub">The full board split by how many <b>total tokens vanilla Claude Code burns</b> on a task
-       (input + output + cache). Each band shows the mean <b>input / output / cache</b> tokens per session, with
-       <b>control</b> (plain Claude Code) as the baseline. Optimizers do little on small sessions; the savings show
-       up as sessions get long — and it's mostly <b>cache</b> tokens that move.</p>
+    <h2>${t("detailH2","By session size — where does the value come from?")}</h2>
+    <p class="sub">${t("detailP",
+      "The full board split by how many <b>total tokens vanilla Claude Code burns</b> on a task (input + output + cache). Each band shows the mean <b>input / output / cache</b> tokens per session, with <b>control</b> (plain Claude Code) as the baseline. Optimizers do little on small sessions; the savings show up as sessions get long — and it's mostly <b>cache</b> tokens that move.")}</p>
     ${bandsHtml}
-    <h2>Per-task detail</h2>
-    <p class="sub">Expand a tool for its cost reduction and adoption on each task, plus the mean
-       <b>input / output / cache</b> tokens it used — so you can see exactly how big each session is.</p>
+    <h2>${t("perTaskH2","Per-task detail")}</h2>
+    <p class="sub">${t("perTaskP",
+      "Expand a tool for its cost reduction and adoption on each task, plus the mean <b>input / output / cache</b> tokens it used — so you can see exactly how big each session is.")}</p>
     ${perTask}`;
 
-  document.getElementById("foot").innerHTML =
-    `Generated from <code>results.json</code> (every raw per-run measurement is in that file). ` +
-    `Long-session tasks: ${d.headline_n_tasks} of ${ (d.tasks||[]).length } total. THOL is open-source and re-runnable end to end.`;
+  document.getElementById("foot").innerHTML = tf("foot",
+    "Generated from <code>results.json</code> (every raw per-run measurement is in that file). Long-session tasks: {n} of {total} total. THOL is open-source and re-runnable end to end.",
+    {n:d.headline_n_tasks, total:(d.tasks||[]).length});
+}
+
+function render(){
+  document.documentElement.lang = LANG;
+  document.getElementById("lang").value = LANG;
+  applyStatic();
+  const rl=document.getElementById("repolink"); if(rl) rl.href = REPO;
+  renderTools();
+  if(RESULTS) renderTables(RESULTS);
+}
+
+document.getElementById("lang").addEventListener("change", e=>{
+  LANG = e.target.value;
+  localStorage.setItem("thol_lang", LANG);
+  render();
+});
+
+render();  // static + tools immediately (English source / cached)
+
+fetch("data/results.json").then(r=>r.json()).then(d=>{
+  RESULTS = d;
+  renderTables(d);
 }).catch(e=>{
   document.getElementById("headline").innerHTML =
-    `<div class="banner">Could not load <code>data/results.json</code> yet. ${e}</div>`;
+    `<div class="banner">${tf("errLoad","Could not load <code>data/results.json</code> yet. {e}",{e:e})}</div>`;
 });
 </script>
 </body>
