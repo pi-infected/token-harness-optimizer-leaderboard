@@ -53,21 +53,39 @@
      All runs use the <b>Claude Sonnet</b> model. With more budget we'd like to push this to multi-million-token
      sessions; for now this is the regime we can afford to measure, and we add new tools in batches as budget allows.</p>
 
-  <div id="gsp"></div>
-
   <h2>What we found so far</h2>
   <p class="sub"><b>Used as documented, most of these tools don't beat plain Claude Code — several make it
      more expensive.</b> The dominant reason is <b>adoption</b>: the agent simply doesn't call the optimizer's
      tools often enough for them to pay back their own overhead. A tool that adds a CLI, an MCP server or a
      prompt the agent ignores is pure cost.</p>
-  <p class="sub">We also tried fixing adoption with a <b>generous system prompt</b> — a verbose, per-tool block
-     telling the agent exactly which function to reach for in which situation. It made things <b>worse</b>, not
-     better. For some tools adoption <i>did</i> rise (e.g. token-optimizer-mcp 1%→25%, squeez 0.5%→21%), yet cost
-     still went <b>up</b>: the tools don't pay for themselves even when the agent uses them, and the extra prompt is
-     billed on every turn. (Those "+GSP" arms are kept out of the ranking.)</p>
   <p class="sub">Where any tool does help, it's on <b>long, expensive sessions</b> (see the session-size split
-     above) — never on the short ones. New tools are added over time as token budget allows; this benchmark is
+     below) — never on the short ones. New tools are added over time as token budget allows; this benchmark is
      expensive to run, so the board grows in batches rather than all at once.</p>
+
+  <h2>Why most tools do poorly — despite great compression numbers</h2>
+  <p class="sub">Almost every tool here advertises an impressive reduction (−58%, −90%, even −99%). Those numbers are
+     usually <b>real but narrow</b>: they measure <b>one of the tool's own functions in isolation</b> — its compressor
+     run on a fixed blob, or its search run on a fixed query — under tightly controlled conditions. That is not how an
+     agent behaves on a real task. In real conditions, three things an isolated compression benchmark never sees
+     usually erase the saving or reverse it:</p>
+  <ol class="sub" style="padding-left:22px">
+    <li><b>Adoption is hard, and mis-adoption backfires.</b> Getting a model to actually call an MCP/CLI tool is
+        difficult; getting a <i>net win</i> is harder still, because the tool has to be used <b>in the right
+        context</b>. When it isn't, the agent gets a poor result, falls back to its normal way of working
+        (re-reading, re-searching) — <b>and learns the tool is unhelpful, so it stops calling it</b>. You pay the
+        tokens for the failed call <i>and</i> lose future adoption. (We even tried forcing adoption with a verbose
+        system prompt — it still cost more; see the GSP experiment below.)</li>
+    <li><b>Lossy output compression makes the agent re-fetch.</b> For tools that compress command/CLI output, if the
+        compaction drops the bytes the model actually needed, the model simply <b>re-runs the command</b> — often
+        bypassing the tool — to recover them. Net result: more turns, more tokens, the opposite of the advertised
+        saving.</li>
+    <li><b>Overhead is paid on every turn.</b> Adding an MCP server or a system prompt injects tokens at the
+        <b>start of every conversation</b>, and they are re-counted on <b>every agent turn</b>. Most of these are
+        cache reads, billed at a reduced rate — <b>but still billed</b>. Over a long session this standing cost
+        quietly accumulates, and for a tool the agent rarely uses it is pure loss.</li>
+  </ol>
+  <p class="sub">Together, this is why a tool can headline "−90% tokens" and still make a real session <b>more
+     expensive</b> end to end — which is exactly what THOL measures.</p>
 
   <h2>How to read this</h2>
   <p class="sub"><b>Cost reduction</b> = how much cheaper an optimizer makes a session versus vanilla Claude Code,
@@ -95,6 +113,8 @@
      bootstrap 95% confidence intervals for the headline figures are in <code>results.json</code>.</p>
 
   <div id="detail"></div>
+
+  <div id="gsp"></div>
 
   <h2>Impartiality</h2>
   <p class="sub">This benchmark is maintained by the author of one of the measured tools (tokenade). The conflict is
@@ -181,11 +201,13 @@ fetch("data/results.json").then(r=>r.json()).then(d=>{
       </tr>`;
     }).join("");
     document.getElementById("gsp").innerHTML = `
-      <h2>With a "generous system prompt" (GSP)</h2>
-      <p class="sub">The same long sessions, but each tool runs with a verbose, per-tool system prompt that tells the
-         agent exactly which of its functions to use when. <b>The pill is the change vs the same tool without the
-         prompt</b> (percentage points of cost reduction). It mostly makes things <b>worse</b> — the prompt is billed
-         every turn and the tools still don't pay for themselves. (Tools without a GSP arm are omitted.)</p>
+      <h2>Can a "generous system prompt" (GSP) fix it?</h2>
+      <p class="sub">Following on from reason #1 above: we tried to <b>force adoption</b>. Each tool is re-run on the
+         same long sessions with a verbose, per-tool system prompt telling the agent exactly which of its functions to
+         use when. <b>The pill is the change vs the same tool without the prompt</b> (percentage points of cost
+         reduction). For some tools adoption <i>did</i> rise (e.g. token-optimizer-mcp 1%→25%, squeez 0.5%→21%), yet
+         it mostly made cost <b>worse</b>: the prompt is billed every turn and the tools still don't pay for
+         themselves even when used. (Hook/prompt tools, and tools without a GSP arm, are omitted.)</p>
       <div class="card"><table>
         <thead><tr><th class="num">#</th><th>Optimizer</th>
           <th class="num">mean cost reduction</th><th class="num">adoption</th>
