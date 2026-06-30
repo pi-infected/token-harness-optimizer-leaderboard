@@ -364,7 +364,7 @@ document.getElementById("lang").addEventListener("change", e=>{
 
 render();  // static + tools immediately (English source / cached)
 
-fetch("data/results.json").then(r=>r.json()).then(d=>{
+fetch("data/results.json", {cache: "no-cache"}).then(r=>r.json()).then(d=>{
   RESULTS = d;
   renderTables(d);
 }).catch(e=>{
