@@ -9,16 +9,16 @@
 <style>
   :root{--bg:#0d0f14;--card:#161a22;--card2:#1c212b;--ink:#e9ecf3;--mut:#a6afc0;
         --line:#272d3a;--good:#3fb950;--warn:#d29922;--bad:#f85149;--accent:#6cb0ff;
-        --prose:43rem;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.22)}
+        --prose:100%;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.22)}
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
   body{margin:0;color:var(--ink);
        background:radial-gradient(1100px 520px at 50% -8%,#19222f 0%,var(--bg) 58%) no-repeat,var(--bg);
-       font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       font:16px/1.72 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
        -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   ::selection{background:rgba(108,176,255,.28)}
-  .wrap{max-width:1000px;margin:0 auto;padding:46px 22px 96px}
-  /* prose stays a comfortable measure; data tables run full width */
+  .wrap{max-width:860px;margin:0 auto;padding:46px 22px 96px}
+  /* prose fills the column; wide tables scroll horizontally on small screens */
   h1{font-size:clamp(30px,4.6vw,42px);line-height:1.1;margin:0 0 12px;font-weight:800;letter-spacing:-.022em;
      background:linear-gradient(176deg,#fff 8%,#aecbf3);-webkit-background-clip:text;background-clip:text;color:transparent}
   h2{font-size:23px;font-weight:750;letter-spacing:-.012em;margin:52px 0 14px;padding-top:22px;
@@ -26,14 +26,22 @@
   h3{font-size:14px;font-weight:700;color:var(--ink);margin:0;text-transform:uppercase;letter-spacing:.03em}
   p,ol,ul{max-width:var(--prose)}
   a{color:var(--accent);text-decoration:none;text-underline-offset:2px} a:hover{text-decoration:underline}
-  .sub{color:var(--mut);margin:0 0 18px}
-  .sub b,.sub strong,.meta b,p b{color:var(--ink);font-weight:650}
-  .lead{font-size:18.5px;line-height:1.6;color:#cfd6e3;max-width:46rem;margin-bottom:26px}
+  .sub{color:var(--mut);margin:0 0 20px}
+  .sub b,.sub strong,.meta b,p b,li b{color:var(--ink);font-weight:650}
+  .lead{font-size:18.5px;line-height:1.62;color:#cfd6e3;max-width:none;margin-bottom:28px}
+  /* definition-style lists for the dense "what this shows / how to read" blocks */
+  ul.defs{list-style:none;padding:0;margin:2px 0 22px}
+  ul.defs>li{color:var(--mut);padding:13px 0;border-bottom:1px solid var(--line)}
+  ul.defs>li:first-child{padding-top:2px}
+  ul.defs>li:last-child{border-bottom:none}
+  .stack>p{margin:0 0 14px} .stack>p:last-child{margin-bottom:0}
   .banner{border:1px solid var(--warn);background:rgba(210,153,34,.1);
           color:#f0d28a;padding:11px 15px;border-radius:10px;margin:0 0 22px;font-size:14px;max-width:var(--prose)}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-        box-shadow:var(--shadow);overflow:hidden;margin:0 0 10px}
-  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14.5px}
+        box-shadow:var(--shadow);overflow-x:auto;overflow-y:hidden;
+        -webkit-overflow-scrolling:touch;margin:0 0 10px}
+  .card::-webkit-scrollbar{height:8px} .card::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14.5px;min-width:600px}
   thead th{background:linear-gradient(180deg,var(--card2),var(--card));border-bottom:1px solid var(--line)}
   th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line)}
   th{color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.055em}
@@ -95,23 +103,28 @@
 
   <div id="banner"></div>
   <div id="headline">Loading results…</div>
-  <p class="sub" style="margin-top:14px" data-i18n="whatShows"><b>What this table shows.</b> How much each tool changes the cost of a
-     coding session versus plain Claude Code, on <b>long sessions only</b> — tasks where vanilla Claude Code burns
-     more than <b>200,000 tokens</b>. A <b>positive number means cheaper</b>; negative means more expensive.
-     <b>Why long sessions:</b> most real work with a coding agent is long and multi-step; short throwaway tasks
-     aren't representative — every tool lands on the same near-zero cost there, so only fixed overhead shows.
-     All runs use the <b>Claude Sonnet</b> model. With more budget we'd like to push this to multi-million-token
-     sessions; for now this is the regime we can afford to measure, and we add new tools in batches as budget allows.</p>
+  <div class="sub stack" style="margin-top:14px" data-i18n="whatShows">
+     <p><b>What this table shows.</b> How much each tool changes the cost of a coding session versus plain
+        Claude Code, on <b>long sessions only</b> — tasks where vanilla Claude Code burns more than
+        <b>200,000 tokens</b>. A <b>positive number means cheaper</b>; negative means more expensive.</p>
+     <p><b>Why long sessions:</b> most real work with a coding agent is long and multi-step; short throwaway
+        tasks aren't representative — every tool lands on the same near-zero cost there, so only fixed overhead shows.</p>
+     <p>All runs use the <b>Claude Sonnet</b> model. With more budget we'd like to push this to
+        multi-million-token sessions; for now this is the regime we can afford to measure, and we add new
+        tools in batches as budget allows.</p></div>
 
   <h2 data-i18n="readH2">How to read this</h2>
-  <p class="sub" data-i18n="readP"><b>Cost reduction</b> = how much cheaper an optimizer makes a session versus vanilla Claude Code,
-     in end-to-end USD, geometric-mean-aggregated across tasks (so no single task dominates). <b>Positive = cheaper,
-     negative = more expensive; 0% = no difference</b>, with <b>control</b> (vanilla Claude Code) sat at the 0% line.
-     <b>Adoption</b> = share of runs in which the agent actually invoked the optimizer's tools — a tool the agent
-     never calls cannot save anything. It's shown as <b>N/A</b> for tools the agent doesn't explicitly call: rtk acts
-     via an automatic hook, and prompt/context ones (lean-ctx, claude-token-efficient) are just text. (tokenade also
-     has a hook, but it additionally exposes CLI functions — map, skeleton, query, exec… — the agent calls by hand,
-     so its adoption counts those.) Every raw per-run measurement is in <code>results.json</code> for your own analysis.</p>
+  <div class="sub" data-i18n="readP"><ul class="defs">
+     <li><b>Cost reduction</b> = how much cheaper an optimizer makes a session versus vanilla Claude Code, in
+        end-to-end USD, geometric-mean-aggregated across tasks (so no single task dominates). <b>Positive =
+        cheaper, negative = more expensive; 0% = no difference</b>, with <b>control</b> (vanilla Claude Code)
+        sat at the 0% line.</li>
+     <li><b>Adoption</b> = share of runs in which the agent actually invoked the optimizer's tools — a tool the
+        agent never calls cannot save anything. It's shown as <b>N/A</b> for tools the agent doesn't explicitly
+        call: rtk acts via an automatic hook, and prompt/context ones (lean-ctx, claude-token-efficient) are
+        just text. (tokenade also has a hook, but it additionally exposes CLI functions — map, skeleton, query,
+        exec… — the agent calls by hand, so its adoption counts those.)</li>
+     <li>Every raw per-run measurement is in <code>results.json</code> for your own analysis.</li></ul></div>
 
   <h2 data-i18n="foundH2">What we found so far</h2>
   <p class="sub" data-i18n="foundP1"><b>Used as documented, most of these tools don't beat plain Claude Code — several make it
