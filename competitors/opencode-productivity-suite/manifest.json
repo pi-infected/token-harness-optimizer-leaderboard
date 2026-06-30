@@ -1,0 +1,12 @@
+{
+  "name": "opencode-productivity-suite",
+  "display_name": "OpenCode Productivity Suite",
+  "verified": false,
+  "upstream": "https://github.com/Rene-Kuhm/opencode-productivity-suite",
+  "install_doc": "curl -L https://raw.githubusercontent.com/Rene-Kuhm/opencode-productivity-suite/main/deploy/production-setup.ps1 | powershell",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "PowerShell-based development productivity suite targeting opencode. NOT a token optimizer in any meaningful sense: no compression hooks, no plugin API usage, no request interception. Contains: framework detection scripts (38+ frameworks via PS1 automation), slash commands (/analyze-codebase, /suggest-patterns, /backend-expert, /tailwind-hacker), CLAUDE.md-style prompt templates per framework, a team dashboard with 'Zero Defect' gamification metrics, and CI/CD config templates. Token reduction claims (60-80%) appear in a static metrics table in README with no benchmark data or mechanism. No opencode plugin code found. Windows-first (PowerShell), no Unix-native install path. Not relevant as a token optimizer.",
+  "requires": ["powershell"],
+  "setup_commands": ["curl -L https://raw.githubusercontent.com/Rene-Kuhm/opencode-productivity-suite/main/deploy/production-setup.ps1 | powershell"]
+}

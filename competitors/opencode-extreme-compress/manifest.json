@@ -1,0 +1,15 @@
+{
+  "name": "opencode-extreme-compress",
+  "display_name": "OpenCode Extreme Compress",
+  "verified": false,
+  "upstream": "https://github.com/mifdlaldev/opencode-extreme-compress",
+  "install_doc": "git clone https://github.com/mifdlaldev/opencode-extreme-compress.git && cd opencode-extreme-compress && bun install && bun run build && ./scripts/install.sh",
+  "version_pin": "v0.3.5",
+  "version_checked": "2026-06-30",
+  "notes": "OpenCode plugin with 3-layer compression: L1=tool-output truncation (head/tail, 200+50 lines, 100KB cap); L2=regex comment stripping from .ts/.js/.py files (not tree-sitter); L3=LLM-based semantic summarizer triggered after N turns (medium+ modes only, requires separate LLM call). Mode ladder: off/shadow/light/medium/extreme. Light is default (L1+L2 only, no LLM call). JSONC config at ~/.config/opencode/extreme-compress.jsonc with per-model mode profiles. Includes standalone TUI (packages/tui) for real-time stats monitoring (reads ~/.config/opencode/extreme-compress-stats.jsonl). Anti-hallucination charter: 6 principles + 15 blocking tests (never lose paths/identifiers/numbers, fail-safe=no-compression, marker on truncation). Cache-safe: never rewrites conversation history; only mutates tool output in-place via tool.execute.after and experimental.chat.messages.transform hooks. Target: OpenCode only. Claimed 40-92% reduction, but self-admits 'measured in unit tests — real-session benchmarks pending'. L4 reference-based dedup (SQLite) not yet implemented.",
+  "requires": ["bun"],
+  "setup_commands": ["bun install", "bun run build", "./scripts/install.sh"],
+  "settings": {
+    "config_path": "~/.config/opencode/extreme-compress.jsonc"
+  }
+}

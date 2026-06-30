@@ -1,0 +1,16 @@
+{
+  "name": "nim-guard",
+  "display_name": "nim-guard",
+  "verified": false,
+  "upstream": "https://github.com/sakthiaswin/nim-guard",
+  "install_doc": "npm install -g nim-guard && nim-guard",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Node.js OpenAI-compatible HTTP proxy purpose-built for NVIDIA NIM free-tier rate limits. Two mechanisms: (1) Rate limiting — token-bucket limiter (queue-and-wait, never reject) enforces per-model RPM+TPM caps with 5% safety margin; model fallback chain on 429 with cooldown tracking. (2) Payload compression — pure string ops on message history before forwarding: collapseBlankLines, trimTrailingWhitespace, truncate messages >12k chars (head 4k + tail 4k + cut marker), dedupe back-to-back identical tool results (sig = tool_call_id+length+prefix). Always preserves last 2 messages untouched. CACHE-BREAKING: rewrites prior message content in-flight. Target: OpenCode (ships a ready-to-paste opencode.jsonc with 35 NIM models). No Claude Code support — NIM proxy only, no hooks, no MCP. Compression is minimal/generic (no format-aware compactors, no code/diff/log routing).",
+  "requires": ["node>=18"],
+  "setup_commands": [
+    "npm install",
+    "cp .env.example .env  # set NIM_API_KEY",
+    "node src/server.js"
+  ]
+}

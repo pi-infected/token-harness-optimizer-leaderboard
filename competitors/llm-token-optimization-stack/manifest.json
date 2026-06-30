@@ -1,0 +1,17 @@
+{
+  "name": "llm-token-optimization-stack",
+  "display_name": "LLM Token Optimization Stack",
+  "verified": false,
+  "upstream": "https://github.com/dinoudon/llm-token-optimization-stack",
+  "install_doc": "Docs-only — see README.md for per-tool install instructions (RTK, th0th, Caveman, ContextGate, token-optimizer-mcp)",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Zero-code documentation-only repo (~0 original implementation). Curates a 5-layer stack of third-party tools: Layer 1 = RTK (CLI proxy, 60-90%), Layer 2 = th0th (semantic search MCP server returning top 3-5 files, 98%), Layer 3 = Caveman (system-prompt terse-output instructions, 70%), Layer 4 = ContextGate (YAML-profile API-response field stripper, 60-90%), Layer 5 = token-optimizer-mcp (MCP caching/dedup, 95%). Claims 80% total token reduction and 80% fewer hallucinations with benchmarks self-reported. No original compression code. Targets Claude Code + OpenCode. CACHE-SAFETY: varies per tool (RTK = cache-safe hook proxy; th0th = selective context injection = cache-safe; Caveman = system prompt injection = cache-breaking on first turn only; ContextGate = middleware field stripping = cache-safe; token-optimizer-mcp = dedup cache = cache-safe).",
+  "requires": ["rust (RTK)", "node>=18 (th0th/token-optimizer-mcp)", "docker (ContextGate, optional)"],
+  "setup_commands": [
+    "cargo install rtk",
+    "curl -fsSL https://raw.githubusercontent.com/S1LV4/th0th/main/install.sh | bash",
+    "npm install -g @ooples/token-optimizer-mcp",
+    "docker run -d -p 8001:8001 contextgate/contextgate"
+  ]
+}

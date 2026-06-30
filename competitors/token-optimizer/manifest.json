@@ -1,0 +1,15 @@
+{
+  "name": "token-optimizer",
+  "display_name": "token-optimizer",
+  "verified": false,
+  "upstream": "https://github.com/edisonaugusthy/token-optimizer",
+  "install_doc": "npm install -g token-optimizer && token-optimizer install\n# or: npx token-optimizer install\n# macOS/Linux one-liner: curl -fsSL https://raw.githubusercontent.com/edisonaugusthy/token-optimizer/main/install.sh | bash",
+  "version_pin": "0.2.1",
+  "version_checked": "2026-06-30",
+  "notes": "opencode TypeScript plugin + MCP stdio server. Cache-safe: hooks tool.execute.after, never rewrites history. Six hook surfaces: (1) tool.definition — slims built-in tool descriptions + truncates verbose param descriptions; (2) tool.execute.before — line-range edit expansion (model writes oldString as '55-64' instead of pasting lines) + sub-agent task prompt compaction (strips AGENTS.md boilerplate, long XML blocks); (3) tool.execute.after — bash filters (git/cargo/pytest/eslint/tsc/ruff/go/brew/make/xcode/curl/docker/kubectl + generic; 30+ command families), read output (path relativization + strip XML boilerplate + footer strip + gitignore filtering), edit confirmations → 'OK', webfetch noise removal, task result wrapper strip, glob grouping by dir, grep per-file capping, browser/computer-use output compaction, MCP output (strips fp/sp/bt/embedding/rank/score fields); (4) experimental.chat.messages.transform — token-budget history trimming (priority-weighted, protects last 3 turns, stubs old low-priority results); (5) experimental.chat.system.transform — strips <example> blocks from system prompt, deduplicates system sections, appends brevity instruction; (6) MCP server mode (filter_output tool, agent-agnostic). gitignore-aware: filters grep/glob results through .gitignore before sending to model.",
+  "requires": ["node>=18", "opencode"],
+  "setup_commands": [
+    "npm install -g token-optimizer",
+    "token-optimizer install"
+  ]
+}

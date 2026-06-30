@@ -1,0 +1,25 @@
+{
+  "name": "copium",
+  "display_name": "Copium",
+  "verified": false,
+  "upstream": "https://github.com/iKislay/copium",
+  "install_doc": "pip install copium-ai",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Python+Rust MCP/HTTPS proxy that intercepts LLM requests mid-flight and compacts message history before it reaches the model. Core compaction pipeline: ContentRouter → CodeAwareCompressor (tree-sitter AST-preserving, tier-1: Python/JS/TS; tier-2: Go/Rust/Java/C/C++) + DiffCompressor (Rust, hunk-aware, max-context-lines=2) + LogCompressor (Rust, format-aware: pytest/npm/cargo/make/jest, conservative dedupe) + SmartCrusher (Rust/PyO3, JSON array row-drop with CCR sentinel) + KompressCompressor (ML text compression, optional [ml] extra). KV-cache-aware transform detects backend precision and scales compression aggressiveness to avoid the precision cliff. ReadLifecycle transform detects stale (file edited post-Read) and superseded (re-Read later) Read outputs and replaces them with compact CCR markers — claims 75% of Read bytes fall in these categories. CCR (Compress-Cache-Retrieve): compressed content is stored with a hash; injected copium_retrieve tool lets the model ask for full content back (reversible). Chain-of-draft output control injects terse-output system-prompt instruction (~20-40% output savings). VerbosityLearn mines session transcripts for behavioral signals (interrupts, fast-skips) and auto-tunes terse level per-user. AutoBatch routes eligible requests to provider Batch APIs (50% discount). MCP proxy mode: transparent proxy in front of upstream MCP servers — compacts tool descriptions (70-90%), schemas (~57%), responses (60-95%), progressive disclosure. SharedContext: SQLite-backed cross-agent compressed context with semantic search, conflict resolution, framework integrations (CrewAI/LangGraph/AutoGen). lean-ctx integration: downloads and manages lean-ctx binary. Hooks: PreCompact/PostCompact Claude Code hooks for auto-compaction interception. CACHE-SAFETY: modifies message history in-flight (rewrites prior turns) — CACHE-BREAKING by design. Targets: Claude Code, Cursor, Codex, OpenCode, Gemini, any OpenAI-compatible proxy.",
+  "requires": ["python>=3.10", "rust (for _core extension, maturin)"],
+  "setup_commands": [
+    "pip install copium-ai",
+    "copium proxy install",
+    "copium mcp proxy install"
+  ],
+  "mcp": "copium mcp proxy serve",
+  "settings": {
+    "hooks": {
+      "PreToolUse": "copium hook pre",
+      "PostToolUse": "copium hook post",
+      "PreCompact": "copium hook pre-compact",
+      "PostCompact": "copium hook post-compact"
+    }
+  }
+}

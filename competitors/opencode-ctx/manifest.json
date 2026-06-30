@@ -1,0 +1,16 @@
+{
+  "name": "opencode-ctx",
+  "display_name": "OpenCode CTX",
+  "verified": false,
+  "upstream": "https://github.com/iamtheavoc1/opencode-ctx",
+  "install_doc": "cd ~/.local/share && git clone https://github.com/iamtheavoc1/opencode-ctx.git && cd opencode-ctx && bun install",
+  "version_pin": "v0.5.1",
+  "version_checked": "2026-06-30",
+  "notes": "OpenCode plugin with 9 deterministic transforms across 2 hook points. chat.params hook: (1) tool-description compression (replaces opencode's 21 verbose tool definitions with dense schemas); (2) system-prompt compression (removes examples/verbose sections from provider prompt, signature-matched against ANTHROPIC_SIGNATURE); (3) oh-my-openagent prompt compression; (4) compaction-prompt swap; (5) optional caveman output style (lite/full/ultra via env var). experimental.chat.messages.transform hook: (6) lossless ANSI/progress-bar cleanup; (7) stale tool-output cap (>600B, older than 3 turns, head300+tail150 keep); (8) superseded-read collapse (earlier reads of same file replaced with pointer); (9) Anthropic 1h cache TTL upgrade (promotes cache breakpoint from 5m→1h on last safe assistant turn). Cache-safe: all transforms are pure deterministic functions; never rewrites/reorders messages; prefix cache stays stable across turns. Target: OpenCode only (Anthropic + OpenAI gpt-5.4-mini confirmed). Live benchmarks: Anthropic -38-41% (10-turn tool-heavy 334k→198k), OpenAI gpt-5.4-mini -45-50% (5-turn tool-heavy 112k→56k). 84+ live benchmark runs documented in bench/.",
+  "requires": ["bun"],
+  "setup_commands": ["bun install"],
+  "settings": {
+    "opencode_config": "~/.config/opencode/opencode.json",
+    "env_vars": ["OPENCODE_CTX_PLUGIN", "OPENCODE_CTX_TRIM", "OPENCODE_CTX_MSGS", "OPENCODE_CTX_CAVEMAN", "OPENCODE_CTX_TTL", "OPENCODE_CTX_DEBUG"]
+  }
+}

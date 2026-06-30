@@ -1,0 +1,12 @@
+{
+  "name": "opencode-context-filter",
+  "display_name": "OpenCode Context Filter Proxy",
+  "verified": false,
+  "upstream": "https://github.com/gunnarnordqvist/opencode-context-filter",
+  "install_doc": "git clone https://github.com/gunnarnordqvist/opencode-context-filter.git && cd opencode-context-filter && ./scripts/install.sh",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "HTTP reverse proxy (Python 3.6+, stdlib only, localhost:11435→Ollama:11434) that intercepts /v1/chat/completions and applies regex stripping to system prompt for small models (llama3.2:1b, qwen2.5:1.5b). Removes: <project> repo tree (10-50k tokens), full <env> section, AGENTS.md and instruction files. Replaces with minimal <env> stub. NOT cache-safe: destructively rewrites request body in-flight before model sees it. Target: OpenCode + Ollama local-only deployments with sub-2B models. Claimed 99% context reduction (45k→200 tokens) and 8x inference speedup. No external deps, single-threaded (~10 req/s). Model list and ports are hardcoded in source. Niche: local small-model use case only, not relevant to hosted API token optimization. Wrapper script starts proxy via nohup before launching OpenCode.",
+  "requires": ["python3"],
+  "setup_commands": ["./scripts/install.sh"]
+}

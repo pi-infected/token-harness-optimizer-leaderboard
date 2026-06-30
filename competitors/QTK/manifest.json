@@ -1,0 +1,15 @@
+{
+  "name": "qtk",
+  "display_name": "QTK (Qalarc Token Killer)",
+  "verified": false,
+  "upstream": "https://github.com/qalarc/QTK",
+  "install_doc": "cd /path/to/your/opencode-project && bun add @qalarc/qtk-plugin\n# then add to .opencode/opencode.jsonc: { \"plugin\": [\"@qalarc/qtk-plugin\"] }\n# Optional Rust sidecar (heavy parsers): download qtk-core binary from GitHub Releases",
+  "version_pin": "0.3.1",
+  "version_checked": "2026-06-30",
+  "notes": "opencode-only TypeScript plugin (tool.execute.after hook). Cache-safe: rewrites tool OUTPUT only, never conversation history. 9 built-in TS compressors (git-status, git-log, ls, rg/grep, pytest, cargo, read-tool, grep-tool, glob-tool) + user TOML DSL filters (RTK-compatible format, hot-reload, fail-open per-file) + optional Rust sidecar qtk-core for heavy parsers (JUnit XML, terraform plan, kubectl -o yaml/json, cargo --message-format=json). DSL pipeline: pass_through_if → strip → dedupe → match → group_by → template → header/footer → truncate. Session dedup cache (SHA-256). Circuit breaker (auto-disable after 3 failures). Savings exporter to .opencode/qtk-savings.json for gmux/Tauri/PWA dashboards. Explicitly downstream of RTK; imports RTK filter corpus via scripts/import-rtk-filters.ts.",
+  "requires": ["bun", "opencode"],
+  "setup_commands": [
+    "bun add @qalarc/qtk-plugin",
+    "# Edit .opencode/opencode.jsonc to add plugin"
+  ]
+}

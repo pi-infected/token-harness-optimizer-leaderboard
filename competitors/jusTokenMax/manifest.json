@@ -1,0 +1,15 @@
+{
+  "name": "justokenmax",
+  "display_name": "jusTokenMax",
+  "verified": false,
+  "upstream": "https://github.com/Kalmantic/jusTokenMax",
+  "install_doc": "pip install justokenmax\n# Hook into Claude Code:\njustokenmax install\n# MCP proxy usage:\njustokenmax proxy -- npx -y some-mcp-server",
+  "version_pin": "0.4.0",
+  "version_checked": "2026-06-30",
+  "notes": "Python toolkit. Multi-surface: (1) Claude Code hooks (PreToolUse/Stop) for attachment optimization at read time; (2) MCP stdio proxy that compresses tools/call results and trims tools/list descriptions from any downstream MCP server. Cache-safe: compresses tool OUTPUT and file attachments, never rewrites history. Key compressors: lockfile→name@version table (npm/yarn/pnpm/poetry/cargo/gemfile), minified-asset stub, diff compression (elides lockfile/generated/dist sections), log compression (ANSI strip + volatile-prefix dedup + signature-based grouping of repeated errors + stack-frame folding), code outline (per-language symbol extraction), delta reads (unified diff on re-read instead of full file), image downscaling (Pillow), PDF→Markdown (pypdf). Skills: cache-align (prompt-prefix stability discipline), terse-output (output token reduction guide), code-index, chat-branch, attachments. discover command surveys Claude Code history (~/.claude/projects/**/*.jsonl) for recoverable tokens and unsupported-ext backlog.",
+  "requires": ["python>=3.9", "pypdf>=4.0", "Pillow>=10.0"],
+  "setup_commands": [
+    "pip install justokenmax",
+    "justokenmax install"
+  ]
+}
