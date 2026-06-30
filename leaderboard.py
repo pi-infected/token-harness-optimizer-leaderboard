@@ -55,7 +55,19 @@ TOKEN_BANDS = [(0, 200_000, "0–200k"),
 # misleading 0. NOTE: tokenade is NOT here — although it has a hook, it also
 # exposes explicit CLI functions (map/skeleton/query/exec/…) the agent calls by
 # hand, so its adoption count is meaningful.
-ADOPTION_NA = {"rtk", "claude-token-efficient", "lean-ctx"}
+# Auto tools (hooks, proxy, SessionStart output-shaping, pure prompt) have NO
+# agent-invoked surface: the agent never *calls* them, so an "adoption" count is
+# meaningless (always 0, but that 0 means "nothing to call", not "ignored").
+# Shown as N/A — their cost reduction stands on its own.
+ADOPTION_NA = {"rtk", "claude-token-efficient", "caveman", "ponytail",
+               "squeez", "headroom"}
+
+# Opt-in tools whose compression depends ENTIRELY on the agent choosing to call
+# their MCP/skill. With zero adoption they did nothing the control didn't, so any
+# measured "cost reduction" is pure noise — zero it (like control) and flag it
+# with a star + footnote so the reader knows why.
+OPT_IN_ADOPTION = {"serena", "codegraph", "code-review-graph", "graphify",
+                   "lean-ctx"}
 
 # A "generous system prompt" only makes sense for tools the agent explicitly
 # calls — it teaches the model which function to reach for. Pointless for a
@@ -324,12 +336,19 @@ def compute(ok, gsp, bad):
         lo, hi = boot_aggregate(pairs_big, rng)
         adopt = sum(cd["per_task"][t]["adoption"] for t in big if t in cd["per_task"])
         nrun = sum(cd["per_task"][t]["n"] for t in big if t in cd["per_task"])
+        # An opt-in tool the agent never called did nothing the control didn't;
+        # its measured reduction is noise. Pin it to the zero line (ratio 1.0)
+        # and flag it so the UI can star it + footnote why.
+        zeroed = c in OPT_IN_ADOPTION and adopt == 0
+        if zeroed:
+            ratio = 1.0
         headline.append({
             "competitor": c, "cost_ratio": ratio,
-            "cost_reduction_pct": round((1 - ratio) * 100, 1),
-            "ci_lo_pct": (round((1 - hi) * 100, 1) if hi is not None else None),
-            "ci_hi_pct": (round((1 - lo) * 100, 1) if lo is not None else None),
+            "cost_reduction_pct": 0.0 if zeroed else round((1 - ratio) * 100, 1),
+            "ci_lo_pct": None if zeroed else (round((1 - hi) * 100, 1) if hi is not None else None),
+            "ci_hi_pct": None if zeroed else (round((1 - lo) * 100, 1) if lo is not None else None),
             "adoption": adopt, "n_runs": nrun, "tasks_compared": len(rs),
+            "zeroed_no_adoption": zeroed,
             "tokens": mean_tokens(c, big),
         })
     # control row — the baseline (0% reduction), sorted in at the zero line.

@@ -207,8 +207,12 @@ function renderTables(d){
 
   const naSet = new Set(d.adoption_na||[]);
   const naLabel = t("na","N/A");
+  // Denominators are normalized to a single campaign target so "/54" and "/60"
+  // don't sit side by side; the numerator is rate-scaled to that base.
+  const ADOPT_DENOM = 60;
   const adoptCell = (name, adoption, n) =>
-    name==="control" ? "—" : naSet.has(name) ? naLabel : `${adoption}/${n}`;
+    name==="control" ? "—" : naSet.has(name) ? naLabel :
+    `${n ? Math.round(adoption*ADOPT_DENOM/n) : adoption}/${ADOPT_DENOM}`;
 
   const TH = `<th class="num">#</th><th>${t("thOpt","Optimizer")}</th>
       <th class="num">${t("thRed","mean cost reduction")}</th><th class="num">${t("thAdopt","adoption")}</th>
@@ -224,7 +228,7 @@ function renderTables(d){
     return `<tr${isCtrl?' style="opacity:.85"':''}>
       <td class="num">${i+1}</td>
       <td><b>${e.competitor}</b>${isCtrl?` <span class="pill">${t("baseline","baseline")}</span>`:(c.version?` <span class="pill">${c.version}</span>`:"")}</td>
-      <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}</td>
+      <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}${e.zeroed_no_adoption?'<sup>*</sup>':''}</td>
       <td class="num">${adoptCell(e.competitor, e.adoption, e.n_runs)}</td>
       <td class="num">${kTok(tk.input)}</td>
       <td class="num">${kTok(tk.output)}</td>
@@ -237,6 +241,7 @@ function renderTables(d){
       <thead><tr>${TH}</tr></thead>
       <tbody>${hrows}</tbody>
     </table></div>
+    ${(d.headline||[]).some(e=>e.zeroed_no_adoption) ? `<p class="meta"><sup>*</sup> ${t("headlineStar","These tools have no automatic mode — their compression depends entirely on the agent choosing to call their MCP/skill. With zero adoption they did nothing the baseline didn't, so their cost reduction is shown as 0, like the control.")}</p>` : ""}
     <p class="meta">${tf("headlineMeta",
       "Model <code>{model}</code> · Claude Code <code>{cc}</code> · {n} long task(s), 10 runs each · higher % = cheaper. <b>Every figure here is a mean</b> — cost reduction is averaged across tasks, the token columns are mean tokens per run. <b>The one exception is adoption</b>, which is a count: the number of runs (out of the total) in which the agent actually called the tool.",
       {model:(d.model||[]).join(", "), cc:(d.claude_versions||[]).join(", "), n:d.headline_n_tasks})}</p>`;
