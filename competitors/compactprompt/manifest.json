@@ -1,0 +1,12 @@
+{
+  "name": "compactprompt",
+  "display_name": "CompactPrompt (paper reproduction)",
+  "verified": false,
+  "upstream": "https://github.com/chirindaopensource/compact_prompt_unified_pipeline_prompt_data_compression_LLM_workflows",
+  "install_doc": "Academic reproduction (arXiv 2510.18043, ACM ICAIF 2025). Python pipeline + Jupyter notebook: `pip install -r requirements.txt`, run the notebook against TAT-QA/FinQA/Wikipedia/ShareGPT/arXiv datasets. NOT an agent integration — no hook/proxy/CLI.",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Research-paper reproduction of prompt+data compression methods: HARD PROMPT PRUNING (drop low-importance tokens, LLMLingua family), N-GRAM ABBREVIATION (codebook for frequent n-grams + legend), and numeric QUANTIZATION. Lossy SEMANTIC compression of the prompt itself — cache-breaking (rewrites the prompt) and quality-risky by design; it measures cost-vs-fidelity trade-offs. Not a coding-agent tool; offline batch analysis only.",
+  "requires": [],
+  "setup_commands": []
+}
