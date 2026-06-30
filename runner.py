@@ -285,11 +285,18 @@ def run_one(comp, task, rep, args, cver):
         row["setup_ms"] = int((time.monotonic() - t0) * 1000)
 
         prompt = (task["_dir"] / "prompt.md").read_text()
-        cmd = [CFG["claude_bin"], "-p", prompt,
+        claude_argv = ["-p", prompt,
                "--output-format", "stream-json", "--verbose",
                "--model", args.model,
                "--max-turns", str(task.get("max_turns", 40)),
                "--dangerously-skip-permissions", "--strict-mcp-config"]
+        # `claude_wrap` lets a competitor run Claude Code through its own
+        # auto-proxy/wrapper (e.g. ["headroom","wrap","claude","--"], which
+        # starts the proxy + sets ANTHROPIC_BASE_URL so ALL API traffic is
+        # compacted automatically — the tool's primary mode). Without it the
+        # tool's official Claude binary is invoked directly.
+        wrap = comp.get("claude_wrap")
+        cmd = (wrap + claude_argv) if wrap else ([CFG["claude_bin"]] + claude_argv)
         if comp.get("mcp"):
             mcp_file = base / "mcp.json"
             mcp_file.write_text(json.dumps(comp["mcp"], indent=1))
