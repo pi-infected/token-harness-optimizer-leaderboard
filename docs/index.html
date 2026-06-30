@@ -107,6 +107,11 @@
         <b>start of every conversation</b>, and they are re-counted on <b>every agent turn</b>. Most of these are
         cache reads, billed at a reduced rate — <b>but still billed</b>. Over a long session this standing cost
         quietly accumulates, and for a tool the agent rarely uses it is pure loss.</li>
+    <li data-i18n="whyLi4"><b>Some tools break the context cache.</b> A proxy like Headroom rewrites the growing
+        conversation history on every turn, so the cached prefix no longer matches byte-for-byte. That forces the
+        model to re-read the whole context as <b>fresh input</b> — billed at the full rate instead of the cached
+        rate, which is <b>~10× cheaper</b>. The few tokens its compression saves are dwarfed by the cache it
+        destroys.</li>
   </ol>
   <p class="sub" data-i18n="whyOutro">Together, this is why a tool can headline "−90% tokens" and still make a real session <b>more
      expensive</b> end to end — which is exactly what THOL measures.</p>
