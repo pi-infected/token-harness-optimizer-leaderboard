@@ -1,0 +1,21 @@
+{
+  "name": "tokf",
+  "display_name": "tokf",
+  "verified": false,
+  "upstream": "https://github.com/mpecan/tokf",
+  "install_doc": "cargo install tokf\n# Or via install script:\ncurl -sSf https://tokf.net/install.sh | sh\n# Then add hook to Claude Code settings.json (tokf install-hook)",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Rust CLI proxy + TOML-driven filter library. Works as a shell hook (Claude Code PreToolUse/PostToolUse) that intercepts Bash command output and routes it through per-command TOML filter configs. Cache-safe: compacts tool OUTPUT only, does not rewrite conversation history. Targets Claude Code primarily (hook integration), also usable as a standalone pipe. Filter pipeline: skip/keep regex, dedup (consecutive/windowed), section capture, JSON extraction, tree restructuring, regex replace, Lua escape hatch. User-overridable stdlib filters; server mode for shared use.",
+  "requires": ["tokf"],
+  "setup_commands": [
+    "cargo install tokf",
+    "tokf install-hook"
+  ],
+  "settings": {
+    "hooks": {
+      "PostToolUse": [{"matcher": "Bash", "command": "tokf hook post"}]
+    }
+  },
+  "bash_command_markers": ["tokf "]
+}

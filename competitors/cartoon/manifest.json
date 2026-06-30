@@ -1,0 +1,32 @@
+{
+  "name": "cartoon",
+  "display_name": "Cartoon",
+  "verified": false,
+  "upstream": "https://github.com/abhijitbansal/cartoon",
+  "install_doc": "uv tool install cartoon  # or: pipx install cartoon  # or: npm install -g cartoon-wrap  # or: cargo install cartoon",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Hook + proxy mechanism. PreToolUse hook rewrites matching Bash/run_in_terminal calls to prepend 'cartoon', which compacts noisy dev-loop output (test runners, linters, builds) into TOON format before it reaches the agent. Cache-safe: compacts tool OUTPUT, does not rewrite conversation history. Targets Claude Code (rewrite via updatedInput), VS Code Copilot Chat (deny+suggest), and Copilot CLI ≥1.0.24. Also ships shell shims as a belt-and-suspenders fallback for agents without hooks. Net-savings guard: if the compacted output is not smaller, emits original byte-identically. Adapters for pytest/jest/vitest/ruff/eslint/tsc/etc inject machine-readable formats (--junit-xml, --json) then re-render as compact reports. Raw archive saved to ~/.local/state/cartoon/runs/ with recovery via 'cartoon logs'.",
+  "requires": ["cartoon"],
+  "setup_commands": [
+    "uv tool install cartoon",
+    "cartoon hook install"
+  ],
+  "settings": {
+    "hooks": {
+      "PreToolUse": [
+        {
+          "matcher": "Bash|run_in_terminal",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "command -v cartoon >/dev/null 2>&1 && cartoon hook rewrite || exit 0",
+              "timeout": 10,
+              "statusMessage": "cartoon: checking for auto-wrap"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

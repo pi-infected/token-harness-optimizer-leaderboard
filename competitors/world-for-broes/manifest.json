@@ -1,0 +1,16 @@
+{
+  "name": "world-for-broes",
+  "display_name": "World for Broes",
+  "verified": false,
+  "upstream": "https://github.com/Jarandjar/world-for-broes",
+  "install_doc": "git clone https://github.com/Jarandjar/world-for-broes.git && cd world-for-broes && pip install -r requirements.txt && export OPENAI_API_KEY=<key> && docker run -p 6333:6333 -v ./qdrant_storage:/qdrant/storage qdrant/qdrant",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "RAG-based context injection for GPT/Codex (not Claude Code). Pre-generates ~1k-token subsystem markdown summaries via agent_context_distiller.py, stores them in DuckDB+Qdrant, then retrieves and prepends relevant chunks to prompts via a custom CodexClient wrapper. This is cache-BREAKING: it rewrites input prompts with dynamically retrieved context, invalidating the KV-cache prefix each time the retrieved chunk set changes. Targets OpenAI Codex / GPT-5.1 only; no hooks, no MCP, no Claude Code integration. Mechanism is pre-call retrieval augmentation, not output compaction.",
+  "requires": ["python3", "pip", "docker"],
+  "setup_commands": [
+    "git clone https://github.com/Jarandjar/world-for-broes.git",
+    "cd world-for-broes && pip install -r requirements.txt",
+    "python agent_context_distiller.py <subsystem> --max-files 5"
+  ]
+}

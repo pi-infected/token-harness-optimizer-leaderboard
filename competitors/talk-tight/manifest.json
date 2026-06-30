@@ -1,0 +1,22 @@
+{
+  "name": "talk-tight",
+  "display_name": "Talk Tight",
+  "verified": false,
+  "upstream": "https://github.com/williamrthomas/talk-tight",
+  "install_doc": "# Claude Code (plugin + hooks):\nclaude plugin marketplace add williamrthomas/talk-tight\nclaude plugin install talk-tight@talk-tight\n\n# Any agent (skills only, no hooks):\nnpx skills add williamrthomas/talk-tight\n\n# Claude Code hooks only:\nbash hooks/install.sh",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Prompt/skill compression protocol — targets AI OUTPUT, not tool output. Injects a system-prompt rule at session start (tight-activate.js SessionStart hook) instructing the model to use formal compressed prose (~70% fewer output tokens). Three compression levels: minimal/standard/max. Level changes tracked via UserPromptSubmit hook (tight-mode-tracker.js). Cache-BREAKING on session start (injects into system prompt). Does NOT compact tool call outputs or bash results — purely a prose style protocol. Multi-agent: Claude Code (hooks+plugin), Codex (plugin), Cursor/Copilot/Windsurf/Cline (skills via npx). Skill-based, zero binaries required.",
+  "requires": [],
+  "setup_commands": [
+    "claude plugin marketplace add williamrthomas/talk-tight",
+    "claude plugin install talk-tight@talk-tight"
+  ],
+  "settings": {
+    "hooks": {
+      "SessionStart": [{"command": "node ~/.claude/tight-activate.js"}],
+      "UserPromptSubmit": [{"command": "node ~/.claude/tight-mode-tracker.js"}]
+    }
+  },
+  "claude_md": "Formal compression protocol active. Zero filler. Every word earns its place. Level: standard."
+}

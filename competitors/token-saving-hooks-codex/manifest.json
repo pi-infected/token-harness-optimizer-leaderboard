@@ -1,0 +1,16 @@
+{
+  "name": "token-saving-hooks-codex",
+  "display_name": "token-saving-hooks-codex",
+  "verified": false,
+  "upstream": "https://github.com/aaron-for-value/token-saving-hooks-codex",
+  "install_doc": "git clone https://github.com/aaron-for-value/token-saving-hooks-codex.git\ncd /your/project\nnode /path/to/token-saving-hooks-codex/setup.js          # project-level\nnode /path/to/token-saving-hooks-codex/setup.js --global  # global",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Hook-only package targeting Codex CLI (not Claude Code). Four hooks: (1) UserPromptSubmit — strips EN+ZH filler phrases and normalises whitespace in the user prompt (cache-BREAKING: rewrites conversation input); (2) PreToolUse Bash diff-guard — blocks git diff unless piped through compress-diff.sh; (3) PreToolUse dedup — blocks repeated identical bash commands; (4) Stop quality gate — checks last test output for failures. Does NOT intercept file reads (Codex PreToolUse limitation). No output compaction of tool results — only prompt rewriting and execution guards. Ported from a Claude Code equivalent; explicitly not compatible with Claude Code.",
+  "requires": ["node", "git"],
+  "setup_commands": [
+    "git clone https://github.com/aaron-for-value/token-saving-hooks-codex.git",
+    "node /path/to/token-saving-hooks-codex/setup.js"
+  ],
+  "claude_md": "Use `git diff | bash compress-diff.sh` to reduce token usage. Do not repeat identical bash commands."
+}

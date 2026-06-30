@@ -1,0 +1,14 @@
+{
+  "name": "agentgauge",
+  "display_name": "AgentGauge",
+  "verified": false,
+  "upstream": "https://github.com/synrouter/agentgauge",
+  "install_doc": "npx agentgauge OR npm install -g agentgauge && agentgauge --help",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Read-only diagnostic CLI (no proxy, no hook, no MCP). Reads local Claude Code session logs (~/.claude/projects/**/*.jsonl) and attributes tokens to 8 buckets: system_prompt, tool_definitions, tool_results, history, user_input, assistant_output, cache_read, cache_write. Runs 6 built-in waste detectors (D0–D5): compressible noise in tool output, unused loaded tool definitions, cache-prefix breaks, repeated tool results, oversized tool results, old compactable history. Outputs terminal/HTML/JSON reports with cost and savings estimates. Does NOT compress or modify anything — pure observability. Cache-neutral (no request-layer changes). Targets Claude Code only in v0.1; Codex parser planned for v0.2. Novel: sidechain vs orchestrator split (sub-agent Task turns broken out), detector D2 explicitly surfaces cache-prefix instability. Positioned as free funnel for synrouter.ai which does the actual request-layer compression.",
+  "requires": ["node>=18"],
+  "setup_commands": [
+    "npm install -g agentgauge"
+  ]
+}

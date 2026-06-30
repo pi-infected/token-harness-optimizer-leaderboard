@@ -1,0 +1,18 @@
+{
+  "name": "trimemh",
+  "display_name": "triMemh",
+  "verified": false,
+  "upstream": "https://github.com/justonemorenight/trimemh",
+  "install_doc": "bun install -g trimemh && trimemh install (auto-detects agents) OR trimemh install --target claude-code --with-hooks",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "MCP server providing a local-first, governance-first agent memory system with a 4-stage compression pipeline (ContentRouter → type-specific compression → CacheAligner → CCR). Claims 93% token reduction. ContentRouter dispatches by content type: TypeScript/code → AST signatures only (bodies deferred), logs → variable normalization + dedup, JSON → schema-only, diffs → filenames + change counts, prose → 3-level reversible sentence compression (CCR). CacheAligner wraps output in a fixed XML skeleton to stabilise the KV-cache prefix across turns — explicitly cache-SAFE design. Full originals stored locally in SQLite; agent fetches on demand via memory_retrieve. Cross-agent: Claude Code, Codex, Cursor, Continue, Windsurf, Copilot CLI, Aider. Hooks available (--with-hooks flag). Includes 5 skills (using-trimemh, remember, recall, handoff, session-history) and 7 .claude/commands. Novel: governance RBAC + stale-memory detection (flags removed symbols/changed fingerprints before agent reads stale context).",
+  "requires": ["bun"],
+  "setup_commands": [
+    "bun install -g trimemh",
+    "trimemh install --target claude-code --with-hooks"
+  ],
+  "mcp": {
+    "description": "MCP server exposing tools: memory_context, memory_search, memory_retrieve, memory_propose, memory_feedback, memory_session_close, memory_code_impact, memory_stats"
+  }
+}

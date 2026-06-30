@@ -1,0 +1,13 @@
+{
+  "name": "lossless-prompt-compressor",
+  "display_name": "Lossless Prompt Compressor",
+  "verified": false,
+  "upstream": "https://github.com/wallmage/lossless-prompt-compressor",
+  "install_doc": "No install required. Copy SKILL.md into your Claude Code skills directory. The skill is invoked on demand to compress instruction documents.",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Pure Claude Code skill (prompt-only, no binary, no hook, no MCP). Compresses AI-facing instruction documents (CLAUDE.md, system prompts, agent rules, specs) in 4 progressive passes: Pass 1 strips Markdown formatting (automatic), Pass 2 deduplicates facts and compresses code/JSON blocks (approval-gated), Pass 3 removes human-only scaffolding like tutorials and coaching, Pass 4 full telegram-style rewrite. Operates on static input files before they enter the context, so this is cache-SAFE when applied offline — it reduces the size of persistent CLAUDE.md / system-prompt files that seed every conversation, effectively shrinking the cache-creation cost once rather than per-call. Targets Claude Code (and any agent with a skill runner). Novel: 23 catalogued techniques with before/after examples, section-number preservation, and an approval gate preventing accidental fact loss.",
+  "requires": [],
+  "setup_commands": [],
+  "claude_md": "Copy SKILL.md to your Claude Code skills directory, then invoke via /lossless-prompt-compressor."
+}

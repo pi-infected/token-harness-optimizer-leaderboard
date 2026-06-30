@@ -1,0 +1,22 @@
+{
+  "name": "token-smithers",
+  "display_name": "Token Smithers",
+  "verified": false,
+  "upstream": "https://github.com/shacharbard/token-smithers",
+  "install_doc": "pip install token-smithers\n# Or with learning feature:\npip install \"token-smithers[learning] @ git+https://github.com/shacharbard/token-smithers.git@stable\"\n# Or pipx:\npipx install token-smithers\n# Then configure:\ntoken-smithers setup",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Python MCP proxy that sits between any MCP client and stdio MCP servers. Wraps each backend MCP server subprocess and compresses tool call results + tool schemas (tools/list responses) before they reach the agent. Cache-safe: compacts tool OUTPUT, does not touch conversation history. 17+ compression strategies (whitespace normalizer, null field elider, key aliasing, RLE encoder, path prefix deduplicator, log level filter, error stack compressor, progressive disclosure, graph encoder, YAML transcoder, toon compressor, test output compressor, smart truncation, sentence scorer, AST skeleton, BM25 sentence selector, semantic diff). Also compresses schema tokens at tools/list time (~55% schema savings). Optional cross-session learning (SQLite) + statistical tool reranking. Targets all MCP-speaking agents: Claude Code, Codex, Cursor, Windsurf, Cline. HTTP/remote MCP not yet supported (stdio only).",
+  "requires": ["python3", "pip"],
+  "setup_commands": [
+    "pip install token-smithers",
+    "token-smithers setup"
+  ],
+  "mcp": {
+    "description": "Wrap existing MCP server: replace 'command'/'args' with token-smithers + original cmd",
+    "example": {
+      "command": "token-smithers",
+      "args": ["proxy", "--", "original-mcp-server", "--arg1"]
+    }
+  }
+}

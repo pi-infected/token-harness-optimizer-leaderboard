@@ -1,0 +1,19 @@
+{
+  "name": "lm-resizer",
+  "display_name": "lm-resizer",
+  "verified": false,
+  "upstream": "https://github.com/phuetz/lm-resizer",
+  "install_doc": "cargo build --release  # no crate published; build from source. Then: lm-resizer install --client claude --scope project",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Multi-surface Rust context compression engine. Mechanisms: (1) PostToolUse hook for Claude Code and Codex that captures command output and records savings; (2) 'lm-resizer exec' wrapper for agents to receive filtered output; (3) MCP stdio server exposing compression/retrieval/stats tools; (4) HTTP proxy compressing OpenAI/Anthropic-compatible provider payloads (validated vs Mistral/Ollama/DeepSeek/OpenRouter/Grok). Cache-safe: compacts tool OUTPUT, not conversation history. Targets Claude Code and Codex primarily. Features: JSON minification, log template compression, diff offload, query-aware row retention (biases surviving rows toward current question), CCR offload to SQLite with recovery. Optional ML content classification via Google Magika (ONNX, opt-in build flag). No telemetry. Companions: Code Explorer (codebase map) + lm-resizer + Code Buddy orchestrator.",
+  "requires": ["lm-resizer"],
+  "setup_commands": [
+    "cargo build --release",
+    "lm-resizer install --client all --scope project"
+  ],
+  "mcp": {
+    "command": "lm-resizer",
+    "args": ["mcp"]
+  }
+}

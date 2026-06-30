@@ -1,0 +1,13 @@
+{
+  "name": "trs",
+  "display_name": "trs (Token-Reducing Shell)",
+  "verified": false,
+  "upstream": "https://github.com/dPeluChe/trs",
+  "install_doc": "npm `@dpeluche/trs` (Rust binary). `trs init claude --global` writes a PreToolUse hook to ~/.claude/settings.json that rewrites outbound commands to `trs <cmd>`, plus an output-saver rules block (~/.claude/trs-output-saver.md @import'd into CLAUDE.md). Per-agent init also covers gemini/cursor/opencode/kilo/pi/droid/codex/copilot.",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Rust per-command output compactor (rtk/tokenade category). NOTABLE: programmatic command-rewrite hooks for many agents tokenade only does MCP/wrap for — Cursor (~/.cursor/hooks.json preToolUse + updated_input), VS Code Copilot, Factory Droid (Claude PreToolUse wire format verbatim), Pi (~/.pi/agent/extensions/trs.ts spawnHook), OpenCode/Kilo (plugin templates), Codex>=0.134. Antigravity/Devin = rules-only. Cache-safe (compacts tool output, never rewrites history).",
+  "requires": ["trs"],
+  "setup_commands": ["trs init claude --global"],
+  "bash_command_markers": ["trs "]
+}

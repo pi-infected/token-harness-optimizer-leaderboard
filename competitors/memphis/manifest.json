@@ -1,0 +1,20 @@
+{
+  "name": "memphis",
+  "display_name": "Memphis",
+  "verified": false,
+  "upstream": "https://github.com/chasedputnam/memphis",
+  "install_doc": "go install github.com/chasedputnam/memphis/cmd/memphis@latest  # or: git clone + make build (Go 1.25+)",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "NOT a token compactor. Memphis is a spec-driven Canon authority layer for AI coding agents. Mechanism: typed Markdown artifacts (requirements, decisions, designs, roadmaps, prompts) versioned in Git, validated by a deterministic offline gate ('memphis gate'), served over MCP. PostToolUse hook runs the gate after Write/Edit calls. Does not compact tool output or reduce token count per se — instead structures agent memory so agents ground on authoritative Canon rather than hallucinating or re-deriving decisions. Cache-safe: does not rewrite conversation history; MCP tools inject Canon context into agent requests. Targets Claude Code (PostToolUse hook + MCP) and Kiro (IDE + CLI hooks). Gate is fully offline/deterministic (BCP-14, ISO 29148, EARS validation). Reference tier (optional, for large doc corpora) uses full-text search via Bleve; can optionally use LLM summarization via OpenAI-compatible endpoint or Ollama. Not a competitor to tokenade in the token-compaction sense — it addresses a different problem (authority/memory, not output noise).",
+  "requires": ["memphis"],
+  "setup_commands": [
+    "go install github.com/chasedputnam/memphis/cmd/memphis@latest",
+    "memphis init .",
+    "memphis hooks install --claude"
+  ],
+  "mcp": {
+    "command": "memphis",
+    "args": ["serve", "/abs/path/to/store", "--mcp"]
+  }
+}
