@@ -297,7 +297,9 @@ function renderTables(d){
   }).join("");
 
   // per-task detail: control first, then each tool by rank
-  const order = ["control", ...(d.headline||[]).map(e=>e.competitor)];
+  // control is pinned first; the headline already carries its own control
+  // entry, so drop it from the spread to avoid a duplicate detail row.
+  const order = ["control", ...(d.headline||[]).map(e=>e.competitor).filter(c=>c!=="control")];
   const perTask = order.map(name=>{
     const isCtrl = name==="control";
     const pt = isCtrl ? (d.control_per_task||{}) : (d.competitors[name]?.per_task||{});
