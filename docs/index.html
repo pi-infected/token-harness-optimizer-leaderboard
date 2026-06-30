@@ -67,6 +67,16 @@
      All runs use the <b>Claude Sonnet</b> model. With more budget we'd like to push this to multi-million-token
      sessions; for now this is the regime we can afford to measure, and we add new tools in batches as budget allows.</p>
 
+  <h2 data-i18n="readH2">How to read this</h2>
+  <p class="sub" data-i18n="readP"><b>Cost reduction</b> = how much cheaper an optimizer makes a session versus vanilla Claude Code,
+     in end-to-end USD, geometric-mean-aggregated across tasks (so no single task dominates). <b>Positive = cheaper,
+     negative = more expensive; 0% = no difference</b>, with <b>control</b> (vanilla Claude Code) sat at the 0% line.
+     <b>Adoption</b> = share of runs in which the agent actually invoked the optimizer's tools — a tool the agent
+     never calls cannot save anything. It's shown as <b>N/A</b> for tools the agent doesn't explicitly call: rtk acts
+     via an automatic hook, and prompt/context ones (lean-ctx, claude-token-efficient) are just text. (tokenade also
+     has a hook, but it additionally exposes CLI functions — map, skeleton, query, exec… — the agent calls by hand,
+     so its adoption counts those.) Every raw per-run measurement is in <code>results.json</code> for your own analysis.</p>
+
   <h2 data-i18n="foundH2">What we found so far</h2>
   <p class="sub" data-i18n="foundP1"><b>Used as documented, most of these tools don't beat plain Claude Code — several make it
      more expensive.</b> The dominant reason is <b>adoption</b>: the agent simply doesn't call the optimizer's
@@ -100,16 +110,6 @@
   </ol>
   <p class="sub" data-i18n="whyOutro">Together, this is why a tool can headline "−90% tokens" and still make a real session <b>more
      expensive</b> end to end — which is exactly what THOL measures.</p>
-
-  <h2 data-i18n="readH2">How to read this</h2>
-  <p class="sub" data-i18n="readP"><b>Cost reduction</b> = how much cheaper an optimizer makes a session versus vanilla Claude Code,
-     in end-to-end USD, geometric-mean-aggregated across tasks (so no single task dominates). <b>Positive = cheaper,
-     negative = more expensive; 0% = no difference</b>, with <b>control</b> (vanilla Claude Code) sat at the 0% line.
-     <b>Adoption</b> = share of runs in which the agent actually invoked the optimizer's tools — a tool the agent
-     never calls cannot save anything. It's shown as <b>N/A</b> for tools the agent doesn't explicitly call: rtk acts
-     via an automatic hook, and prompt/context ones (lean-ctx, claude-token-efficient) are just text. (tokenade also
-     has a hook, but it additionally exposes CLI functions — map, skeleton, query, exec… — the agent calls by hand,
-     so its adoption counts those.) Every raw per-run measurement is in <code>results.json</code> for your own analysis.</p>
 
   <h2 data-i18n="methodH2">Method &amp; reproduction</h2>
   <p class="sub" data-i18n="methodP1">Each run is one fully isolated headless Claude Code session (throwaway <code>HOME</code>, throwaway
