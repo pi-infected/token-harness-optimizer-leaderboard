@@ -12,6 +12,7 @@ Isolation model (the host setup is NEVER touched):
 """
 import argparse
 import json
+import socket
 import os
 import re
 import shutil
@@ -157,6 +158,10 @@ def build_env(cfgdir, manifest):
         env.setdefault("PYENV_ROOT", str(pyenv_root))
     env.setdefault("npm_config_cache", str(ROOT / ".cache" / "npm"))
     env.setdefault("UV_CACHE_DIR", str(ROOT / ".cache" / "uv"))
+    # Share the HuggingFace model cache across the throwaway HOMEs so tools that
+    # pull an ONNX/transformer model (e.g. headroom's Kompress compressor) fetch
+    # it once instead of re-downloading per run. Immutable weights → safe to share.
+    env.setdefault("HF_HOME", str(ROOT / ".cache" / "hf"))
     env.update({k: v.replace("${CFG}", str(cfgdir))
                 for k, v in (manifest.get("env") or {}).items()})
     return env
@@ -296,7 +301,22 @@ def run_one(comp, task, rep, args, cver):
         # compacted automatically — the tool's primary mode). Without it the
         # tool's official Claude binary is invoked directly.
         wrap = comp.get("claude_wrap")
-        cmd = (wrap + claude_argv) if wrap else ([CFG["claude_bin"]] + claude_argv)
+        if wrap:
+            # Give each wrapped run its own proxy port so back-to-back runs
+            # never collide on a default fixed port (the failure mode that
+            # rc=1'd most of the first headroom re-bench). `${PORT}` in the
+            # wrap is substituted with a free port.
+            s = socket.socket(); s.bind(("127.0.0.1", 0))
+            free_port = s.getsockname()[1]; s.close()
+            wrap = [t.replace("${PORT}", str(free_port)) for t in wrap]
+            # Keep --strict-mcp-config (in claude_argv): it blocks the heavy MCP
+            # tool-definitions headroom's wrapper auto-registers (serena +
+            # codebase-memory + headroom-retrieve) from bloating the context.
+            # The proxy still compresses traffic in token mode (inline, no
+            # retrieve tool needed) — measured cc -14% on log-needle-zh.
+            cmd = wrap + claude_argv
+        else:
+            cmd = [CFG["claude_bin"]] + claude_argv
         if comp.get("mcp"):
             mcp_file = base / "mcp.json"
             mcp_file.write_text(json.dumps(comp["mcp"], indent=1))

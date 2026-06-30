@@ -17,6 +17,8 @@
   "headroom",
   "wrap",
   "claude",
+  "-p",
+  "${PORT}",
   "--"
  ]
 }
