@@ -1,0 +1,14 @@
+{
+  "name": "headroom",
+  "display_name": "Headroom (headroomlabs-ai)",
+  "upstream": "https://github.com/headroomlabs-ai/headroom",
+  "version_pin": "0.27.0",
+  "version_checked": "2026-06-26",
+  "verified": false,
+  "install_doc": "README: `pip install \"headroom-ai[all]\"` then `headroom mcp install`. THOL installs the pinned PyPI build (`uv tool install \"headroom-ai[all]\"`) and declares the stdio MCP server directly.",
+  "notes": "Compress-Cache-Retrieve MCP server (headroom_compress/retrieve/stats as on-demand tools). Automatic compaction of all traffic needs the separate `headroom proxy` (ANTHROPIC_BASE_URL); THOL runs the MCP-only mode so adoption is measured honestly, not forced.",
+  "requires": ["headroom"],
+  "mcp": {"mcpServers": {"headroom": {"command": "headroom", "args": ["mcp", "serve"]}}},
+  "tool_prefixes": ["mcp__headroom__"],
+  "bash_command_markers": ["headroom "]
+}

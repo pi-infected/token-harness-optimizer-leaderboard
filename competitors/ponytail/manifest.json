@@ -1,0 +1,23 @@
+{
+  "name": "ponytail",
+  "display_name": "Ponytail (DietrichGebert)",
+  "upstream": "https://github.com/DietrichGebert/ponytail",
+  "version_pin": "main",
+  "version_checked": "2026-06-26",
+  "verified": false,
+  "install_doc": "README: Claude Code `/plugin marketplace add DietrichGebert/ponytail` + `/plugin install ponytail@ponytail` (interactive). THOL replicates that non-interactively: it clones the plugin into the sandbox config and wires the same SessionStart/SubagentStart/UserPromptSubmit hooks + skills the plugin ships (hooks/claude-codex-hooks.json).",
+  "notes": "A Claude Code plugin + lifecycle hooks that inject a 'lazy senior dev' persona every turn so the agent writes LESS code (over-building is the waste it targets). Not an MCP server, not an output compressor — it acts on the INPUT/behaviour side. Whether 'write less' keeps task success is what this benchmark measures.",
+  "requires": ["node"],
+  "setup_commands": [
+    "git clone --depth 1 https://github.com/DietrichGebert/ponytail \"$CLAUDE_CONFIG_DIR/ponytail\"",
+    "mkdir -p \"$CLAUDE_CONFIG_DIR/skills\" && cp -r \"$CLAUDE_CONFIG_DIR/ponytail/skills/\"* \"$CLAUDE_CONFIG_DIR/skills/\""
+  ],
+  "settings": {
+    "hooks": {
+      "SessionStart": [{"hooks": [{"type": "command", "command": "node \"${CFG}/ponytail/hooks/ponytail-activate.js\"; exit 0", "timeout": 5}]}],
+      "SubagentStart": [{"hooks": [{"type": "command", "command": "node \"${CFG}/ponytail/hooks/ponytail-subagent.js\"; exit 0", "timeout": 5}]}],
+      "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "node \"${CFG}/ponytail/hooks/ponytail-mode-tracker.js\"; exit 0", "timeout": 5}]}]
+    }
+  },
+  "tool_prefixes": []
+}

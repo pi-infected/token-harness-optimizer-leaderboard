@@ -1,0 +1,13 @@
+{
+  "name": "graphify",
+  "display_name": "Graphify (safishamsi)",
+  "upstream": "https://github.com/safishamsi/graphify",
+  "version_pin": "0.8.49",
+  "version_checked": "2026-06-26",
+  "verified": false,
+  "install_doc": "README: `uv tool install graphifyy` then `graphify install --platform claude` to drop the skill into the agent config. THOL installs the pinned PyPI build and the Claude Code skill at setup; the agent builds/queries the per-repo graph via `graphify` itself.",
+  "notes": "Code-knowledge-graph retrieval. A skill teaches the agent to build `graphify-out/graph.json` (no-LLM extraction) and run `graphify query \"...\"` / `graphify path` / `graphify explain` instead of reading whole files. THOL installs the skill; graph build + queries happen in-session via the `graphify` CLI.",
+  "requires": ["graphify"],
+  "setup_commands": ["graphify install --platform claude"],
+  "bash_command_markers": ["graphify "]
+}

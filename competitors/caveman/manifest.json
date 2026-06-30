@@ -1,0 +1,12 @@
+{
+  "name": "caveman",
+  "display_name": "Caveman (JuliusBrussee)",
+  "upstream": "https://github.com/JuliusBrussee/caveman",
+  "version_pin": "v1.9.0",
+  "version_checked": "2026-06-26",
+  "verified": false,
+  "install_doc": "README: `curl -fsSL .../install.sh | bash`. THOL runs the same Node installer pinned to v1.9.0 for Claude Code: `npx -y github:JuliusBrussee/caveman#v1.9.0 -- --only claude --with-init` (drops the skill + SessionStart hook into the sandbox config).",
+  "notes": "A Claude Code skill + SessionStart hook that makes the agent answer in 'caveman' style (drops filler words) to cut OUTPUT tokens. No MCP, no bash-output wrapper; activated per-session by a hook + the /caveman slash command. Whether terser prose actually preserves answer quality is exactly what this benchmark measures.",
+  "setup_commands": ["npx -y github:JuliusBrussee/caveman#v1.9.0 -- --only claude --with-init"],
+  "tool_prefixes": []
+}
