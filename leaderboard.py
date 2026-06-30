@@ -296,6 +296,16 @@ def compute(ok, gsp, bad):
                 "output": round(st.mean(outs)) if outs else 0,
                 "cache": round(st.mean(cas)) if cas else 0}
 
+    # Opt-in tools the agent never called anywhere in the campaign. Their
+    # measured reduction is noise, so we pin them to the zero line (like
+    # control) and star them — in the headline, the size bands, AND the
+    # per-task detail. One source of truth for all three.
+    zeroed_competitors = {
+        c for c, cd in competitors.items()
+        if c in OPT_IN_ADOPTION
+        and sum(v.get("adoption", 0) for v in cd["per_task"].values()) == 0
+    }
+
     bands = []
     for lo_b, hi_b, label in TOKEN_BANDS:
         bt = sorted(t for t in tasks if lo_b <= task_tokens[t] < hi_b)
@@ -309,8 +319,11 @@ def compute(ok, gsp, bad):
             rs = [cd["per_task"][t]["ratio"] for t in bt
                   if t in cd["per_task"] and cd["per_task"][t].get("ratio")]
             if rs:
+                zc = c in zeroed_competitors
                 rank.append({"competitor": c,
-                             "aggregate_cost_ratio": math.exp(st.mean(list(map(math.log, rs)))),
+                             "aggregate_cost_ratio": 1.0 if zc else
+                             math.exp(st.mean(list(map(math.log, rs)))),
+                             "zeroed_no_adoption": zc,
                              "tasks_compared": len(rs),
                              "tokens": mean_tokens(c, bt)})
         # cheapest-first; control (ratio 1.0 = 0% reduction) sorts into place
@@ -339,7 +352,7 @@ def compute(ok, gsp, bad):
         # An opt-in tool the agent never called did nothing the control didn't;
         # its measured reduction is noise. Pin it to the zero line (ratio 1.0)
         # and flag it so the UI can star it + footnote why.
-        zeroed = c in OPT_IN_ADOPTION and adopt == 0
+        zeroed = c in zeroed_competitors
         if zeroed:
             ratio = 1.0
         headline.append({
@@ -408,6 +421,7 @@ def compute(ok, gsp, bad):
         "headline": headline,
         "headline_gsp": headline_gsp,
         "adoption_na": sorted(ADOPTION_NA),
+        "zeroed_no_adoption": sorted(zeroed_competitors),
         "token_bands": bands,
         # control's per-task token breakdown (the baseline shown in the detail)
         "control_per_task": {t: {

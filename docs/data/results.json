@@ -315,6 +315,12 @@
   "rtk",
   "squeez"
  ],
+ "zeroed_no_adoption": [
+  "code-review-graph",
+  "graphify",
+  "lean-ctx",
+  "serena"
+ ],
  "token_bands": [
   {
    "label": "0\u2013200k",
@@ -333,6 +339,7 @@
     {
      "competitor": "claude-token-efficient",
      "aggregate_cost_ratio": 0.9693966536283807,
+     "zeroed_no_adoption": false,
      "tasks_compared": 6,
      "tokens": {
       "input": 13378,
@@ -343,6 +350,7 @@
     {
      "competitor": "ponytail",
      "aggregate_cost_ratio": 0.9694993998319704,
+     "zeroed_no_adoption": false,
      "tasks_compared": 6,
      "tokens": {
       "input": 13860,
@@ -361,8 +369,42 @@
      }
     },
     {
+     "competitor": "code-review-graph",
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 14514,
+      "output": 3585,
+      "cache": 136303
+     }
+    },
+    {
+     "competitor": "graphify",
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 16068,
+      "output": 4069,
+      "cache": 146174
+     }
+    },
+    {
+     "competitor": "lean-ctx",
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
+     "tasks_compared": 6,
+     "tokens": {
+      "input": 15563,
+      "output": 3561,
+      "cache": 133951
+     }
+    },
+    {
      "competitor": "serena",
-     "aggregate_cost_ratio": 1.0327032792826185,
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
      "tasks_compared": 6,
      "tokens": {
       "input": 14763,
@@ -373,6 +415,7 @@
     {
      "competitor": "tokenade",
      "aggregate_cost_ratio": 1.0360380011258001,
+     "zeroed_no_adoption": false,
      "tasks_compared": 6,
      "tokens": {
       "input": 14372,
@@ -381,28 +424,9 @@
      }
     },
     {
-     "competitor": "code-review-graph",
-     "aggregate_cost_ratio": 1.0425982978474586,
-     "tasks_compared": 6,
-     "tokens": {
-      "input": 14514,
-      "output": 3585,
-      "cache": 136303
-     }
-    },
-    {
-     "competitor": "lean-ctx",
-     "aggregate_cost_ratio": 1.0981898401832688,
-     "tasks_compared": 6,
-     "tokens": {
-      "input": 15563,
-      "output": 3561,
-      "cache": 133951
-     }
-    },
-    {
      "competitor": "codegraph",
      "aggregate_cost_ratio": 1.099537030662286,
+     "zeroed_no_adoption": false,
      "tasks_compared": 6,
      "tokens": {
       "input": 15598,
@@ -413,6 +437,7 @@
     {
      "competitor": "caveman",
      "aggregate_cost_ratio": 1.1165829539011134,
+     "zeroed_no_adoption": false,
      "tasks_compared": 6,
      "tokens": {
       "input": 16576,
@@ -421,18 +446,9 @@
      }
     },
     {
-     "competitor": "graphify",
-     "aggregate_cost_ratio": 1.119054283675063,
-     "tasks_compared": 6,
-     "tokens": {
-      "input": 16068,
-      "output": 4069,
-      "cache": 146174
-     }
-    },
-    {
      "competitor": "rtk",
      "aggregate_cost_ratio": 1.1763669844104772,
+     "zeroed_no_adoption": false,
      "tasks_compared": 6,
      "tokens": {
       "input": 16377,
@@ -443,6 +459,7 @@
     {
      "competitor": "squeez",
      "aggregate_cost_ratio": 1.2203898648556388,
+     "zeroed_no_adoption": false,
      "tasks_compared": 6,
      "tokens": {
       "input": 16349,
@@ -453,6 +470,7 @@
     {
      "competitor": "headroom",
      "aggregate_cost_ratio": 1.5500627565049365,
+     "zeroed_no_adoption": false,
      "tasks_compared": 6,
      "tokens": {
       "input": 26734,
@@ -474,18 +492,9 @@
    "n_tasks": 3,
    "ranking": [
     {
-     "competitor": "graphify",
-     "aggregate_cost_ratio": 0.8781514528537999,
-     "tasks_compared": 3,
-     "tokens": {
-      "input": 14135,
-      "output": 3154,
-      "cache": 205533
-     }
-    },
-    {
      "competitor": "tokenade",
      "aggregate_cost_ratio": 0.8792268064371621,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 15427,
@@ -496,6 +505,7 @@
     {
      "competitor": "caveman",
      "aggregate_cost_ratio": 0.8874050562320663,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 13948,
@@ -504,43 +514,14 @@
      }
     },
     {
-     "competitor": "lean-ctx",
-     "aggregate_cost_ratio": 0.9104167143990289,
-     "tasks_compared": 3,
-     "tokens": {
-      "input": 15364,
-      "output": 3107,
-      "cache": 210017
-     }
-    },
-    {
      "competitor": "claude-token-efficient",
      "aggregate_cost_ratio": 0.9468108831499262,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 15281,
       "output": 3219,
       "cache": 236584
-     }
-    },
-    {
-     "competitor": "serena",
-     "aggregate_cost_ratio": 0.9651322519630021,
-     "tasks_compared": 3,
-     "tokens": {
-      "input": 16195,
-      "output": 3407,
-      "cache": 219320
-     }
-    },
-    {
-     "competitor": "code-review-graph",
-     "aggregate_cost_ratio": 0.9958270832159256,
-     "tasks_compared": 3,
-     "tokens": {
-      "input": 16406,
-      "output": 3583,
-      "cache": 231868
      }
     },
     {
@@ -554,8 +535,53 @@
      }
     },
     {
+     "competitor": "code-review-graph",
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 16406,
+      "output": 3583,
+      "cache": 231868
+     }
+    },
+    {
+     "competitor": "graphify",
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 14135,
+      "output": 3154,
+      "cache": 205533
+     }
+    },
+    {
+     "competitor": "lean-ctx",
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 15364,
+      "output": 3107,
+      "cache": 210017
+     }
+    },
+    {
+     "competitor": "serena",
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 16195,
+      "output": 3407,
+      "cache": 219320
+     }
+    },
+    {
      "competitor": "rtk",
      "aggregate_cost_ratio": 1.0009040385136783,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 19981,
@@ -566,6 +592,7 @@
     {
      "competitor": "ponytail",
      "aggregate_cost_ratio": 1.0147120172341566,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 16191,
@@ -576,6 +603,7 @@
     {
      "competitor": "codegraph",
      "aggregate_cost_ratio": 1.01703612586498,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 16511,
@@ -586,6 +614,7 @@
     {
      "competitor": "squeez",
      "aggregate_cost_ratio": 1.1074108274087924,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 18683,
@@ -596,6 +625,7 @@
     {
      "competitor": "headroom",
      "aggregate_cost_ratio": 1.189216792128731,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 22586,
@@ -619,6 +649,7 @@
     {
      "competitor": "tokenade",
      "aggregate_cost_ratio": 0.7318731525891763,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 21564,
@@ -629,6 +660,7 @@
     {
      "competitor": "caveman",
      "aggregate_cost_ratio": 0.8725496201741099,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 23857,
@@ -639,31 +671,12 @@
     {
      "competitor": "squeez",
      "aggregate_cost_ratio": 0.9135751819429643,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 21969,
       "output": 6687,
       "cache": 426939
-     }
-    },
-    {
-     "competitor": "lean-ctx",
-     "aggregate_cost_ratio": 0.9180373028132534,
-     "tasks_compared": 3,
-     "tokens": {
-      "input": 23829,
-      "output": 7080,
-      "cache": 424799
-     }
-    },
-    {
-     "competitor": "graphify",
-     "aggregate_cost_ratio": 0.9592456322206538,
-     "tasks_compared": 3,
-     "tokens": {
-      "input": 23690,
-      "output": 7910,
-      "cache": 382277
      }
     },
     {
@@ -678,7 +691,8 @@
     },
     {
      "competitor": "code-review-graph",
-     "aggregate_cost_ratio": 1.0160212688487646,
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
      "tasks_compared": 3,
      "tokens": {
       "input": 25647,
@@ -687,8 +701,42 @@
      }
     },
     {
+     "competitor": "graphify",
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 23690,
+      "output": 7910,
+      "cache": 382277
+     }
+    },
+    {
+     "competitor": "lean-ctx",
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 23829,
+      "output": 7080,
+      "cache": 424799
+     }
+    },
+    {
+     "competitor": "serena",
+     "aggregate_cost_ratio": 1.0,
+     "zeroed_no_adoption": true,
+     "tasks_compared": 3,
+     "tokens": {
+      "input": 25938,
+      "output": 9098,
+      "cache": 430425
+     }
+    },
+    {
      "competitor": "claude-token-efficient",
      "aggregate_cost_ratio": 1.0175718687723048,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 25320,
@@ -699,6 +747,7 @@
     {
      "competitor": "codegraph",
      "aggregate_cost_ratio": 1.02297895757676,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 25183,
@@ -707,18 +756,9 @@
      }
     },
     {
-     "competitor": "serena",
-     "aggregate_cost_ratio": 1.0438480958852365,
-     "tasks_compared": 3,
-     "tokens": {
-      "input": 25938,
-      "output": 9098,
-      "cache": 430425
-     }
-    },
-    {
      "competitor": "ponytail",
      "aggregate_cost_ratio": 1.0944109647545812,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 27542,
@@ -729,6 +769,7 @@
     {
      "competitor": "headroom",
      "aggregate_cost_ratio": 1.161126998362037,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 42269,
@@ -739,6 +780,7 @@
     {
      "competitor": "rtk",
      "aggregate_cost_ratio": 1.2256954278752545,
+     "zeroed_no_adoption": false,
      "tasks_compared": 3,
      "tokens": {
       "input": 28230,
