@@ -1,0 +1,12 @@
+{
+  "name": "promptshrink",
+  "display_name": "PromptShrink",
+  "verified": false,
+  "upstream": "https://github.com/civitas-io/promptshrink",
+  "install_doc": "N/A — spec/docs only, implementation not started per README",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "SPEC-ONLY / NOT IMPLEMENTED. Detailed architecture spec for a prompt compression proxy: segments prompts into typed zones (system instructions, few-shot examples, RAG chunks, code blocks) and applies different compression strategies per zone (LLMLingua-2 semantic compression, rule-based filler removal, embedding similarity quality gate). Redis-backed segment cache for static content dedup. Proxy mode (OpenAI-compatible base_url swap) + SDK mode (one-line compress() call). Targets RAG/few-shot/system-prompt compression, NOT agent tool-output compression. Cache-breaking: explicitly compresses INPUT prompts (rewrites content before sending) — would invalidate Anthropic prompt cache if used with Claude. Operates server-side as a proxy. The PRD cites 30-50% reduction target on static content. Part of Civitas/Presidium ecosystem (org-level cost governance).",
+  "requires": [],
+  "setup_commands": []
+}

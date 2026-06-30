@@ -1,0 +1,17 @@
+{
+  "name": "tinker-experiments",
+  "display_name": "Tinker Experiments",
+  "verified": false,
+  "upstream": "https://github.com/mayank-ketkar-sf/tinker-experiments",
+  "install_doc": "pip install -r requirements.txt; export TINKER_API_KEY=<key>",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Prompt distillation research: fine-tunes a small student model (Qwen3-4B via Tinker API LoRA) to internalize a 591-token system prompt, eliminating it at inference time. 85.5% token reduction per query (691→100 tokens), 98.3% cost drop vs teacher model. Mechanism is model weight baking, not runtime hook/compaction — requires fine-tuning infra and is specific to one fixed persona/system-prompt. NOT cache-safe in any Claude Code sense; operates at model training level, not at API/hook level. No hook, no compactor, no CLI integration. Target: any LLM inference workload with a large fixed system prompt (not Claude Code specifically). One-off research experiment, not a deployed tool.",
+  "requires": ["tinker-api-key", "python3", "pip"],
+  "setup_commands": [
+    "pip install -r requirements.txt",
+    "export TINKER_API_KEY=<your_key>",
+    "python src/03_generate_teacher_data.py",
+    "python src/06_train_student_model.py"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "token-slayer",
+  "display_name": "token-slayer",
+  "verified": false,
+  "upstream": "https://github.com/withmewtwo/token-slayer",
+  "install_doc": "N/A — docs-only repo, no installable component",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "DOCS-ONLY. A curated list/README documenting other tools (caveman, rtk, code-review-graph, context-mode, claude-token-optimizer, token-optimizer-mcp, claude-context, token-savior). No implementation. No code. Identifies problem categories (CLAUDE.md bloat, history re-reads, plugin injection, tool schema overhead, log noise). Crypto/Solidity-focused framing but content is generic. Cache-safe: N/A (no implementation).",
+  "requires": [],
+  "setup_commands": []
+}

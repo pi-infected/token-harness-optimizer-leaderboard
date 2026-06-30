@@ -1,0 +1,12 @@
+{
+  "name": "ai-context-optimizer",
+  "display_name": "Cline Token Manager (ai-context-optimizer)",
+  "verified": false,
+  "upstream": "https://github.com/web-werkstatt/ai-context-optimizer",
+  "install_doc": "Download .vsix from releases/beta/, open VS Code → Ctrl+Shift+P → 'Extensions: Install from VSIX'",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "VS Code extension (VSIX) targeting Cline users. Claims 76% token reduction via smart file selection (TF-IDF relevance scoring), cache-explosion prevention (50k hard limit with smart trimming), context compression per file type (TS 85%, Python 82%, JSON 71%, Markdown 65%), and a Python/ML gateway (LLM-style). Also includes a 'Auto-Fix Token Limits' feature that patches Cline's hardcoded 8192 output token cap to match actual model limits (Claude 4 Sonnet → 64k). Has Pro license tier via Freemius. Implementation ships in two compiled .vsix blobs (~11.7 MB each) — source TypeScript not present in repo, only package.json and compiled artifacts. Cache-breaking: operates client-side on file selection/context before sending; does NOT intercept or rewrite conversation history. Target agent: Cline (VS Code extension).",
+  "requires": ["vscode"],
+  "setup_commands": []
+}

@@ -1,0 +1,12 @@
+{
+  "name": "claude-restart-trajectory-analysis",
+  "display_name": "Claude Code Restart Trajectory Analysis",
+  "verified": false,
+  "upstream": "https://github.com/unknown/claude-restart-trajectory-analysis",
+  "install_doc": "N/A — static HTML report with raw payload data files",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "RESEARCH/DATA-ONLY. Static HTML page with 2 before/after payload captures from a Claude Code proxy, quantifying what a session restart clears. Key findings: restart reduces payload 36-73% depending on session depth. Bloat sources identified: (1) Read tool results embedded in-context — large files (131KB _index.tsx, args.rs) stay in conversation history; (2) CLAUDE.md re-injected every request (~53KB in worst case); (3) system-reminder accumulation (<system-reminder> tags for Bash background processes, TodoWrite, malware guidance, file-open notifications); (4) continuation summaries from prior overflow sessions add ~6KB overhead that compounds. Data captured via Claude Code proxy intercepting raw API payloads (model: claude-opus-4-5). No implementation. Cache-safe: N/A.",
+  "requires": [],
+  "setup_commands": []
+}

@@ -1,0 +1,16 @@
+{
+  "name": "agent-integration-patterns",
+  "display_name": "Agent Integration Patterns",
+  "verified": false,
+  "upstream": "https://github.com/Sh0rtC1rcu1t/agent-integration-patterns",
+  "install_doc": "pip install -r requirements.txt && set OPENAI_API_KEY + GITHUB_TOKEN in .env",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Educational benchmark comparing two OpenAI tool-call patterns: 'RPC' (SDK-wrapped function hides pagination/filtering from agent) vs 'REST' (raw HTTP tool, agent must drive all logic). Measures token cost and steps-to-completion for the same GitHub-issues task. No hook, proxy, or compaction layer — this is not a token-optimizer at all. It is a research demo showing that high-level SDK tools reduce agent token consumption vs raw REST calls. Cache-breaking: every run creates a fresh OpenAI conversation with no caching. Target agents: OpenAI gpt-4o-mini only.",
+  "requires": ["OPENAI_API_KEY", "GITHUB_TOKEN"],
+  "setup_commands": [
+    "pip install -r requirements.txt",
+    "cp .env.example .env  # fill OPENAI_API_KEY and GITHUB_TOKEN",
+    "python -m src.main"
+  ]
+}

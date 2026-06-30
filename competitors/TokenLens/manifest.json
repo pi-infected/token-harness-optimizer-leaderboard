@@ -1,0 +1,19 @@
+{
+  "name": "tokenlens",
+  "display_name": "TokenLens",
+  "verified": false,
+  "upstream": "https://github.com/lavanyaashri/TokenLens",
+  "install_doc": "brew install ollama && ollama serve && ollama pull llama3.2 && ollama pull phi3 && git clone https://github.com/lavanyaashri/TokenLens && cd TokenLens && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && python -m uvicorn backend.main:app --reload",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Research/benchmarking web UI tool: compresses text (extractive embedding-based + abstractive LLM summarization via Ollama), scores output with ROUGE-L and semantic similarity, plots quality-vs-compression tradeoff curve across 9 ratios. Operates on documents pasted or uploaded by user — NOT a coding agent hook. Fully local (Ollama), no API keys. NOT cache-safe in the Anthropic sense: has no awareness of Claude context caching. Target: humans researching prompt compression, not coding agents.",
+  "requires": ["ollama", "python3"],
+  "setup_commands": [
+    "brew install ollama",
+    "ollama serve",
+    "ollama pull llama3.2",
+    "ollama pull phi3",
+    "pip install -r requirements.txt",
+    "python -m uvicorn backend.main:app --reload"
+  ]
+}

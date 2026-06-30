@@ -1,0 +1,15 @@
+{
+  "name": "tokenoptimizer",
+  "display_name": "tokenOptimizer",
+  "verified": false,
+  "upstream": "https://github.com/Aarav74/tokenOptimizer",
+  "install_doc": "pip install -r requirements.txt && uvicorn main:app",
+  "version_pin": "main",
+  "version_checked": "2026-06-30",
+  "notes": "Web app (FastAPI + static HTML) that converts JSON arrays to TOON format (columnar CSV-like: 'root[N]{col1,col2}:\\nval,...'). Runs a local server; user pastes JSON into a browser UI and copies the TOON output. No agent integration, no hooks, no CLI proxy — purely a manual conversion tool requiring the user to manually reformat data before sending it to an LLM. Not cache-safe in any meaningful sense: it does not touch the agent pipeline at all. Target: any LLM user who wants to manually compress JSON payloads. Single-commit repo, no releases, no tags.",
+  "requires": ["python3", "fastapi", "uvicorn", "tiktoken", "pydantic"],
+  "setup_commands": [
+    "pip install -r requirements.txt",
+    "uvicorn main:app --reload"
+  ]
+}
