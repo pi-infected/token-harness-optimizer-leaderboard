@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS runs (
   wall_ms INTEGER, setup_ms INTEGER,
   tool_calls INTEGER, competitor_tool_calls INTEGER,
   tool_rounds INTEGER,
+  tokenade_claim_weighted INTEGER,  -- what tokenade's own ledger claims it saved this run
   verify_detail TEXT, error TEXT
 );
 """
@@ -229,6 +230,10 @@ def insert_row(row):
         con.execute("ALTER TABLE runs ADD COLUMN tool_rounds INTEGER")
     except sqlite3.OperationalError:
         pass  # column already present
+    try:
+        con.execute("ALTER TABLE runs ADD COLUMN tokenade_claim_weighted INTEGER")
+    except sqlite3.OperationalError:
+        pass
     cols = ", ".join(row)
     q = f"INSERT OR REPLACE INTO runs ({cols}) VALUES ({','.join('?' * len(row))})"
     con.execute(q, list(row.values()))
@@ -257,6 +262,7 @@ def run_one(comp, task, rep, args, cver):
            "api_duration_ms": None, "wall_ms": None, "setup_ms": 0,
            "tool_calls": None, "competitor_tool_calls": None,
            "tool_rounds": None,
+           "tokenade_claim_weighted": None,
            "verify_detail": None, "error": None}
     try:
         build_workspace(task, ws)
@@ -374,6 +380,12 @@ def run_one(comp, task, rep, args, cver):
             insert_row(row)
             return row
 
+        # Reconciliation: capture what tokenade's OWN ledger claims it saved
+        # on THIS run (weighted, measured only), so a paired analysis can
+        # compare the claim to the real cost delta vs control. Non-tokenade
+        # competitors leave no ledger → stays None. Zero API cost.
+        row["tokenade_claim_weighted"] = read_tokenade_claim(home)
+
         score, vout = run_verify(task, ws, answer_file)
         (art / "verify.txt").write_text(vout)
         if score is None:
@@ -387,6 +399,80 @@ def run_one(comp, task, rep, args, cver):
         (art / "run.json").write_text(json.dumps(row, indent=1))
         if not args.keep_workspaces and base.exists():
             shutil.rmtree(base, ignore_errors=True)
+
+
+def read_tokenade_claim(home):
+    """Weighted measured savings tokenade booked in this run's sandbox HOME
+    (input + cache/10 + output*5). None when there's no tokenade ledger."""
+    led = Path(home) / ".tokenade" / "gain.jsonl"
+    if not led.exists():
+        return None
+    w = 0.0
+    try:
+        for line in led.read_text(errors="replace").splitlines():
+            try:
+                d = json.loads(line)
+            except Exception:
+                continue
+            if d.get("est") is True:
+                continue
+            before = d.get("tokens_before") or 0
+            after = d.get("tokens_after") or 0
+            saved = d.get("saved")
+            saved = (before - after) if saved is None else min(saved, before - after)
+            if saved <= 0:
+                continue
+            io = d.get("io") or "input"
+            w += saved * (5.0 if io == "output" else 0.1 if io == "cache" else 1.0)
+    except Exception:
+        return None
+    return int(w)
+
+
+def reconcile(db_path=None):
+    """Compare tokenade's CLAIMED weighted savings to the REAL weighted cost
+    delta vs the control arm, per (task, model). Prints a table + a verdict;
+    flags any task where the claim diverges from reality by >20%."""
+    con = sqlite3.connect(db_path or DB_PATH)
+    con.execute(SCHEMA)
+    try:
+        con.execute("ALTER TABLE runs ADD COLUMN tokenade_claim_weighted INTEGER")
+    except sqlite3.OperationalError:
+        pass
+    con.row_factory = sqlite3.Row
+    rows = [dict(r) for r in con.execute(
+        "SELECT * FROM runs WHERE status='ok' AND success=1").fetchall()]
+    con.close()
+
+    def wtok(r):
+        return ((r["input_tokens"] or 0)
+                + (r["cache_read_tokens"] or 0) / 10.0
+                + (r["output_tokens"] or 0) * 5.0)
+
+    # control arm = competitor named 'control' (raw Claude, no optimizer)
+    ctrl = {}
+    for r in rows:
+        if r["competitor"] == "control":
+            ctrl.setdefault((r["task"], r["model"]), []).append(wtok(r))
+    print(f"{'task':32} {'claim':>12} {'real Δ vs ctrl':>16} {'ratio':>8}  verdict")
+    flagged = 0
+    for r in rows:
+        if r["competitor"] != "tokenade" or r.get("tokenade_claim_weighted") is None:
+            continue
+        base = ctrl.get((r["task"], r["model"]))
+        if not base:
+            continue
+        real_delta = sum(base) / len(base) - wtok(r)
+        claim = r.get("tokenade_claim_weighted")
+        ratio = (claim / real_delta) if real_delta > 0 else float("inf")
+        ok = real_delta > 0 and 0.8 <= ratio <= 1.2
+        if not ok:
+            flagged += 1
+        print(f"{r['task'][:32]:32} {claim:>12} {real_delta:>16.0f} "
+              f"{ratio:>8.2f}  {'OK' if ok else 'DIVERGES>20%'}")
+    print(f"\n{flagged} task(s) diverge >20% between tokenade's claim and the "
+          f"measured cost delta vs control.")
+    return flagged
 
 
 def select(arg, available, what):
@@ -592,6 +678,8 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("list")
     sub.add_parser("selftest")
+    # Pure analysis over the existing DB — reads only, runs no sessions.
+    sub.add_parser("reconcile")
     for name in ("run", "calibrate", "smoke"):
         p = sub.add_parser(name)
         p.add_argument("-c", "--competitors",
@@ -624,6 +712,8 @@ def main():
     args = ap.parse_args()
     if args.cmd == "list":
         cmd_list(args)
+    elif args.cmd == "reconcile":
+        sys.exit(1 if reconcile() else 0)
     elif args.cmd == "selftest":
         cmd_selftest(args)
     elif args.cmd == "stabilize":
