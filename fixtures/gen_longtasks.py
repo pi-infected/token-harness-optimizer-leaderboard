@@ -405,7 +405,8 @@ def gen_debug_ledger():
     print(f"  ledger-debug: shipped RED {passed}/{total}, ref GREEN {ref_total}/{ref_total}")
     # 4. truth + task files.
     write(TRUTH / "code-debug-ledger-py.json",
-          json.dumps({"frozen_test_hashes": frozen, "total_tests": ref_total}, indent=2))
+          json.dumps({"frozen_test_hashes": frozen, "total_tests": ref_total,
+                      "baseline_passed": passed}, indent=2))
     _write_task(
         "code-debug-ledger-py",
         title="Debug a red accounting test-suite (5 bugs across 5 modules)",
@@ -443,8 +444,9 @@ fails = errs = 0
 m = re.search(r"failures=(\\d+)", out); fails = int(m.group(1)) if m else 0
 m = re.search(r"errors=(\\d+)", out);   errs = int(m.group(1)) if m else 0
 passed = total - fails - errs
-score = 1.0 if r.returncode == 0 else max(0.0, passed / total)
-emit(score, f"{passed}/{total} tests pass"
+base = t.get("baseline_passed", 0)
+score = 1.0 if r.returncode == 0 else max(0.0, (passed - base) / max(1, total - base))
+emit(score, f"{passed}/{total} tests pass ({base} already passed untouched)"
             + ("" if r.returncode == 0 else f"; tail: {out[-300:]}"))
 ''',
     )
@@ -808,7 +810,8 @@ def gen_feature_validate():
     print(f"  validate-feature: shipped RED {shipped_passed}/{total}, ref GREEN {total}/{total}")
 
     write(TRUTH / "code-feature-validate-py.json",
-          json.dumps({"frozen_test_hashes": frozen, "total_tests": total}, indent=2))
+          json.dumps({"frozen_test_hashes": frozen, "total_tests": total,
+                      "baseline_passed": shipped_passed}, indent=2))
     _write_task(
         "code-feature-validate-py",
         title="Implement a validators module + wire it into 8 handlers",
@@ -840,8 +843,9 @@ fails = errs = 0
 m = re.search(r"failures=(\\d+)", out); fails = int(m.group(1)) if m else 0
 m = re.search(r"errors=(\\d+)", out);   errs = int(m.group(1)) if m else 0
 passed = total - fails - errs
-score = 1.0 if r.returncode == 0 else max(0.0, passed / total)
-emit(score, f"{passed}/{total} tests pass"
+base = t.get("baseline_passed", 0)
+score = 1.0 if r.returncode == 0 else max(0.0, (passed - base) / max(1, total - base))
+emit(score, f"{passed}/{total} tests pass ({base} already passed untouched)"
             + ("" if r.returncode == 0 else f"; tail: {out[-300:]}"))
 ''',
     )
@@ -858,7 +862,7 @@ def _write_task(task_id, *, title, fixture, max_turns, timeout_s, prompt, verify
         "max_turns": max_turns,
         "timeout_s": timeout_s,
         "success_threshold": 1.0,
-        "baseline_score": 0.3,
+        "baseline_score": 0.0,
     }, indent=2) + "\n")
     (d / "prompt.md").write_text(prompt)
     (d / "verify.py").write_text(verify)

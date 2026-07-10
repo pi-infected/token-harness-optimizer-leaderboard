@@ -235,9 +235,9 @@ const TOOLS = [
   ["claude-token-efficient","https://github.com/drona23/claude-token-efficient"],
   ["codegraph","https://github.com/colbymchenry/codegraph"],
   ["code-review-graph","https://github.com/tirth8205/code-review-graph"],
+  ["edgee","https://github.com/edgee-ai/edgee"],
   ["lean-ctx","https://github.com/yvgude/lean-ctx"],
   ["rtk","https://github.com/rtk-ai/rtk"],
-  ["serena","https://github.com/oraios/serena"],
   ["squeez","https://github.com/claudioemmanuel/squeez"],
   ["token-optimizer-mcp","https://github.com/ooples/token-optimizer-mcp"],
   ["tokenade","https://tokenade.net"]
@@ -260,7 +260,7 @@ function renderTables(d){
         {min:minRep,max:maxRep})}</div>` : "";
 
   const naSet = new Set(d.adoption_na||[]);
-  const zeroedSet = new Set(d.zeroed_no_adoption||[]);
+  const flaggedSet = new Set(d.no_adoption||[]);
   const naLabel = t("na","N/A");
   // Denominators are normalized to a single campaign target so "/54" and "/60"
   // don't sit side by side; the numerator is rate-scaled to that base.
@@ -283,7 +283,7 @@ function renderTables(d){
     return `<tr${isCtrl?' style="opacity:.85"':''}>
       <td class="num">${i+1}</td>
       <td><b>${e.competitor}</b>${isCtrl?` <span class="pill">${t("baseline","baseline")}</span>`:(c.version?` <span class="pill">${c.version}</span>`:"")}</td>
-      <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}${e.zeroed_no_adoption?'<sup>*</sup>':''}</td>
+      <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}${e.no_adoption?'<sup>*</sup>':''}</td>
       <td class="num">${adoptCell(e.competitor, e.adoption, e.n_runs)}</td>
       <td class="num">${kTok(tk.input)}</td>
       <td class="num">${kTok(tk.output)}</td>
@@ -296,7 +296,7 @@ function renderTables(d){
       <thead><tr>${TH}</tr></thead>
       <tbody>${hrows}</tbody>
     </table></div>
-    ${(d.headline||[]).some(e=>e.zeroed_no_adoption) ? `<p class="meta"><sup>*</sup> ${t("headlineStar","These tools have no automatic mode — their compression depends entirely on the agent choosing to call their MCP/skill. With zero adoption they did nothing the baseline didn't, so their cost reduction is shown as 0, like the control.")}</p>` : ""}
+    ${(d.headline||[]).some(e=>e.no_adoption) ? `<p class="meta"><sup>*</sup> ${t("headlineStar","Zero adoption this campaign: the agent never called this tool's MCP/skill. The figure shown is its measured end-to-end effect — the tool's standing overhead (schemas/prompts re-billed every turn) plus run-to-run noise — not its capability when used.")}</p>` : ""}
     <p class="meta">${tf("headlineMeta",
       "Model <code>{model}</code> · Claude Code <code>{cc}</code> · {n} long task(s), 10 runs each · higher % = cheaper. <b>Every figure here is a mean</b> — cost reduction is averaged across tasks, the token columns are mean tokens per run. <b>The one exception is adoption</b>, which is a count: the number of runs (out of the total) in which the agent actually called the tool.",
       {model:(d.model||[]).join(", "), cc:(d.claude_versions||[]).join(", "), n:d.headline_n_tasks})}</p>`;
@@ -340,7 +340,7 @@ function renderTables(d){
       return `<tr${isCtrl?' style="opacity:.85"':''}>
         <td class="num">${i+1}</td>
         <td>${e.competitor}${isCtrl?` <span class="pill">${t("baseline","baseline")}</span>`:''}</td>
-        <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}${zeroedSet.has(e.competitor)?'<sup>*</sup>':''}</td>
+        <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}${flaggedSet.has(e.competitor)?'<sup>*</sup>':''}</td>
         <td class="num">${kTok(tk.input)}</td>
         <td class="num">${kTok(tk.output)}</td>
         <td class="num">${kTok(tk.cache)}</td></tr>`;}).join("");
@@ -358,13 +358,13 @@ function renderTables(d){
   const perTask = order.map(name=>{
     const isCtrl = name==="control";
     const pt = isCtrl ? (d.control_per_task||{}) : (d.competitors[name]?.per_task||{});
-    const isZeroed = zeroedSet.has(name);
+    const isFlagged = flaggedSet.has(name);
     const trows=(d.tasks||[]).map(tk=>{
       const p=pt[tk]; if(!p) return "";
-      const red = isCtrl ? null : (isZeroed ? 0 : redOfRatio(p.ratio));
+      const red = isCtrl ? null : redOfRatio(p.ratio);
       return `<tr><td>${tk}</td>
         <td class="num">${p.n}</td>
-        <td class="num ratio ${isCtrl?'':redClass(red)}">${isCtrl?"—":(p.ratio==null?"—":pct(red))}${isZeroed?'<sup>*</sup>':''}</td>
+        <td class="num ratio ${isCtrl?'':redClass(red)}">${isCtrl?"—":(p.ratio==null?"—":pct(red))}${isFlagged?'<sup>*</sup>':''}</td>
         <td class="num">${adoptCell(name, p.adoption, p.n)}</td>
         <td class="num">${kTok(p.mean_input_tokens)}</td>
         <td class="num">${kTok(p.mean_output_tokens)}</td>
@@ -372,7 +372,7 @@ function renderTables(d){
     }).join("");
     const he = (d.headline||[]).find(e=>e.competitor===name);
     const label = isCtrl ? t("ctrlSummary","control — baseline (vanilla Claude Code)")
-                         : tf("toolSummary","{name} — {pct} on long sessions",{name:name, pct:((he?pct(he.cost_reduction_pct):"—")+(isZeroed?"*":""))});
+                         : tf("toolSummary","{name} — {pct} on long sessions",{name:name, pct:((he?pct(he.cost_reduction_pct):"—")+(isFlagged?"*":""))});
     return `<details${isCtrl?' open':''}><summary>${label}</summary>
       <div class="card" style="margin:8px 0"><table>
         <thead><tr><th>${t("thTask","task")}</th><th class="num">${t("thRuns","runs")}</th><th class="num">${t("thRed","mean cost reduction")}</th><th class="num">${t("thAdopt","adoption")}</th>
@@ -385,7 +385,7 @@ function renderTables(d){
     <p class="sub">${t("detailP",
       "The full board split by how many <b>total tokens vanilla Claude Code burns</b> on a task (input + output + cache). Each band shows the mean <b>input / output / cache</b> tokens per session, with <b>control</b> (plain Claude Code) as the baseline. Optimizers do little on small sessions; the savings show up as sessions get long — and it's mostly <b>cache</b> tokens that move.")}</p>
     ${bandsHtml}
-    ${(d.zeroed_no_adoption||[]).length ? `<p class="meta"><sup>*</sup> ${t("headlineStar","These tools have no automatic mode — their compression depends entirely on the agent choosing to call their MCP/skill. With zero adoption they did nothing the baseline didn't, so their cost reduction is shown as 0, like the control.")}</p>` : ""}
+    ${(d.no_adoption||[]).length ? `<p class="meta"><sup>*</sup> ${t("headlineStar","Zero adoption this campaign: the agent never called this tool's MCP/skill. The figure shown is its measured end-to-end effect — the tool's standing overhead (schemas/prompts re-billed every turn) plus run-to-run noise — not its capability when used.")}</p>` : ""}
     <h2>${t("perTaskH2","Per-task detail")}</h2>
     <p class="sub">${t("perTaskP",
       "Expand a tool for its cost reduction and adoption on each task, plus the mean <b>input / output / cache</b> tokens it used — so you can see exactly how big each session is.")}</p>

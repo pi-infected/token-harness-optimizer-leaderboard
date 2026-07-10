@@ -1,0 +1,1 @@
+{"id":"web-research-oss-inventory","kind":"noncode","max_turns":40,"success_threshold":0.3,"timeout_s":1800,"title":"Deep web research: inventory the maximum of open-source LLM token-optimization projects as JSON","workspace":{}}

@@ -42,6 +42,15 @@ claude -p "<task prompt>" --output-format stream-json --verbose \
   `rtk init -g`, `codegraph init`…) run per-run inside that sandbox and their
   duration is recorded as `setup_ms`. `--strict-mcp-config` guarantees only
   the competitor's declared servers are loaded. The host setup is never modified.
+  The sandbox `PATH` is sanitized (host command-shim directories are
+  stripped — a shim intercepting `node`/`python` can silently mute a stdio
+  MCP server) and recorded per run in `runs/<id>/env.json`.
+- **MCP preflight & evidence.** Each declared MCP server must pass a raw
+  stdio handshake once per (competitor, Claude Code version) — cached in the
+  `mcp_health` table, run in its own throwaway sandbox, never via a Claude
+  session, so the first measured run still starts fresh. A server that cannot
+  handshake fails loudly instead of burning API money. Each run records what
+  the session saw at init (`mcp_init_status`).
 - **Installation fidelity.** Each competitor is installed exactly as its own
   README instructs, encoded in `competitors/<name>/manifest.json` with a
   pointer to the upstream doc that was followed. Maintainers can PR a fix to
@@ -80,16 +89,31 @@ failed runs never count as savings.
    delta smaller than the control noise floor is presented as a real effect.
 2. **Fixed everything else.** Model ID, Claude Code version, repo commits
    (`repos.lock.json`), task prompts and fixtures are pinned. Fixtures are
-   generated deterministically (`fixtures/generate_fixtures.py`, fixed seed) —
-   verified byte-identical (same SHA-256 over `fixtures/out` + `fixtures/truth`)
-   across regenerations, so anyone reproduces the exact same inputs + ground truth.
-3. **Pre-registered tasks.** The task set is frozen before competitor runs and
-   never edited to flatter or punish a specific tool. The only post-hoc filter is
-   a stated, tool-blind rule: tasks where the control averages under ~5 turns are
-   dropped — too trivial to separate any tool (everyone lands on the same
-   near-zero cost), and unlike real agent work.
-4. **Everything published.** Full per-run transcripts, raw results DB, all
-   manifests, all verifiers. Anyone can re-run the entire board.
+   generated deterministically from a seed of record
+   (`fixtures/generate_fixtures.py`; 42 for every campaign up to 2.1.183) —
+   byte-identical across regenerations for a given seed, so anyone reproduces
+   the exact same inputs + ground truth. A new campaign may regenerate the
+   data-driven fixtures with a fresh seed (`THOL_FIXTURE_SEED`), published
+   with the campaign, as an anti-overfitting measure.
+3. **Pre-registered tasks.** The task set is frozen before a campaign's first
+   run and never edited during a campaign. Battery revisions happen only
+   between campaigns and are documented in the battery changelog below. The
+   only post-hoc filter is a stated, tool-blind rule: tasks where the control
+   averages under ~5 turns are dropped — too trivial to separate any tool
+   (everyone lands on the same near-zero cost), and unlike real agent work.
+4. **Everything published.** The raw results DB (every per-run measurement),
+   all manifests, all verifiers, and the exact scripts that produce every
+   figure (`leaderboard.py`, `reproduce_tables.py`). Per-run transcript
+   artifacts are archived and published per campaign **from the next campaign
+   onward** — the 2.1.183 campaign's transcripts were not retained, a
+   documented gap; its DB rows and `results.json` remain the record. Anyone
+   can re-run the entire board.
+5. **No silent post-processing.** Opt-in tools that end a campaign with zero
+   adoption keep their **measured** ratio, annotated `no_adoption` — an
+   unused MCP/skill surface still costs schema overhead every turn, and that
+   cost is part of the result. Arms not aggregated (out of scope, or an
+   install later found invalid) are documented below and in COMPETITORS.md;
+   their raw rows stay in the DB.
 
 ## Impartiality charter
 
@@ -123,20 +147,29 @@ Infrastructure-noise runs (transient API 401s, usage-policy false-positives) are
 excluded from scoring, not silently dropped; verifiers award no credit on an
 untouched workspace (`python3 runner.py selftest`), so successes are earned.
 
-**Two tools are tracked but not ranked** (documented, not hidden):
+**Arms tracked but not ranked** (documented, not hidden):
 - **claude-context** needs an `OPENAI_API_KEY` + a Milvus/Zilliz vector DB; keyless,
   its MCP server exposes no tools, so it would only measure vanilla Claude Code.
 - **claude-mem** is a cross-session *memory* tool, at odds with the per-run
   throwaway-`HOME` isolation (memory never persists between runs), so a
   single-session-cost benchmark can only measure its overhead.
+- **serena** was removed from the board by the COMPETITORS.md scope rule
+  (LSP refactoring toolkit; token savings is a side claim, not the product's
+  function). Its 2.1.183 rows stay in the DB, flagged in `excluded_arms`.
+- **lean-ctx (2.1.183 arm)** ran a degraded install (MCP server only, missing
+  the documented `onboard` hooks integration) — found in the 2026-07-09
+  audit. Excluded pending a re-run with the corrected manifest.
 
-## Task battery (12 tasks)
+## Task battery (17 tasks; 12 scored in the published campaign)
 
-Pre-registered and frozen before any competitor run; scored by programmatic
-verifiers against ground truth that is never copied into the workspace. Trivially
--short tasks (control averaging under ~5 turns) are excluded by the stated rule
-above. Fixtures are generated deterministically (`fixtures/*.py`, fixed seed);
-`code-overview-cobra` runs against a pinned real repo (`repos.lock.json`).
+Scored by programmatic verifiers against ground truth that is never copied
+into the workspace; verifiers award zero on an untouched workspace (enforced
+by `runner.py selftest`). Trivially-short tasks (control averaging under ~5
+turns) are excluded by the stated rule above. Fixtures are generated
+deterministically (`fixtures/*.py`, seed of record); `code-overview-cobra`
+and the two Django tasks run against pinned real repos (`repos.lock.json`).
+
+Scored in the 2.1.183 campaign:
 
 | id | task | workspace | threshold |
 |----|------|-----------|-----------|
@@ -153,8 +186,23 @@ above. Fixtures are generated deterministically (`fixtures/*.py`, fixed seed);
 | report-pdf | analyze a CSV and produce a PDF report | sales-csv fixture | 1.0 |
 | seo-audit | SEO audit of a website export, write a report | seo-site fixture | 1.0 |
 
-The repository also carries generators and verifiers for further tasks not yet
-run in the published campaign; the board grows in batches as token budget allows.
+Additions frozen for the next campaign:
+
+| id | task | why it was added |
+|----|------|------------------|
+| code-comprehension-django | precise behavioral facts across a large real repo's subsystems | comprehension-bound work on a real, big codebase |
+| code-settings-inventory-django | exhaustive settings inventory of a real framework | audit/inventory class: easy to get 90% of, hard to finish |
+| code-migration-py-xl | migrate a deprecated API across 24 modules | long, repetitive, command-heavy session class the 12-task battery lacked |
+| code-refactor-split-py | split a fat module into a package, tests stay green | refactoring class, absent from the battery |
+| web-research-oss-inventory | build a web-researched inventory, output JSON | web-research class (WebSearch/WebFetch-heavy sessions) |
+
+### Battery changelog
+
+- **2026-07-10** (between campaigns): added `code-migration-py-xl` and
+  `code-refactor-split-py` from the never-run reserve; re-normalized the
+  debug/migration/refactor verifier scores so an untouched workspace earns
+  exactly 0 (success thresholds unchanged — no published ranking was
+  affected).
 
 ## Usage
 
@@ -191,6 +239,9 @@ completion, and all state lives in the project directory (workspaces under
 
 The Claude Code version is recorded per run; a publishable campaign should
 run on a single version (check with `SELECT DISTINCT claude_version FROM runs`).
+The published campaign of record is pinned in the `CAMPAIGN` file —
+`leaderboard.py` reads it (after `THOL_CAMPAIGN`) and refuses to silently
+regenerate the board from whatever version happened to run last.
 
 ## Limitations & future work
 
@@ -205,6 +256,14 @@ run on a single version (check with `SELECT DISTINCT claude_version FROM runs`).
   Claude Code `2.1.183`. A smarter or cheaper model, or a future CC version,
   could shift both the overhead and the adoption rate. Re-running on more
   models is the obvious extension.
+- **Headless MCP dynamics suppress adoption.** In `-p` sessions MCP servers
+  connect asynchronously: at session start they are `pending` and expose zero
+  tools; their tools appear mid-session, behind ToolSearch on recent Claude
+  Code versions (verified on 2.1.183 and 2.1.205). MCP tools therefore
+  compete at a structural disadvantage during the early planning turns — a
+  harness property every MCP competitor shares. The healthcheck plus
+  `mcp_init_status` ensure "zero adoption" never hides a broken server, but
+  adoption figures should be read with this cold-start effect in mind.
 - **Finite, general task battery.** 12 substantive tasks (trivially-short ones,
   where control finishes in under ~5 turns, are excluded — see below). A tool
   tuned for a workflow we don't cover (huge monorepos, long multi-session

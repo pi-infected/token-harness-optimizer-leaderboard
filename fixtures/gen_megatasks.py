@@ -62,7 +62,7 @@ def _write_task(task_id, *, title, fixture, max_turns, timeout_s, prompt, verify
         "max_turns": max_turns,
         "timeout_s": timeout_s,
         "success_threshold": 1.0,
-        "baseline_score": 0.3,
+        "baseline_score": 0.0,
     }, indent=2) + "\n")
     (d / "prompt.md").write_text(prompt)
     (d / "verify.py").write_text(verify)
@@ -701,8 +701,9 @@ fails = errs = 0
 m = re.search(r"failures=(\\d+)", out); fails = int(m.group(1)) if m else 0
 m = re.search(r"errors=(\\d+)", out);   errs = int(m.group(1)) if m else 0
 passed = total - fails - errs
-score = 1.0 if r.returncode == 0 else max(0.0, passed / total)
-emit(score, f"{passed}/{total} tests pass"
+base = t.get("baseline_passed", 0)
+score = 1.0 if r.returncode == 0 else max(0.0, (passed - base) / max(1, total - base))
+emit(score, f"{passed}/{total} tests pass ({base} already passed untouched)"
             + ("" if r.returncode == 0 else f"; tail: {out[-300:]}"))
 '''
 
@@ -737,7 +738,8 @@ def gen_debug_cascade():
           f"ref GREEN {ref_total}/{ref_total}, bugs={len(CASCADE_BUGS)}")
 
     write(TRUTH / "code-debug-cascade-py.json",
-          json.dumps({"frozen_test_hashes": frozen, "total_tests": ref_total},
+          json.dumps({"frozen_test_hashes": frozen, "total_tests": ref_total,
+                      "baseline_passed": passed},
                      indent=2) + "\n")
     _write_task(
         "code-debug-cascade-py",
@@ -1157,8 +1159,9 @@ fails = errs = 0
 m = re.search(r"failures=(\\d+)", out); fails = int(m.group(1)) if m else 0
 m = re.search(r"errors=(\\d+)", out);   errs = int(m.group(1)) if m else 0
 passed = total - fails - errs
-score = 1.0 if r.returncode == 0 else max(0.0, passed / total)
-emit(score, f"{passed}/{total} tests pass"
+base = t.get("baseline_passed", 0)
+score = 1.0 if r.returncode == 0 else max(0.0, (passed - base) / max(1, total - base))
+emit(score, f"{passed}/{total} tests pass ({base} already passed untouched)"
             + ("" if r.returncode == 0 else f"; tail: {out[-300:]}"))
 '''
 
@@ -1211,7 +1214,8 @@ def gen_debug_pipeline():
           f"{ref_total}/{ref_total}, bugs={len(PIPELINE_BUGS)}, valid_rows={n_valid}")
 
     write(TRUTH / "code-debug-pipeline-py.json",
-          json.dumps({"frozen_hashes": frozen, "total_tests": ref_total},
+          json.dumps({"frozen_hashes": frozen, "total_tests": ref_total,
+                      "baseline_passed": passed},
                      indent=2) + "\n")
     _write_task(
         "code-debug-pipeline-py",

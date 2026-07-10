@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from _vlib import WS, emit, hashes_intact, run, truth  # noqa: E402
 
-t = truth("code-migration-py.json")
+t = truth("code-migration-py-xl.json")
 if not hashes_intact(WS, t["frozen_hashes"]):
     emit(0.0, "a frozen file (net.py / legacy_http.py / tests) was modified")
 app = WS / "webtools" / "app"

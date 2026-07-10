@@ -49,31 +49,27 @@ TOKEN_BANDS = [(0, 200_000, "0–200k"),
                (200_000, 400_000, "200k–400k"),
                (400_000, 1_000_000, "400k–1M")]
 
-# Adoption (= did the agent explicitly invoke the tool?) is undefined for tools
-# the agent never calls: rtk acts via an automatic hook, and prompt/context ones
-# (lean-ctx, claude-token-efficient) are just text. Shown as N/A rather than a
-# misleading 0. NOTE: tokenade is NOT here — although it has a hook, it also
-# exposes explicit CLI functions (map/skeleton/query/exec/…) the agent calls by
-# hand, so its adoption count is meaningful.
-# Auto tools (hooks, proxy, SessionStart output-shaping, pure prompt) have NO
-# agent-invoked surface: the agent never *calls* them, so an "adoption" count is
-# meaningless (always 0, but that 0 means "nothing to call", not "ignored").
-# Shown as N/A — their cost reduction stands on its own.
+# Adoption (= did the agent explicitly invoke the tool?) is undefined for
+# tools with no callable surface (automatic hooks, proxies, pure prompts):
+# shown as N/A. tokenade and lean-ctx are NOT here — besides their hooks they
+# expose functions the agent calls by hand, so their adoption counts.
 ADOPTION_NA = {"rtk", "claude-token-efficient", "caveman", "ponytail",
-               "squeez", "headroom"}
+               "squeez", "headroom", "edgee"}
 
-# Opt-in tools whose compression depends ENTIRELY on the agent choosing to call
-# their MCP/skill. With zero adoption they did nothing the control didn't, so any
-# measured "cost reduction" is pure noise — zero it (like control) and flag it
-# with a star + footnote so the reader knows why.
-OPT_IN_ADOPTION = {"serena", "codegraph", "code-review-graph", "graphify",
-                   "lean-ctx"}
+# Opt-in tools whose effect depends entirely on the agent calling their
+# MCP/skill. A zero-adoption campaign is flagged `no_adoption` and the
+# measured ratio is published as-is (an unused tool surface still costs
+# schema overhead every turn — pinning it to 0 would hide that).
+OPT_IN_ADOPTION = {"codegraph", "code-review-graph", "graphify"}
+
+# Arms kept in the DB but not aggregated: serena is out of scope
+# (COMPETITORS.md inclusion rule); lean-ctx's 2.1.183 arm ran a degraded
+# install (MCP only, missing its `onboard` hooks) and awaits a re-run.
+EXCLUDED_ARMS = {"serena", "serena-gsp", "lean-ctx", "lean-ctx-gsp"}
 
 # A "generous system prompt" only makes sense for tools the agent explicitly
-# calls — it teaches the model which function to reach for. Pointless for a
-# hook (rtk: nothing to call) or a pure prompt (lean-ctx), so those GSP arms
-# are excluded from the GSP comparison table.
-NO_GSP = {"rtk", "lean-ctx"}
+# calls; pointless for a hook/proxy with nothing to call.
+NO_GSP = {"rtk", "edgee"}
 
 
 def _vkey(v):
@@ -89,18 +85,26 @@ def rows(campaign=None):
     the harness, so a ratio is only meaningful within a single version.
 
     campaign: explicit claude_version (or substring like '2.1.177'); falls back
-    to env THOL_CAMPAIGN; otherwise the LATEST version present in the DB."""
+    to env THOL_CAMPAIGN, then to the checked-in CAMPAIGN pin file (the
+    published campaign of record — regenerating the board can never silently
+    switch to whatever version ran last); only if none of those exist, the
+    LATEST version present in the DB, with a loud warning."""
     con = sqlite3.connect(DB)
     con.row_factory = sqlite3.Row
     versions = [r[0] for r in con.execute(
         "SELECT DISTINCT claude_version FROM runs WHERE status='ok' "
         "AND claude_version IS NOT NULL")]
     campaign = campaign or os.environ.get("THOL_CAMPAIGN")
+    if not campaign and (ROOT / "CAMPAIGN").exists():
+        campaign = (ROOT / "CAMPAIGN").read_text().strip() or None
     if campaign:
         match = [v for v in versions if campaign in (v or "")]
         campaign = match[0] if match else campaign
     elif versions:
         campaign = max(versions, key=_vkey)
+        print(f"WARNING: no campaign pinned (arg/THOL_CAMPAIGN/CAMPAIGN file) "
+              f"— defaulting to the latest version in the DB ({campaign}). "
+              f"Do not publish this without pinning.", file=sys.stderr)
     # Filters:
     #  * tasks — only those still present in tasks/ (see active_tasks): the
     #    trivially-short tasks (control < ~5 turns) were moved out, which
@@ -117,19 +121,23 @@ def rows(campaign=None):
         "AND claude_version=? "
         "AND competitor NOT IN ('learned-hook','tokenade-forced') "
         "AND competitor NOT LIKE '%-gsp'",
-        (campaign,)) if r["task"] in keep]
+        (campaign,))
+        if r["task"] in keep and r["competitor"] not in EXCLUDED_ARMS]
     bad = [dict(r) for r in con.execute(
         "SELECT competitor, task, status, COUNT(*) n FROM runs "
         "WHERE status!='ok' AND claude_version=? "
-        "GROUP BY competitor, task, status", (campaign,))]
+        "GROUP BY competitor, task, status", (campaign,))
+        if r["competitor"] not in EXCLUDED_ARMS]
     # The '*-gsp' arms (generous system prompt) — kept separate so the GSP
     # comparison table can show that the verbose prompt raised cost.
     gsp = [dict(r) for r in con.execute(
         "SELECT * FROM runs WHERE status='ok' AND score IS NOT NULL "
         "AND claude_version=? AND competitor LIKE '%-gsp'",
-        (campaign,)) if r["task"] in keep]
+        (campaign,))
+        if r["task"] in keep and r["competitor"] not in EXCLUDED_ARMS]
     con.close()
     return out, gsp, bad, campaign
+
 
 
 def boot_ratio(comp_costs, ctrl_costs, rng):
@@ -296,11 +304,9 @@ def compute(ok, gsp, bad):
                 "output": round(st.mean(outs)) if outs else 0,
                 "cache": round(st.mean(cas)) if cas else 0}
 
-    # Opt-in tools the agent never called anywhere in the campaign. Their
-    # measured reduction is noise, so we pin them to the zero line (like
-    # control) and star them — in the headline, the size bands, AND the
-    # per-task detail. One source of truth for all three.
-    zeroed_competitors = {
+    # Opt-in tools the agent never called anywhere in the campaign — the UI
+    # stars these rows (measured ratio = standing overhead + noise).
+    no_adoption_flags = {
         c for c, cd in competitors.items()
         if c in OPT_IN_ADOPTION
         and sum(v.get("adoption", 0) for v in cd["per_task"].values()) == 0
@@ -319,11 +325,10 @@ def compute(ok, gsp, bad):
             rs = [cd["per_task"][t]["ratio"] for t in bt
                   if t in cd["per_task"] and cd["per_task"][t].get("ratio")]
             if rs:
-                zc = c in zeroed_competitors
                 rank.append({"competitor": c,
-                             "aggregate_cost_ratio": 1.0 if zc else
+                             "aggregate_cost_ratio":
                              math.exp(st.mean(list(map(math.log, rs)))),
-                             "zeroed_no_adoption": zc,
+                             "no_adoption": c in no_adoption_flags,
                              "tasks_compared": len(rs),
                              "tokens": mean_tokens(c, bt)})
         # cheapest-first; control (ratio 1.0 = 0% reduction) sorts into place
@@ -349,19 +354,16 @@ def compute(ok, gsp, bad):
         lo, hi = boot_aggregate(pairs_big, rng)
         adopt = sum(cd["per_task"][t]["adoption"] for t in big if t in cd["per_task"])
         nrun = sum(cd["per_task"][t]["n"] for t in big if t in cd["per_task"])
-        # An opt-in tool the agent never called did nothing the control didn't;
-        # its measured reduction is noise. Pin it to the zero line (ratio 1.0)
-        # and flag it so the UI can star it + footnote why.
-        zeroed = c in zeroed_competitors
-        if zeroed:
-            ratio = 1.0
         headline.append({
             "competitor": c, "cost_ratio": ratio,
-            "cost_reduction_pct": 0.0 if zeroed else round((1 - ratio) * 100, 1),
-            "ci_lo_pct": None if zeroed else (round((1 - hi) * 100, 1) if hi is not None else None),
-            "ci_hi_pct": None if zeroed else (round((1 - lo) * 100, 1) if lo is not None else None),
+            "cost_reduction_pct": round((1 - ratio) * 100, 1),
+            "ci_lo_pct": round((1 - hi) * 100, 1) if hi is not None else None,
+            "ci_hi_pct": round((1 - lo) * 100, 1) if lo is not None else None,
             "adoption": adopt, "n_runs": nrun, "tasks_compared": len(rs),
-            "zeroed_no_adoption": zeroed,
+            # measured ratio published as-is; the UI stars the row and
+            # explains that with zero adoption it reflects standing
+            # overhead + noise (see OPT_IN_ADOPTION comment)
+            "no_adoption": c in no_adoption_flags,
             "tokens": mean_tokens(c, big),
         })
     # control row — the baseline (0% reduction), sorted in at the zero line.
@@ -421,7 +423,7 @@ def compute(ok, gsp, bad):
         "headline": headline,
         "headline_gsp": headline_gsp,
         "adoption_na": sorted(ADOPTION_NA),
-        "zeroed_no_adoption": sorted(zeroed_competitors),
+        "no_adoption": sorted(no_adoption_flags),
         "token_bands": bands,
         # control's per-task token breakdown (the baseline shown in the detail)
         "control_per_task": {t: {
@@ -447,6 +449,11 @@ def render_md(d):
         L.append("> **WARNING — more than one Claude Code version slipped past "
                  f"the campaign filter: {d['claude_versions']}.** This should "
                  "not happen; investigate before publishing.\n")
+    if d.get("no_adoption"):
+        L.append("> `*` Zero adoption this campaign: "
+                 f"{', '.join(d['no_adoption'])} — the measured ratio "
+                 "reflects standing overhead plus noise, not capability "
+                 "when used.\n")
 
     # ---- ranking (inserted at top after title)
     rank_lines = ["## Ranking (geometric mean cost ratio vs control, "

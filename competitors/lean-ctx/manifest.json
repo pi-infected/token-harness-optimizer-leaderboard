@@ -3,15 +3,31 @@
   "display_name": "LeanCTX",
   "verified": true,
   "upstream": "https://github.com/yvgude/lean-ctx",
-  "install_doc": "README get-started offers `curl -fsSL https://leanctx.com/install.sh | sh`, brew, `npm install -g lean-ctx-bin`, or `cargo install lean-ctx`. We pin the npm prebuilt binary `lean-ctx-bin@3.8.4` (no host build, matches codegraph approach). The stdio MCP server is the bare `lean-ctx` command with NO args (`lean-ctx help all`: 'lean-ctx  Start MCP server (stdio)'; `lean-ctx serve` is the HTTP variant). `lean-ctx onboard` is deliberately NOT used: it rewrites the host ~/.zshrc with a shell hook (host pollution) and the benchmark injects the MCP config directly anyway.",
+  "install_doc": "README get-started: `curl -fsSL https://leanctx.com/install.sh | sh` (or brew / `npm install -g lean-ctx-bin` / cargo), then `lean-ctx onboard` ('Connect your AI tools with one command (recommended)'). We pin the npm prebuilt binary `lean-ctx-bin@3.8.4` and run the official `lean-ctx onboard --yes` per run inside the sandbox HOME: it installs the full Claude Code integration — PreToolUse `hook rewrite` (Bash) + `hook redirect` (Read/Grep/View/ListFiles) auto-compression, observe hooks, a lean-ctx skill, a global CLAUDE.md, MCP tool permissions and the local daemon (hook commands use absolute paths to the pinned binary). The MCP stdio server (bare `lean-ctx`, 13 tools at the default profile) is declared below.",
   "version_pin": "3.8.4",
   "version_checked": "2026-06-13",
-  "notes": "Claims up to 99% savings — exactly the kind of headline THOL exists to test. Single Rust binary exposing 76 MCP tools (ctx_*) at the default profile; those tool schemas are themselves per-turn overhead the benchmark will surface. MCP server validated via an initialize handshake on this machine (serverInfo lean-ctx 3.8.4, capabilities.tools).",
-  "requires": ["lean-ctx"],
+  "notes": "Claims up to 99% savings — exactly the kind of headline THOL exists to test. Primary mechanism is passive (onboard's redirect/rewrite hooks); the MCP server adds a callable surface. The 2.1.183 arm ran an earlier, MCP-only manifest and is excluded from the board pending a re-run with this one. Validated on this machine 2026-07-10: `onboard --yes` headless in a sandbox HOME writes the hooks/skill/CLAUDE.md/permissions above; MCP handshake OK (13 tools, ~140ms); full haiku session exercised the install end-to-end.",
+  "requires": [
+    "lean-ctx"
+  ],
+  "setup_commands": [
+    "lean-ctx onboard --yes"
+  ],
+  "teardown_commands": [
+    "lean-ctx serve --stop || true"
+  ],
   "mcp": {
     "mcpServers": {
-      "lean-ctx": {"command": "lean-ctx", "args": []}
+      "lean-ctx": {
+        "command": "lean-ctx",
+        "args": []
+      }
     }
   },
-  "tool_prefixes": ["mcp__lean-ctx__"]
+  "tool_prefixes": [
+    "mcp__lean-ctx__"
+  ],
+  "bash_command_markers": [
+    "lean-ctx "
+  ]
 }

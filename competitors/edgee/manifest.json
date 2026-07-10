@@ -1,0 +1,22 @@
+{
+  "name": "edgee",
+  "display_name": "Edgee",
+  "verified": true,
+  "upstream": "https://github.com/edgee-ai/edgee",
+  "version_pin": "v0.2.12",
+  "version_checked": "2026-07-10 (111 stars, Apache-2.0, 25 releases)",
+  "install_doc": "README: `curl -fsSL https://edgee.ai/install.sh | bash` then `edgee launch claude` (routes Claude Code through the Edgee gateway). THOL pins the v0.2.12 release binary (sha256-verified, x86_64-linux-gnu asset). DOCUMENTED DEVIATION: `edgee launch` requires an Edgee ACCOUNT (interactive browser OAuth; adds cloud analytics/session history) — not reproducible headless. THOL instead runs the auth-free `edgee local-gateway` per run on a dedicated ${PORT} and points the session at it via ANTHROPIC_BASE_URL; per its own help this serves 'POST /v1/messages -> Anthropic Messages API (passthrough + compression)' — the same Edgee compression pipeline, minus the cloud account features.",
+  "notes": "Rust LLM gateway ('Same output, fewer tokens, lower bill'): compresses redundant tool output (logs, file listings, build results) in the request context before it reaches the model. Derived from RTK (credited upstream) but proxy-based instead of hook-based, so it needs no agent opt-in — adoption is N/A like headroom/rtk. Validated on this machine 2026-07-10: full headless Claude Code session through the local gateway (correct answer, cost recorded, gateway stable, teardown clean).",
+  "requires": [
+    "edgee"
+  ],
+  "setup_commands": [
+    "nohup edgee local-gateway --port ${PORT} >\"$HOME/edgee-gateway.log\" 2>&1 & for i in $(seq 40); do curl -s -o /dev/null \"http://127.0.0.1:${PORT}/\" && exit 0; sleep 0.25; done; echo 'edgee local-gateway did not come up' >&2; exit 1"
+  ],
+  "teardown_commands": [
+    "fuser -k -TERM ${PORT}/tcp || true"
+  ],
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:${PORT}"
+  }
+}

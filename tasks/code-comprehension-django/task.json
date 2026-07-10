@@ -1,0 +1,9 @@
+{
+ "id": "code-comprehension-django",
+ "title": "Comprehension-bound collection: precise behavioral facts across Django subsystems",
+ "kind": "code",
+ "workspace": {"repo": "django"},
+ "max_turns": 40,
+ "timeout_s": 2400,
+ "success_threshold": 0.7
+}

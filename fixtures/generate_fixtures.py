@@ -8,11 +8,17 @@ agent must never see goes to fixtures/truth/.
 import csv
 import hashlib
 import json
+import os
 import random
 import shutil
 from pathlib import Path
 
-SEED = 42
+# Seed of record: 42 for every campaign up to and including 2.1.183.
+# A scored campaign MAY regenerate the data-driven fixtures with a fresh,
+# published seed (THOL_FIXTURE_SEED) so that no tool tuned against a previous
+# campaign's fixture instances carries a memorized-surface advantage. The
+# hand-authored fixtures (planted debug bugs, specs) are seed-independent.
+SEED = int(os.environ.get("THOL_FIXTURE_SEED", "42"))
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "out"
 TRUTH = HERE / "truth"

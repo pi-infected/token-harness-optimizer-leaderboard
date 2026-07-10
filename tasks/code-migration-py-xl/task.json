@@ -1,9 +1,9 @@
 {
-  "id": "code-debug-ledger-py",
-  "title": "Debug a red accounting test-suite (5 bugs across 5 modules)",
+  "id": "code-migration-py-xl",
+  "title": "Migrate a deprecated API across 24 modules",
   "kind": "code",
   "workspace": {
-    "fixture": "ledger-debug"
+    "fixture": "migration-py-xl"
   },
   "max_turns": 60,
   "timeout_s": 1800,

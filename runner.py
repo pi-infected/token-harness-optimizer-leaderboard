@@ -49,7 +49,14 @@ CREATE TABLE IF NOT EXISTS runs (
   tool_calls INTEGER, competitor_tool_calls INTEGER,
   tool_rounds INTEGER,
   tokenade_claim_weighted INTEGER,  -- what tokenade's own ledger claims it saved this run
+  mcp_init_status TEXT,   -- JSON: declared MCP servers' status at session init
   verify_detail TEXT, error TEXT
+);
+CREATE TABLE IF NOT EXISTS mcp_health (
+  competitor TEXT, claude_version TEXT, server TEXT,
+  checked_at TEXT, status TEXT,     -- ok | fail
+  n_tools INTEGER, latency_ms INTEGER, error TEXT,
+  PRIMARY KEY (competitor, claude_version, server)
 );
 """
 
@@ -146,6 +153,11 @@ def setup_config_dir(cfgdir, manifest):
 def build_env(cfgdir, manifest):
     env = {k: v for k, v in os.environ.items()
            if not k.startswith(("TOKENADE", "CLAUDE"))}
+    # PATH hygiene: host command shims (e.g. a dir wrapping node/python)
+    # can silently mute stdio MCP servers spawned through them — strip them.
+    # The effective PATH is recorded per run in the env.json artifact.
+    env["PATH"] = ":".join(p for p in env.get("PATH", "").split(":")
+                           if "/.tokenade/" not in p)
     env["HOME"] = str(cfgdir.parent)
     env["CLAUDE_CONFIG_DIR"] = str(cfgdir)
     env["CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC"] = "1"
@@ -169,7 +181,8 @@ def build_env(cfgdir, manifest):
 
 
 def parse_stream(transcript_path, manifest):
-    """Returns (result_event, tool_calls, competitor_tool_calls, tool_rounds).
+    """Returns (result_event, tool_calls, competitor_tool_calls, tool_rounds,
+    mcp_init_status_json).
 
     tool_rounds = number of assistant messages carrying >=1 tool_use, i.e. the
     real count of serial tool-call rounds (each one re-reads the whole context).
@@ -180,6 +193,7 @@ def parse_stream(transcript_path, manifest):
     prefixes = tuple(manifest.get("tool_prefixes") or ())
     markers = manifest.get("bash_command_markers") or []
     result_ev, calls, comp_calls, rounds = None, 0, 0, 0
+    init_ev = None
     with transcript_path.open() as f:
         for line in f:
             line = line.strip()
@@ -189,7 +203,10 @@ def parse_stream(transcript_path, manifest):
                 ev = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if ev.get("type") == "assistant":
+            if ev.get("type") == "system" and ev.get("subtype") == "init" \
+                    and init_ev is None:
+                init_ev = ev
+            elif ev.get("type") == "assistant":
                 msg_has_tool = False
                 for block in (ev.get("message") or {}).get("content") or []:
                     if block.get("type") != "tool_use":
@@ -207,7 +224,17 @@ def parse_stream(transcript_path, manifest):
                     rounds += 1
             elif ev.get("type") == "result":
                 result_ev = ev
-    return result_ev, calls, comp_calls, rounds
+    # What the session saw at init: MCP servers connect asynchronously in
+    # headless mode (typically still 'pending' here), so record it.
+    mcp_init = None
+    if init_ev is not None:
+        tools = init_ev.get("tools") or []
+        mcp_init = json.dumps({
+            "servers": init_ev.get("mcp_servers") or [],
+            "mcp_tools_at_init": sum(1 for t in tools
+                                     if t.startswith("mcp__")),
+        })
+    return result_ev, calls, comp_calls, rounds, mcp_init
 
 
 def run_verify(task, ws, answer_file):
@@ -224,7 +251,7 @@ def run_verify(task, ws, answer_file):
 
 def insert_row(row):
     con = sqlite3.connect(DB_PATH)
-    con.execute(SCHEMA)
+    con.executescript(SCHEMA)
     # migrate pre-existing tables that lack newer columns
     try:
         con.execute("ALTER TABLE runs ADD COLUMN tool_rounds INTEGER")
@@ -232,6 +259,10 @@ def insert_row(row):
         pass  # column already present
     try:
         con.execute("ALTER TABLE runs ADD COLUMN tokenade_claim_weighted INTEGER")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        con.execute("ALTER TABLE runs ADD COLUMN mcp_init_status TEXT")
     except sqlite3.OperationalError:
         pass
     cols = ", ".join(row)
@@ -263,11 +294,27 @@ def run_one(comp, task, rep, args, cver):
            "tool_calls": None, "competitor_tool_calls": None,
            "tool_rounds": None,
            "tokenade_claim_weighted": None,
+           "mcp_init_status": None,
            "verify_detail": None, "error": None}
+    env = None
+    sub = lambda x: x  # replaced once the run's port is allocated
     try:
         build_workspace(task, ws)
         setup_config_dir(cfgdir, comp)
         env = build_env(cfgdir, comp)
+        # one free port per run, substitutable as ${PORT} anywhere the
+        # manifest needs it (env, setup/teardown commands, claude_wrap) so
+        # back-to-back runs of proxy/gateway competitors never collide.
+        s = socket.socket(); s.bind(("127.0.0.1", 0))
+        free_port = s.getsockname()[1]; s.close()
+        sub = lambda x: x.replace("${PORT}", str(free_port))
+        env = {k: sub(v) for k, v in env.items()}
+        # record the exact environment the session ran with
+        (art / "env.json").write_text(json.dumps(
+            {"PATH": env.get("PATH"), "HOME": env.get("HOME"),
+             "port": free_port,
+             "manifest_env": {k: env.get(k)
+                              for k in (comp.get("env") or {})}}, indent=1))
         claude_md = comp.get("claude_md")
         if comp.get("claude_md_file"):
             claude_md = (comp["_dir"] / comp["claude_md_file"]).read_text()
@@ -283,6 +330,7 @@ def run_one(comp, task, rep, args, cver):
 
         t0 = time.monotonic()
         for cmdline in comp.get("setup_commands") or []:
+            cmdline = sub(cmdline)
             r = subprocess.run(cmdline, shell=True, cwd=ws, env=env,
                                capture_output=True, text=True, timeout=900)
             (art / "setup.log").open("a").write(
@@ -308,13 +356,11 @@ def run_one(comp, task, rep, args, cver):
         # tool's official Claude binary is invoked directly.
         wrap = comp.get("claude_wrap")
         if wrap:
-            # Give each wrapped run its own proxy port so back-to-back runs
-            # never collide on a default fixed port (the failure mode that
-            # rc=1'd most of the first headroom re-bench). `${PORT}` in the
-            # wrap is substituted with a free port.
-            s = socket.socket(); s.bind(("127.0.0.1", 0))
-            free_port = s.getsockname()[1]; s.close()
-            wrap = [t.replace("${PORT}", str(free_port)) for t in wrap]
+            # `${PORT}` in the wrap is substituted with this run's free port
+            # so back-to-back wrapped runs never collide on a default fixed
+            # port (the failure mode that rc=1'd most of the first headroom
+            # re-bench).
+            wrap = [sub(t) for t in wrap]
             # Keep --strict-mcp-config (in claude_argv): it blocks the heavy MCP
             # tool-definitions headroom's wrapper auto-registers (serena +
             # codebase-memory + headroom-retrieve) from bloating the context.
@@ -348,9 +394,10 @@ def run_one(comp, task, rep, args, cver):
         row["wall_ms"] = int((time.monotonic() - w0) * 1000)
         (art / "stderr.log").write_text(stderr or "")
 
-        result_ev, calls, comp_calls, rounds = parse_stream(transcript, comp)
+        result_ev, calls, comp_calls, rounds, mcp_init = \
+            parse_stream(transcript, comp)
         row.update(tool_calls=calls, competitor_tool_calls=comp_calls,
-                   tool_rounds=rounds)
+                   tool_rounds=rounds, mcp_init_status=mcp_init)
         if result_ev is None:
             row.update(status="claude_error",
                        error=f"no result event (rc={p.returncode}); "
@@ -396,9 +443,130 @@ def run_one(comp, task, rep, args, cver):
         insert_row(row)
         return row
     finally:
+        # teardown_commands: best-effort cleanup a competitor needs after the
+        # session (e.g. stopping a local gateway/daemon started in setup) —
+        # never affects the run's recorded status.
+        if env is not None:
+            for cmdline in comp.get("teardown_commands") or []:
+                cmdline = sub(cmdline)
+                try:
+                    r = subprocess.run(cmdline, shell=True,
+                                       cwd=(ws if ws.exists() else base),
+                                       env=env, capture_output=True,
+                                       text=True, timeout=60)
+                    (art / "teardown.log").open("a").write(
+                        f"$ {cmdline}\nrc={r.returncode}\n{r.stdout}\n{r.stderr}\n")
+                except Exception as e:
+                    (art / "teardown.log").open("a").write(
+                        f"$ {cmdline}\nEXC {e}\n")
         (art / "run.json").write_text(json.dumps(row, indent=1))
         if not args.keep_workspaces and base.exists():
             shutil.rmtree(base, ignore_errors=True)
+
+
+def _handshake_stdio(cmd, cwd, env, timeout_s=60):
+    """Raw MCP stdio handshake: initialize + tools/list. Returns
+    (ok, n_tools, latency_ms, error)."""
+    import select
+    init = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+        "protocolVersion": "2024-11-05", "capabilities": {},
+        "clientInfo": {"name": "thol-healthcheck", "version": "1"}}}
+    t0 = time.monotonic()
+    try:
+        p = subprocess.Popen(cmd, cwd=cwd, env=env, stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             text=True, bufsize=1)
+    except OSError as e:
+        return False, 0, 0, f"spawn failed: {e}"
+    try:
+        p.stdin.write(json.dumps(init) + "\n")
+        p.stdin.flush()
+        deadline = t0 + timeout_s
+
+        def read_json(want_id):
+            while time.monotonic() < deadline:
+                r, _, _ = select.select([p.stdout], [], [], 0.5)
+                if not r:
+                    if p.poll() is not None:
+                        return None, f"server exited rc={p.returncode}"
+                    continue
+                line = p.stdout.readline()
+                if not line:
+                    return None, f"stdout closed (rc={p.poll()})"
+                try:
+                    ev = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if ev.get("id") == want_id:
+                    return ev, None
+            return None, f"no response within {timeout_s}s"
+
+        resp, err = read_json(1)
+        if resp is None:
+            return False, 0, int((time.monotonic() - t0) * 1000), err
+        latency = int((time.monotonic() - t0) * 1000)
+        p.stdin.write(json.dumps(
+            {"jsonrpc": "2.0", "method": "notifications/initialized"}) + "\n")
+        p.stdin.write(json.dumps(
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/list",
+             "params": {}}) + "\n")
+        p.stdin.flush()
+        resp, err = read_json(2)
+        if resp is None:
+            return False, 0, latency, f"tools/list: {err}"
+        tools = (resp.get("result") or {}).get("tools") or []
+        return True, len(tools), latency, None
+    except Exception as e:
+        return False, 0, int((time.monotonic() - t0) * 1000), str(e)
+    finally:
+        try:
+            p.kill()
+        except Exception:
+            pass
+
+
+def ensure_mcp_health(comp, cver):
+    """Handshake every declared MCP server once per (competitor,
+    claude_version), cached in mcp_health. A raw stdio handshake in its own
+    throwaway sandbox — no Claude session, nothing pre-warmed, so measured
+    runs start pristine. Returns {server_name: (ok, error)}."""
+    servers = (comp.get("mcp") or {}).get("mcpServers") or {}
+    if not servers:
+        return {}
+    con = sqlite3.connect(DB_PATH)
+    con.executescript(SCHEMA)
+    cached = {r[0]: (r[1] == "ok", r[2]) for r in con.execute(
+        "SELECT server, status, error FROM mcp_health "
+        "WHERE competitor=? AND claude_version=?", (comp["name"], cver))}
+    if set(cached) == set(servers) and all(ok for ok, _ in cached.values()):
+        con.close()
+        return cached
+    # sandbox mirroring run conditions (throwaway HOME + tiny workspace),
+    # torn down right after — never reused by an actual run
+    base = Path(CFG["runs_root"]) / f"mcp-health__{comp['name']}__{int(time.time())}"
+    ws, cfgdir = base / "workspace", base / "home" / ".claude"
+    out = {}
+    try:
+        ws.mkdir(parents=True)
+        (ws / "app.py").write_text("def add(a, b):\n    return a + b\n")
+        setup_config_dir(cfgdir, comp)
+        env = build_env(cfgdir, comp)
+        for name, srv in servers.items():
+            cmd = [srv["command"]] + list(srv.get("args") or [])
+            ok, n_tools, latency, err = _handshake_stdio(cmd, ws, env)
+            out[name] = (ok, err)
+            con.execute(
+                "INSERT OR REPLACE INTO mcp_health VALUES (?,?,?,?,?,?,?,?)",
+                (comp["name"], cver, name, now_iso(),
+                 "ok" if ok else "fail", n_tools, latency, err))
+            print(f"  mcp-health {comp['name']}/{name}: "
+                  f"{'OK' if ok else 'FAIL'} tools={n_tools} "
+                  f"{latency}ms{' — ' + err if err else ''}")
+        con.commit()
+    finally:
+        con.close()
+        shutil.rmtree(base, ignore_errors=True)
+    return out
 
 
 def read_tokenade_claim(home):
@@ -434,7 +602,7 @@ def reconcile(db_path=None):
     delta vs the control arm, per (task, model). Prints a table + a verdict;
     flags any task where the claim diverges from reality by >20%."""
     con = sqlite3.connect(db_path or DB_PATH)
-    con.execute(SCHEMA)
+    con.executescript(SCHEMA)
     try:
         con.execute("ALTER TABLE runs ADD COLUMN tokenade_claim_weighted INTEGER")
     except sqlite3.OperationalError:
@@ -529,6 +697,23 @@ def cmd_run(args):
         print(f"hard budget: ${args.budget_usd:.2f}")
     print(f"model={args.model}  claude={cver}\n")
 
+    # MCP preflight — once per (competitor, claude_version), cached in
+    # mcp_health; a broken server must fail loudly, not burn API money and
+    # surface as fake "0 adoption".
+    if not getattr(args, "skip_mcp_healthcheck", False):
+        unhealthy = set()
+        for c in comp_names:
+            if not comps[c].get("mcp") or not any(k[0] == c for k in todo):
+                continue
+            res = ensure_mcp_health(comps[c], cver)
+            bad = {s: e for s, (ok, e) in res.items() if not ok}
+            if bad:
+                unhealthy.add(c)
+                print(f"!! MCP healthcheck FAILED for '{c}': {bad}\n"
+                      f"   -> its planned runs are SKIPPED. Fix the install "
+                      f"(or force with --skip-mcp-healthcheck).")
+        todo = [k for k in todo if k[0] not in unhealthy]
+
     spent = 0.0
     done = 0
     # `plan` interleaves reps so temporal drift (API conditions, model
@@ -552,7 +737,7 @@ def _control_turns(task_id, cver, comp_name="control"):
     """num_turns of every OK run for this (competitor, task) at this CC
     version — the campaign-scoped sample the stabilization rule grows."""
     con = sqlite3.connect(DB_PATH)
-    con.execute(SCHEMA)
+    con.executescript(SCHEMA)
     rows = con.execute(
         "SELECT num_turns FROM runs WHERE competitor=? AND task=? "
         "AND status='ok' AND claude_version=? AND num_turns IS NOT NULL",
@@ -591,6 +776,11 @@ def cmd_stabilize(args):
     print(f"stabilize: {comp['name']} @ {cver}  model={args.model}\n"
           f"  criterion: nmin={args.nmin} nmax={args.nmax} "
           f"rel_SEM<={args.tol}\n")
+    if comp.get("mcp") and not getattr(args, "skip_mcp_healthcheck", False):
+        res = ensure_mcp_health(comp, cver)
+        bad = {s: e for s, (ok, e) in res.items() if not ok}
+        if bad:
+            sys.exit(f"MCP healthcheck failed for '{comp['name']}': {bad}")
     if args.budget_usd:
         print(f"hard budget: ${args.budget_usd:.2f}\n")
     spent = 0.0
@@ -600,7 +790,7 @@ def cmd_stabilize(args):
         # rep index must be globally unique for this (comp,task); count ALL
         # recorded runs (any version) so a fresh campaign never reuses an id
         con = sqlite3.connect(DB_PATH)
-        con.execute(SCHEMA)
+        con.executescript(SCHEMA)
         rep = (con.execute("SELECT COUNT(*) FROM runs WHERE competitor=? "
                            "AND task=?", (comp["name"], t)).fetchone()[0]) + 1
         con.close()
@@ -695,6 +885,9 @@ def main():
         p.add_argument("--keep-workspaces", action="store_true")
         p.add_argument("--rerun", action="store_true",
                        help="ignore completed runs instead of resuming")
+        p.add_argument("--skip-mcp-healthcheck", action="store_true",
+                       help="skip the once-per-campaign MCP server "
+                            "handshake preflight")
     ps = sub.add_parser("stabilize",
                         help="run a competitor (default control) per task "
                              "until its mean num_turns stabilizes")
@@ -709,6 +902,7 @@ def main():
                     help="stop when relative SEM of the mean <= tol")
     ps.add_argument("--budget-usd", type=float, default=None)
     ps.add_argument("--keep-workspaces", action="store_true")
+    ps.add_argument("--skip-mcp-healthcheck", action="store_true")
     args = ap.parse_args()
     if args.cmd == "list":
         cmd_list(args)

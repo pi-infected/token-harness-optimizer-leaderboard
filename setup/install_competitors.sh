@@ -10,13 +10,18 @@
 #
 # Tools NOT listed here need no global binary — the runner launches them via
 # npx / their MCP entry / a dropped-in file, fully inside the per-run sandbox:
-#   claude-context (npx @zilliz/claude-context-mcp@0.1.14, needs OPENAI_API_KEY),
-#   claude-mem (npx claude-mem@13.5.4 install), token-optimizer-mcp
+#   caveman (npx -y github:JuliusBrussee/caveman#v1.9.0), ponytail (plugin
+#   cloned into the sandbox config), claude-context (npx
+#   @zilliz/claude-context-mcp@0.1.14, needs OPENAI_API_KEY), claude-mem
+#   (npx claude-mem@13.5.4 install), token-optimizer-mcp
 #   (npx @ooples/token-optimizer-mcp@5.0.1), claude-token-efficient (CLAUDE.md
-#   drop-in @ b32fa8b), code-review-graph (pip, CLI self-registers MCP).
+#   drop-in @ b32fa8b).
 #
-# Prerequisites: node>=18 + npm, Rust + cargo, uv. Versions used when this
-# board was last run: node v22.21.1, npm 11.6.4.
+# serena is NOT installed: excluded from the board by the COMPETITORS.md
+# scope rule (LSP refactoring toolkit, not a token optimizer).
+#
+# Prerequisites: node>=18 + npm, Rust + cargo, uv, curl. Versions used when
+# this board was last run: node v22.21.1, npm 11.6.4.
 set -euo pipefail
 
 echo ">> codegraph 0.9.9 (npm)"
@@ -24,7 +29,9 @@ npm install -g @colbymchenry/codegraph@0.9.9
 
 echo ">> lean-ctx 3.8.4 (npm prebuilt binary)"
 # README also offers install.sh / brew / cargo; we pin the npm binary.
-# Do NOT run `lean-ctx onboard`: it rewrites your shell rc with a hook.
+# The full Claude Code integration (`lean-ctx onboard --yes`: hooks, skill,
+# CLAUDE.md, permissions) runs per-run inside the sandbox HOME — see
+# competitors/lean-ctx/manifest.json setup_commands.
 npm install -g lean-ctx-bin@3.8.4
 
 echo ">> rtk v0.42.3 (cargo, from git tag)"
@@ -33,15 +40,33 @@ cargo install --git https://github.com/rtk-ai/rtk --tag v0.42.3 rtk
 echo ">> squeez 1.22.1 (cargo)"
 cargo install squeez@1.22.1
 
-echo ">> serena v1.5.3 (uv tool, from git)"
-uv tool install --from git+https://github.com/oraios/serena@v1.5.3 serena
+echo ">> graphify 0.8.49 (uv tool, PyPI package 'graphifyy')"
+uv tool install graphifyy==0.8.49
+
+echo ">> headroom 0.27.0 (uv tool)"
+uv tool install "headroom-ai[all]==0.27.0"
+
+echo ">> code-review-graph 2.3.6 (uv tool)"
+uv tool install code-review-graph==2.3.6
+
+echo ">> edgee v0.2.12 (pinned release binary, sha256-verified)"
+# README's `curl -fsSL https://edgee.ai/install.sh | bash` installs latest;
+# THOL pins the release asset instead so campaigns are reproducible.
+EDGEE_URL="https://github.com/edgee-ai/edgee/releases/download/v0.2.12"
+EDGEE_TMP="$(mktemp -d)"
+curl -fsSL -o "$EDGEE_TMP/edgee" "$EDGEE_URL/edgee.x86_64-unknown-linux-gnu"
+curl -fsSL -o "$EDGEE_TMP/edgee.sha256" "$EDGEE_URL/edgee.x86_64-unknown-linux-gnu.sha256"
+(cd "$EDGEE_TMP" && sha256sum -c <(awk '{print $1"  edgee"}' edgee.sha256))
+install -m755 "$EDGEE_TMP/edgee" "$HOME/.local/bin/edgee"
+rm -rf "$EDGEE_TMP"
 
 echo
 echo "Installed binaries:"
-for b in codegraph lean-ctx rtk squeez serena; do
-  printf '  %-10s ' "$b"; command -v "$b" || echo "(MISSING — check the step above)"
+for b in codegraph lean-ctx rtk squeez graphify headroom code-review-graph edgee; do
+  printf '  %-18s ' "$b"; command -v "$b" || echo "(MISSING — check the step above)"
 done
 echo
 echo "Now verify the whole pipeline before a real campaign:"
 echo "  python3 runner.py list        # all competitors should appear"
 echo "  python3 runner.py selftest    # verifiers must pass on empty workspaces"
+echo "  (runner.py run performs a once-per-campaign MCP healthcheck automatically)"
