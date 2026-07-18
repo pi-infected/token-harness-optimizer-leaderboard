@@ -138,12 +138,12 @@
 
   <h2 data-i18n="foundH2">What we found so far</h2>
   <p class="sub" data-i18n="foundP1">Most tools in the table post a <b>positive</b> number on long sessions — but <b>only one of them is
-     distinguishable from noise</b>. Across the full battery exactly one is significantly cheaper than the
-     control — <code>tokenade</code>, which is maintained by this benchmark's author (see <b>Impartiality</b>
-     below) — and two are significantly more expensive: <code>lean-ctx</code> and <code>headroom</code>. Every
-     other tool's confidence interval spans the control. <code>edgee</code>'s +14.7%, for instance, carries an
-     interval running from <b>−11% to +37%</b>: on ten runs per task, a real 15% saving and a real 10% penalty
-     both fit the data.</p>
+     distinguishable from noise</b>. Read the <b>95% CI</b> column: only <code>tokenade</code> sits clear of the
+     control on the cheaper side, and only <code>headroom</code> on the more expensive side. Every other interval
+     spans 0%. <code>edgee</code>'s +14.7%, for instance, runs from <b>−11% to +37%</b>: on ten runs per task, a
+     real 15% saving and a real 10% penalty both fit the data. Across the full 17-task battery
+     <code>lean-ctx</code> also comes out significantly more expensive. Note that the one tool that does separate
+     from the control is maintained by this benchmark's author — see <b>Impartiality</b> below.</p>
   <p class="sub" data-i18n="foundP1b"><b>That is a limit of this benchmark as much as a verdict on the tools.</b> Agent runs are noisy and
      ten runs per task only resolves large effects; a genuine saving of a few percent would not show up here as
      anything but noise. So the honest reading of a mid-table row is <b>“not shown to help”</b>, not “shown not
@@ -294,20 +294,40 @@ function renderTables(d){
     name==="control" ? "—" : naSet.has(name) ? naLabel : `${adoption}/${n}`;
 
   const TH = `<th class="num">#</th><th>${t("thOpt","Optimizer")}</th>
-      <th class="num">${t("thRed","mean cost reduction")}</th><th class="num">${t("thAdopt","adoption")}</th>
+      <th class="num">${t("thRed","mean cost reduction")}</th>
+      <th class="num">${t("thCI","95% CI")}</th><th>${t("thVerdict","vs control")}</th>
+      <th class="num">${t("thAdopt","adoption")}</th>
       <th class="num">${t("thIn","input token")}</th><th class="num">${t("thOut","output token")}</th>
       <th class="num">${t("thCache","cache token")}</th>`;
+
+  // An interval that straddles 0% means the measurement cannot tell this tool
+  // apart from the control — the headline percentage alone would over-claim.
+  const sgn = x => (x>=0?"+":"−")+Math.abs(x).toFixed(0);
+  const ciCell = (lo,hi) => (lo==null||hi==null) ? "—"
+    : `${sgn(lo)} … ${sgn(hi)}%`;
+  const verdictCell = (lo,hi,isCtrl) => {
+    if(isCtrl) return `<span class="pill">${t("baseline","baseline")}</span>`;
+    if(lo==null||hi==null) return "—";
+    if(lo>0)  return `<b style="color:var(--good)">${t("vCheap","cheaper")}</b>`;
+    if(hi<0)  return `<b style="color:var(--bad)">${t("vExp","more expensive")}</b>`;
+    return `<span style="color:var(--mut)">${t("vNs","not distinguishable")}</span>`;
+  };
 
   // ===== HEADLINE =====
   const hrows = (d.headline||[]).map((e,i)=>{
     const isCtrl = e.competitor==="control";
     const c = d.competitors[e.competitor]||{};
     const p = e.cost_reduction_pct;
+    const lo = e.ci_lo_pct, hi = e.ci_hi_pct;
     const tk = e.tokens||{};
+    // grey out a percentage its own interval does not support
+    const ns = !isCtrl && lo!=null && hi!=null && lo<=0 && hi>=0;
     return `<tr${isCtrl?' style="opacity:.85"':''}>
       <td class="num">${i+1}</td>
       <td><b>${e.competitor}</b>${isCtrl?` <span class="pill">${t("baseline","baseline")}</span>`:(c.version?` <span class="pill">${c.version}</span>`:"")}</td>
-      <td class="num ratio ${isCtrl?'':redClass(p)}">${pct(p)}${e.no_adoption?'<sup>*</sup>':''}</td>
+      <td class="num ratio ${isCtrl||ns?'r-warn':redClass(p)}"${ns?' style="opacity:.6"':''}>${pct(p)}${e.no_adoption?'<sup>*</sup>':''}</td>
+      <td class="num" style="font-size:13px;color:var(--mut);white-space:nowrap">${ciCell(lo,hi)}</td>
+      <td style="font-size:13px">${verdictCell(lo,hi,isCtrl)}</td>
       <td class="num">${adoptCell(e.competitor, e.adoption, e.n_runs)}</td>
       <td class="num">${kTok(tk.input)}</td>
       <td class="num">${kTok(tk.output)}</td>
@@ -323,7 +343,7 @@ function renderTables(d){
     ${(d.headline||[]).some(e=>e.no_adoption) ? `<p class="meta"><sup>*</sup> ${t("headlineStar","Effectively zero adoption this campaign: the agent almost never called this tool's MCP/skill. The figure shown is its measured end-to-end effect — the tool's standing overhead (schemas/prompts re-billed every turn) plus run-to-run noise — not its capability when used. Treat the ranking of a starred row as undetermined.")}</p>` : ""}
     ${(d.no_token_accounting||[]).some(c=>(d.headline||[]).some(e=>e.competitor===c)) ? `<p class="meta">${tf("headlineNoTok","<code>{tools}</code> route through a gateway that strips usage from the result stream: cost is measured normally, but per-run token counts come back empty and are shown as “—”. That is missing accounting, not zero consumption.",{tools:(d.no_token_accounting||[]).join(", ")})}</p>` : ""}
     <p class="meta">${tf("headlineMeta",
-      "Model <code>{model}</code> · Claude Code <code>{cc}</code> · {n} long task(s), 10 runs each · higher % = cheaper. <b>Every figure here is a mean</b> — cost reduction is averaged across tasks, the token columns are mean tokens per run. <b>The one exception is adoption</b>, which is a count: the number of runs (out of the total) in which the agent actually called the tool.",
+      "Model <code>{model}</code> · Claude Code <code>{cc}</code> · {n} long task(s), 10 runs each · higher % = cheaper. <b>Every figure here is a mean</b> — cost reduction is averaged across tasks, the token columns are mean tokens per run. <b>The one exception is adoption</b>, which is a count: the number of runs (out of the total) in which the agent actually called the tool. <b>The 95% CI column is the range the true effect is consistent with</b> (bootstrap, 10,000 resamples): when it spans 0% the tool cannot be told apart from the control on this sample, and its percentage is greyed out — read it as “not shown to help”, not “shown not to help”.",
       {model:(d.model||[]).join(", "), cc:(d.claude_versions||[]).join(", "), n:d.headline_n_tasks})}</p>`;
 
 
