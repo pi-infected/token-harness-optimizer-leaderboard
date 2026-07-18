@@ -62,15 +62,10 @@ ADOPTION_NA = {"rtk", "claude-token-efficient", "caveman", "ponytail",
 # schema overhead every turn — pinning it to 0 would hide that).
 OPT_IN_ADOPTION = {"codegraph", "code-review-graph", "graphify"}
 
-# Arms kept in the DB but not aggregated: serena is out of scope
-# (COMPETITORS.md inclusion rule); lean-ctx's 2.1.183 arm ran a degraded
-# install (MCP only, missing its `onboard` hooks) and awaits a re-run.
-EXCLUDED_ARMS = {"serena", "serena-gsp", "lean-ctx", "lean-ctx-gsp"}
-
-# A "generous system prompt" only makes sense for tools the agent explicitly
-# calls; pointless for a hook/proxy with nothing to call.
-NO_GSP = {"rtk", "edgee"}
-
+# Tools that proxy through a gateway which does not report usage in the result
+# stream: cost is measured normally, per-run token counts come back empty.
+# Reported as n/a so an absent measurement is not read as zero consumption.
+NO_TOKEN_ACCOUNTING = {"edgee"}
 
 def _vkey(v):
     """Sortable key for a claude_version string like '2.1.177 (Claude Code)'."""
@@ -109,34 +104,21 @@ def rows(campaign=None):
     #  * tasks — only those still present in tasks/ (see active_tasks): the
     #    trivially-short tasks (control < ~5 turns) were moved out, which
     #    removes them from every aggregate here.
-    #  * '*-gsp' arms — the "generous system prompt" experiment (a verbose
-    #    per-tool prompt teaching the agent which CLI/MCP function to use when).
-    #    It made costs WORSE (overhead, ~no extra adoption), so it's reported in
-    #    the methodology, not mixed into the headline tool ranking.
     #  * 'learned-hook' / 'tokenade-forced' — defensive exclusion of legacy
     #    internal experiment arms, should they ever reappear in a results DB.
     keep = active_tasks()
     out = [dict(r) for r in con.execute(
         "SELECT * FROM runs WHERE status='ok' AND score IS NOT NULL "
         "AND claude_version=? "
-        "AND competitor NOT IN ('learned-hook','tokenade-forced') "
-        "AND competitor NOT LIKE '%-gsp'",
+        "AND competitor NOT IN ('learned-hook','tokenade-forced')",
         (campaign,))
-        if r["task"] in keep and r["competitor"] not in EXCLUDED_ARMS]
+        if r["task"] in keep]
     bad = [dict(r) for r in con.execute(
         "SELECT competitor, task, status, COUNT(*) n FROM runs "
         "WHERE status!='ok' AND claude_version=? "
-        "GROUP BY competitor, task, status", (campaign,))
-        if r["competitor"] not in EXCLUDED_ARMS]
-    # The '*-gsp' arms (generous system prompt) — kept separate so the GSP
-    # comparison table can show that the verbose prompt raised cost.
-    gsp = [dict(r) for r in con.execute(
-        "SELECT * FROM runs WHERE status='ok' AND score IS NOT NULL "
-        "AND claude_version=? AND competitor LIKE '%-gsp'",
-        (campaign,))
-        if r["task"] in keep and r["competitor"] not in EXCLUDED_ARMS]
+        "GROUP BY competitor, task, status", (campaign,))]
     con.close()
-    return out, gsp, bad, campaign
+    return out, bad, campaign
 
 
 
@@ -176,7 +158,7 @@ def boot_aggregate(pairs, rng):
     return draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws))]
 
 
-def compute(ok, gsp, bad):
+def compute(ok, bad):
     """Single source of truth: returns a structured dict consumed by both the
     markdown renderer and the JSON export. The RNG is advanced in a fixed
     order (competitors sorted, tasks sorted) so results are reproducible."""
@@ -300,6 +282,8 @@ def compute(ok, gsp, bad):
             ins.append(st.mean([r["cache_creation_tokens"] or 0 for r in rs]))
             outs.append(st.mean([r["output_tokens"] or 0 for r in rs]))
             cas.append(st.mean([r["cache_read_tokens"] or 0 for r in rs]))
+        if comp in NO_TOKEN_ACCOUNTING:
+            return {"input": None, "output": None, "cache": None}
         return {"input": round(st.mean(ins)) if ins else 0,
                 "output": round(st.mean(outs)) if outs else 0,
                 "cache": round(st.mean(cas)) if cas else 0}
@@ -377,41 +361,6 @@ def compute(ok, gsp, bad):
         })
     headline.sort(key=lambda e: e["cost_ratio"])
 
-    # ---- GSP comparison: same headline computation, but for the "+GSP"
-    # (generous system prompt) arms, with the delta vs the same tool WITHOUT
-    # the prompt. Shows that the verbose prompt raised cost. base→headline%.
-    by_gsp = defaultdict(list)
-    for r in gsp:
-        by_gsp[(r["competitor"], r["task"])].append(r)
-    base_red = {e["competitor"]: e["cost_reduction_pct"] for e in headline}
-    headline_gsp = []
-    for gc in sorted({c for c, _ in by_gsp}):
-        base = gc[:-4] if gc.endswith("-gsp") else gc
-        if base in NO_GSP:
-            continue
-        rs, nrun, adopt = [], 0, 0
-        for t in big:
-            gr = by_gsp.get((gc, t), [])
-            gcosts = [r["total_cost_usd"] for r in gr
-                      if r["success"] and r["total_cost_usd"] is not None]
-            nrun += len(gr)
-            adopt += sum(1 for r in gr if (r["competitor_tool_calls"] or 0) > 0)
-            if gcosts and ctrl_succ_costs.get(t):
-                rs.append(st.mean(gcosts) / st.mean(ctrl_succ_costs[t]))
-        if not rs:
-            continue
-        red = round((1 - math.exp(st.mean(list(map(math.log, rs))))) * 100, 1)
-        headline_gsp.append({
-            "competitor": gc, "base": base,
-            "cost_reduction_pct": red,
-            # delta in percentage points vs the same tool without GSP (None if
-            # the base tool wasn't comparable on these long tasks)
-            "delta_vs_base_pp": (round(red - base_red[base], 1) if base in base_red else None),
-            "adoption": adopt, "n_runs": nrun, "tasks_compared": len(rs),
-            "tokens": mean_tokens(gc, big, by_gsp),
-        })
-    headline_gsp.sort(key=lambda e: -e["cost_reduction_pct"])
-
     return {
         "params": {"bootstrap_draws": BOOT, "seed": SEED, "ci": "95%"},
         "model": sorted({r.get("model") for r in ok if r.get("model")}),
@@ -421,9 +370,10 @@ def compute(ok, gsp, bad):
         "headline_min_tokens": HEADLINE_MIN,
         "headline_n_tasks": len(big),
         "headline": headline,
-        "headline_gsp": headline_gsp,
         "adoption_na": sorted(ADOPTION_NA),
         "no_adoption": sorted(no_adoption_flags),
+        "opt_in_adoption": sorted(OPT_IN_ADOPTION),
+        "no_token_accounting": sorted(NO_TOKEN_ACCOUNTING),
         "token_bands": bands,
         # control's per-task token breakdown (the baseline shown in the detail)
         "control_per_task": {t: {
@@ -522,10 +472,10 @@ def render_md(d):
 def main():
     if not DB.exists():
         sys.exit("no results.sqlite yet — run runner.py first")
-    ok, gsp, bad, campaign = rows()
+    ok, bad, campaign = rows()
     if not ok:
         sys.exit(f"no OK runs for campaign {campaign!r} — check THOL_CAMPAIGN")
-    d = compute(ok, gsp, bad)
+    d = compute(ok, bad)
     d["campaign"] = campaign
     md = render_md(d)
     (ROOT / "leaderboard.md").write_text(md)

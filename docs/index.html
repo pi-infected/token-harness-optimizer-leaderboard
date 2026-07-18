@@ -146,8 +146,7 @@
         difficult; getting a <i>net win</i> is harder still, because the tool has to be used <b>in the right
         context</b>. When it isn't, the agent gets a poor result, falls back to its normal way of working
         (re-reading, re-searching) — <b>and learns the tool is unhelpful, so it stops calling it</b>. You pay the
-        tokens for the failed call <i>and</i> lose future adoption. (We even tried forcing adoption with a verbose
-        system prompt — it still cost more; see the GSP experiment below.)</li>
+        tokens for the failed call <i>and</i> lose future adoption.</li>
     <li data-i18n="whyLi2"><b>Lossy output compression makes the agent re-fetch.</b> For tools that compress command/CLI output, if the
         compaction drops the bytes the model actually needed, the model simply <b>re-runs the command</b> — often
         bypassing the tool — to recover them. Net result: more turns, more tokens, the opposite of the advertised
@@ -182,7 +181,6 @@
 
   <div id="detail"></div>
 
-  <div id="gsp"></div>
 
   <h2 data-i18n="imparH2">Impartiality</h2>
   <p class="sub" data-i18n="imparP">This benchmark is maintained by the author of one of the measured tools (tokenade). The conflict is
@@ -229,17 +227,21 @@ const redOfRatio = r => r==null? null : (1-r)*100;
 const kTok = n => { if(n==null) return "—"; if(n>=1e6) return (n/1e6).toFixed(2)+"M"; if(n>=1e3) return (n/1e3).toFixed(2)+"k"; return ""+n; };
 
 // tools list (language-neutral names + URLs; tokenade → tokenade.net)
+// The 12 arms actually measured in this campaign (control excluded — it is
+// vanilla Claude Code, not a tool). Keep in sync with competitors/*/manifest
+// `upstream`: an entry here that was not benchmarked implies a result exists.
 const TOOLS = [
-  ["claude-context","https://github.com/zilliztech/claude-context"],
-  ["claude-mem","https://github.com/thedotmack/claude-mem"],
+  ["caveman","https://github.com/JuliusBrussee/caveman"],
   ["claude-token-efficient","https://github.com/drona23/claude-token-efficient"],
   ["codegraph","https://github.com/colbymchenry/codegraph"],
   ["code-review-graph","https://github.com/tirth8205/code-review-graph"],
   ["edgee","https://github.com/edgee-ai/edgee"],
+  ["graphify","https://github.com/safishamsi/graphify"],
+  ["headroom","https://github.com/headroomlabs-ai/headroom"],
   ["lean-ctx","https://github.com/yvgude/lean-ctx"],
+  ["ponytail","https://github.com/DietrichGebert/ponytail"],
   ["rtk","https://github.com/rtk-ai/rtk"],
   ["squeez","https://github.com/claudioemmanuel/squeez"],
-  ["token-optimizer-mcp","https://github.com/ooples/token-optimizer-mcp"],
   ["tokenade","https://tokenade.net"]
 ];
 function renderTools(){
@@ -296,37 +298,12 @@ function renderTables(d){
       <thead><tr>${TH}</tr></thead>
       <tbody>${hrows}</tbody>
     </table></div>
-    ${(d.headline||[]).some(e=>e.no_adoption) ? `<p class="meta"><sup>*</sup> ${t("headlineStar","Zero adoption this campaign: the agent never called this tool's MCP/skill. The figure shown is its measured end-to-end effect — the tool's standing overhead (schemas/prompts re-billed every turn) plus run-to-run noise — not its capability when used.")}</p>` : ""}
+    ${(d.headline||[]).some(e=>e.no_adoption) ? `<p class="meta"><sup>*</sup> ${t("headlineStar","Effectively zero adoption this campaign: the agent almost never called this tool's MCP/skill. The figure shown is its measured end-to-end effect — the tool's standing overhead (schemas/prompts re-billed every turn) plus run-to-run noise — not its capability when used. Treat the ranking of a starred row as undetermined.")}</p>` : ""}
+    ${(d.no_token_accounting||[]).some(c=>(d.headline||[]).some(e=>e.competitor===c)) ? `<p class="meta">${tf("headlineNoTok","<code>{tools}</code> route through a gateway that strips usage from the result stream: cost is measured normally, but per-run token counts come back empty and are shown as “—”. That is missing accounting, not zero consumption.",{tools:(d.no_token_accounting||[]).join(", ")})}</p>` : ""}
     <p class="meta">${tf("headlineMeta",
       "Model <code>{model}</code> · Claude Code <code>{cc}</code> · {n} long task(s), 10 runs each · higher % = cheaper. <b>Every figure here is a mean</b> — cost reduction is averaged across tasks, the token columns are mean tokens per run. <b>The one exception is adoption</b>, which is a count: the number of runs (out of the total) in which the agent actually called the tool.",
       {model:(d.model||[]).join(", "), cc:(d.claude_versions||[]).join(", "), n:d.headline_n_tasks})}</p>`;
 
-  // ===== GSP =====
-  const gsp = d.headline_gsp||[];
-  if(gsp.length){
-    const grows = gsp.map((e,i)=>{
-      const p = e.cost_reduction_pct, dl = e.delta_vs_base_pp;
-      const delta = (dl==null)? "" : ` <span class="pill" style="color:${dl>0?'var(--good)':'var(--bad)'}">${pct(dl).replace('%','pp')} ${t("vsBase","vs base")}</span>`;
-      const tk = e.tokens||{};
-      return `<tr>
-        <td class="num">${i+1}</td>
-        <td>${e.base} <span class="pill">+GSP</span></td>
-        <td class="num ratio ${redClass(p)}">${pct(p)}${delta}</td>
-        <td class="num">${adoptCell(e.base, e.adoption, e.n_runs)}</td>
-        <td class="num">${kTok(tk.input)}</td>
-        <td class="num">${kTok(tk.output)}</td>
-        <td class="num">${kTok(tk.cache)}</td>
-      </tr>`;
-    }).join("");
-    document.getElementById("gsp").innerHTML = `
-      <h2>${t("gspH2",'Can a "generous system prompt" (GSP) fix it?')}</h2>
-      <p class="sub">${t("gspIntro",
-        'Following on from reason #1 above: we tried to <b>force adoption</b>. Each tool is re-run on the same long sessions with a verbose, per-tool system prompt telling the agent exactly which of its functions to use when. <b>The pill is the change vs the same tool without the prompt</b> (percentage points of cost reduction). For some tools adoption <i>did</i> rise (e.g. token-optimizer-mcp 1%→25%, squeez 0.5%→21%), yet it mostly made cost <b>worse</b>: the prompt is billed every turn and the tools still don\'t pay for themselves even when used. (Hook/prompt tools, and tools without a GSP arm, are omitted.)')}</p>
-      <div class="card"><table>
-        <thead><tr>${TH}</tr></thead>
-        <tbody>${grows}</tbody>
-      </table></div>`;
-  } else { document.getElementById("gsp").innerHTML = ""; }
 
   // ===== DETAIL: per session-size band =====
   const THband = `<th class="num">#</th><th>${t("thOpt","Optimizer")}</th><th class="num">${t("thRed","mean cost reduction")}</th>

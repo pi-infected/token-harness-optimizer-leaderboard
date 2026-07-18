@@ -1,9 +1,11 @@
 {
- "id": "code-settings-inventory-django",
- "title": "Goal-driven heavy collection: inventory settings usage across Django",
- "kind": "code",
- "workspace": {"repo": "django"},
- "max_turns": 40,
- "timeout_s": 2400,
- "success_threshold": 0.7
+  "id": "code-settings-inventory-django",
+  "title": "Goal-driven heavy collection: inventory settings usage across Django",
+  "kind": "code",
+  "workspace": {
+    "repo": "django"
+  },
+  "max_turns": 60,
+  "timeout_s": 2400,
+  "success_threshold": 0.7
 }

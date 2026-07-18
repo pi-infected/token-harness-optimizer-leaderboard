@@ -49,8 +49,8 @@ def row(cells, widths):
 
 
 def main():
-    ok, gsp, bad, campaign = rows()
-    d = compute(ok, gsp, bad)
+    ok, bad, campaign = rows()
+    d = compute(ok, bad)
     print(f"Campaign: {campaign}   model: {', '.join(d['model'])}")
     print(f"Tasks scored: {len(d['tasks'])}   (headline = {d['headline_n_tasks']} "
           f"tasks where control > {d['headline_min_tokens']:,} tokens)\n")
@@ -64,18 +64,6 @@ def main():
         adopt = "—" if e["competitor"] == "control" else f"{e['adoption']}/{e['n_runs']}"
         print(row([i, e["competitor"], pct(e["cost_reduction_pct"]), adopt,
                    ktok(t.get("input")), ktok(t.get("output")), ktok(t.get("cache"))], W))
-
-    # ---- GSP comparison (Δ vs the same tool without the generous prompt) ----
-    if d.get("headline_gsp"):
-        print("\n== GENEROUS SYSTEM PROMPT — long sessions, Δ vs base ==")
-        print(row(["#", "optimizer", "cost reduction", "Δ vs base", "adoption", "input tok", "output tok", "cache tok"],
-                  [3, 24, 16, 12, 12, 12, 12, 12]))
-        for i, e in enumerate(d["headline_gsp"], 1):
-            t = e.get("tokens", {})
-            dl = "—" if e["delta_vs_base_pp"] is None else (f"+{e['delta_vs_base_pp']:.1f}pp" if e["delta_vs_base_pp"] >= 0 else f"{e['delta_vs_base_pp']:.1f}pp")
-            print(row([i, e["base"] + "+GSP", pct(e["cost_reduction_pct"]), dl,
-                       f"{e['adoption']}/{e['n_runs']}", ktok(t.get("input")), ktok(t.get("output")), ktok(t.get("cache"))],
-                      [3, 24, 16, 12, 12, 12, 12, 12]))
 
     # ---- TOKEN-BAND tables ----
     for b in d["token_bands"]:

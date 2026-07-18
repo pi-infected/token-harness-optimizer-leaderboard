@@ -156,8 +156,17 @@ def build_env(cfgdir, manifest):
     # PATH hygiene: host command shims (e.g. a dir wrapping node/python)
     # can silently mute stdio MCP servers spawned through them — strip them.
     # The effective PATH is recorded per run in the env.json artifact.
-    env["PATH"] = ":".join(p for p in env.get("PATH", "").split(":")
-                           if "/.tokenade/" not in p)
+    # Pin Claude Code to a fixed version. The machine's `claude` symlink can be
+    # flipped by CC's auto-updater or a parallel interactive session, silently
+    # running a different harness version mid-campaign (a reproducibility hole:
+    # cost/turns shift with the version). A bench-owned bin dir holding a
+    # `claude` -> versions/<pinned> symlink, prepended to PATH, makes every run
+    # use the pinned binary regardless of the global symlink — including edgee,
+    # whose `edgee launch claude` resolves `claude` via PATH.
+    pin = str(ROOT / ".claude-pin")
+    env["PATH"] = pin + ":" + ":".join(
+        p for p in env.get("PATH", "").split(":")
+        if "/.tokenade/" not in p and p != pin)
     env["HOME"] = str(cfgdir.parent)
     env["CLAUDE_CONFIG_DIR"] = str(cfgdir)
     env["CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC"] = "1"
@@ -668,6 +677,19 @@ def cmd_run(args):
     # triples and redoes only what is missing. --rerun forces everything.
     env0 = build_env(Path("/tmp"), {})
     cver = claude_version(env0)
+    # Refuse to run if the harness is not the pinned campaign version. Claude
+    # Code prunes old builds, which can leave .claude-pin/claude dangling and
+    # PATH resolving to another version; since resume is keyed on
+    # claude_version, that would start a fresh campaign instead of continuing
+    # this one. Fail loudly rather than measure under a different harness.
+    want = os.environ.get("THOL_CAMPAIGN")
+    if want and not cver.startswith(want):
+        sys.exit(f"campaign pin mismatch: THOL_CAMPAIGN={want} but claude is "
+                 f"{cver!r}.\nThe .claude-pin/claude symlink is dangling or "
+                 f"wrong — repoint it at a {want} binary (npm install --prefix "
+                 f".cache/claude-{want.split('.')[-1]} "
+                 f"@anthropic-ai/claude-code@{want}), or unset THOL_CAMPAIGN to "
+                 f"deliberately start a new campaign at {cver}.")
     # resume is CAMPAIGN-AWARE: only runs recorded under the SAME
     # claude_version count as "done". A new Claude Code release therefore
     # re-measures every cell from scratch instead of silently inheriting the
@@ -697,6 +719,19 @@ def cmd_run(args):
         print(f"hard budget: ${args.budget_usd:.2f}")
     print(f"model={args.model}  claude={cver}\n")
 
+    # Binary preflight — a competitor whose `requires` binary vanished from
+    # PATH (an installer removing a rival, an npm/cargo prune) would otherwise
+    # log one install_error per planned run. Check once, skip its cells.
+    missing = {c: [b for b in comps[c].get("requires") or []
+                   if not shutil.which(b, path=env0.get("PATH"))]
+               for c in comp_names}
+    absent = {c: b for c, b in missing.items() if b and any(k[0] == c for k in todo)}
+    for c, bins in absent.items():
+        print(f"!! required binary missing for '{c}': {bins}\n"
+              f"   -> its planned runs are SKIPPED. Install it, then relaunch "
+              f"(setup/install_competitors.sh).")
+    todo = [k for k in todo if k[0] not in absent]
+
     # MCP preflight — once per (competitor, claude_version), cached in
     # mcp_health; a broken server must fail loudly, not burn API money and
     # surface as fake "0 adoption".
@@ -716,6 +751,7 @@ def cmd_run(args):
 
     spent = 0.0
     done = 0
+    streak = 0  # consecutive infrastructure failures
     # `plan` interleaves reps so temporal drift (API conditions, model
     # updates) spreads evenly across competitors instead of biasing one
     for c, t, rep in todo:
@@ -731,6 +767,16 @@ def cmd_run(args):
               f"turns={r['num_turns']} "
               f"wall={(r['wall_ms'] or 0) / 1000:.0f}s "
               f"(total ${spent:.2f})", flush=True)
+        # An environment failure (expired credentials, API outage) hits every
+        # run alike and marches through the whole plan in minutes, leaving a
+        # campaign of empty rows. Stop on a streak so the cause can be fixed
+        # and the campaign resumed.
+        streak = streak + 1 if r["status"] == "claude_error" else 0
+        if streak >= args.max_consecutive_errors:
+            sys.exit(f"\n{streak} consecutive claude_error runs — aborting.\n"
+                     f"last error: {(r['error'] or '')[:200]}\n"
+                     f"Fix the cause, then relaunch the same command: "
+                     f"completed runs are skipped, failed ones are redone.")
 
 
 def _control_turns(task_id, cver, comp_name="control"):
@@ -888,6 +934,9 @@ def main():
         p.add_argument("--skip-mcp-healthcheck", action="store_true",
                        help="skip the once-per-campaign MCP server "
                             "handshake preflight")
+        p.add_argument("--max-consecutive-errors", type=int, default=5,
+                       help="abort after this many consecutive claude_error "
+                            "runs (expired credentials, API outage)")
     ps = sub.add_parser("stabilize",
                         help="run a competitor (default control) per task "
                              "until its mean num_turns stabilizes")

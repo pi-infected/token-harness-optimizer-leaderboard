@@ -1,137 +1,137 @@
 {
- "name": "tokenade",
- "display_name": "Tokenade",
- "verified": true,
- "version_pin": "0.8.13",
- "version_checked": "2026-07-10",
- "upstream": "https://tokenade.net",
- "install_doc": "Faithful replica of what `tokenade install --only claude-code --yes` (0.8.13) writes by default: hooks only, no MCP server for Claude Code. Captured 2026-07-10 in a sandboxed HOME + CLAUDE_CONFIG_DIR: PostToolUse hookwrap (Bash|Read), hookwrap-postread (Read|Grep), hookwrap-websearch-post (WebSearch), index-touch (Edit|Write|MultiEdit), PreToolUse pre-edit-snapshot + Bash-rewrite (hookwrap-pretool), passive UserPromptSubmit/SessionStart/PreCompact hooks, autoCompactWindow=700000, and the project CLAUDE.md scaffold (the installer also writes an AGENTS.md twin; Claude Code reads CLAUDE.md). Debug-log path rewritten to the per-run sandbox; binary path is absolute, as installed. The installer writes the binary's absolute path into each hook command; it is normalized to the bare `tokenade` name here so the manifest is machine-independent (the runner already enforces `requires: [tokenade]` on PATH).",
- "requires": [
-  "tokenade"
- ],
- "claude_md": "# Project rules for AI coding agents\n\nAuto-scaffolded by tokenade on first MCP session. Safe to edit; the tokenade block below is identified by the HTML marker and will be updated in-place on future tokenade upgrades.\n\n<!-- tokenade-scaffold -->\n## Explore code with the `tokenade` CLI (cheaper than reading whole files)\nUse these only when you don't yet know where code lives — if you know the path, open it directly:\n`tokenade map` (repo structure) · `skeleton <file…>` (signatures) · `query <symbol…>` (locate a symbol) · `impact <file…>` (dependents) · `semantic \"<query>\"` (search by meaning). They take MANY targets per call (`tokenade skeleton a.rs b.rs c.rs`) — batch in ONE turn.\n\n## Compute over data with `tokenade exec`\n`tokenade exec --lang python --script '<code>'` (also sh/node/ruby/awk/jq/perl) runs in a sandbox and returns ONLY its stdout. Use it to COMPUTE over data — filter/aggregate a large or structured output, pull facts across SEVERAL files, or apply one mechanical edit across many files (migration, find-replace) — in ONE script, not one command per item. It is NOT a file reader: to read content, use the parallel reads above, not `exec`. Long or quote-heavy script? `--script-file <path>` (or `--script -` on stdin) avoids shell quoting entirely.\n\n## Commands\nIf you do not have hooks (i.e. you are not Claude Code or Gemini CLI), use `tokenade wrap '<cmd>'` to wrap all your commands. If there is an opportunity for compacting noisy output, tokenade will find it — and you will waste fewer tokens.\nCall binaries by their PATH name, not an absolute path (`git`, not `/usr/bin/git`) — an absolute path bypasses tokenade's hook and PATH shim, so that command's output isn't compacted.\n\n## Keep output lean\nKeep prose terse and code minimal — every token you write is billed as output.\n- **Prose:** answer directly — no preamble, recap, tool-call narration, summary, or emoji. Drop articles, filler (*just/really/basically/simply*) and hedging; fragments fine; short word over long.\n- **Output:** don't paste long raw output — quote the shortest decisive line. No decorative tables.\n- **Code:** write the least that works; reuse before adding (`query` / `skeleton` / `impact`, stdlib, platform feature — YAGNI).\n- **Verbatim:** keep code, identifiers, API/CLI names and error strings exact — never abbreviate or paraphrase. Keep the user's language.\n- **Correctness first:** fix root causes not symptoms, don't downgrade the algorithm, don't guess APIs/flags/versions — verify.\n- **Full prose where terseness could mislead:** security/data-loss warnings, irreversible-action confirmations, multi-step sequences.\n<!-- /tokenade-scaffold -->\n",
- "settings": {
-  "_tokenadeAutoCompact": true,
-  "autoCompactWindow": 700000,
-  "env": {
-   "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "700000"
+  "name": "tokenade",
+  "display_name": "Tokenade",
+  "verified": true,
+  "version_pin": "0.8.13",
+  "version_checked": "2026-07-11",
+  "upstream": "https://tokenade.net",
+  "install_doc": "Faithful replica of what `tokenade install --only claude-code --yes` writes. Binary recompiled 2026-07-11 (still self-reports 0.8.13); PreToolUse gate matcher now includes WebSearch.",
+  "requires": [
+    "tokenade"
+  ],
+  "claude_md": "# Project rules for AI coding agents\n\nAuto-scaffolded by tokenade on first MCP session. Safe to edit; the tokenade block below is identified by the HTML marker and will be updated in-place on future tokenade upgrades.\n\n<!-- tokenade-scaffold -->\n## Explore code with the `tokenade` CLI (cheaper than reading whole files)\nUse these only when you don't yet know where code lives \u2014 if you know the path, open it directly:\n`tokenade map` (repo structure) \u00b7 `skeleton <file\u2026>` (signatures) \u00b7 `query <symbol\u2026>` (locate a symbol) \u00b7 `impact <file\u2026>` (dependents) \u00b7 `semantic \"<query>\"` (search by meaning). They take MANY targets per call (`tokenade skeleton a.rs b.rs c.rs`) \u2014 batch in ONE turn.\n\n## Compute over data with `tokenade exec`\n`tokenade exec --lang python --script '<code>'` (also sh/node/ruby/awk/jq/perl) runs in a sandbox and returns ONLY its stdout. Use it to COMPUTE over data \u2014 filter/aggregate a large or structured output, pull facts across SEVERAL files, or apply one mechanical edit across many files (migration, find-replace) \u2014 in ONE script, not one command per item. It is NOT a file reader: to read content, use the parallel reads above, not `exec`. Long or quote-heavy script? `--script-file <path>` (or `--script -` on stdin) avoids shell quoting entirely.\n\n## Commands\nIf you do not have hooks (i.e. you are not Claude Code or Gemini CLI), use `tokenade wrap '<cmd>'` to wrap all your commands. If there is an opportunity for compacting noisy output, tokenade will find it \u2014 and you will waste fewer tokens.\nCall binaries by their PATH name, not an absolute path (`git`, not `/usr/bin/git`) \u2014 an absolute path bypasses tokenade's hook and PATH shim, so that command's output isn't compacted.\n\n## Keep output lean\nKeep prose terse and code minimal \u2014 every token you write is billed as output.\n- **Prose:** answer directly \u2014 no preamble, recap, tool-call narration, summary, or emoji. Drop articles, filler (*just/really/basically/simply*) and hedging; fragments fine; short word over long.\n- **Output:** don't paste long raw output \u2014 quote the shortest decisive line. No decorative tables.\n- **Code:** write the least that works; reuse before adding (`query` / `skeleton` / `impact`, stdlib, platform feature \u2014 YAGNI).\n- **Verbatim:** keep code, identifiers, API/CLI names and error strings exact \u2014 never abbreviate or paraphrase. Keep the user's language.\n- **Correctness first:** fix root causes not symptoms, don't downgrade the algorithm, don't guess APIs/flags/versions \u2014 verify.\n- **Full prose where terseness could mislead:** security/data-loss warnings, irreversible-action confirmations, multi-step sequences.\n<!-- /tokenade-scaffold -->\n",
+  "settings": {
+    "_tokenadeAutoCompact": true,
+    "autoCompactWindow": 700000,
+    "env": {
+      "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "700000"
+    },
+    "hooks": {
+      "PostToolUse": [
+        {
+          "hooks": [
+            {
+              "_tag": "tokenade",
+              "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\''tokenade'\\'' hookwrap 2>/dev/null; exit 0'",
+              "type": "command"
+            }
+          ],
+          "matcher": "Bash|Read"
+        },
+        {
+          "hooks": [
+            {
+              "_tag": "tokenade-postread",
+              "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\''tokenade'\\'' hookwrap-postread 2>/dev/null; exit 0'",
+              "type": "command"
+            }
+          ],
+          "matcher": "Read|Grep"
+        },
+        {
+          "hooks": [
+            {
+              "_tag": "tokenade-websearch-post",
+              "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\''tokenade'\\'' hookwrap-websearch-post 2>/dev/null; exit 0'",
+              "type": "command"
+            }
+          ],
+          "matcher": "WebSearch"
+        },
+        {
+          "hooks": [
+            {
+              "_tag": "tokenade-index",
+              "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\''tokenade'\\'' index-touch 2>/dev/null; exit 0'",
+              "type": "command"
+            }
+          ],
+          "matcher": "Edit|Write|MultiEdit"
+        }
+      ],
+      "PreCompact": [
+        {
+          "hooks": [
+            {
+              "_tag": "tokenade-precompact",
+              "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\''tokenade'\\'' hookwrap-precompact 2>/dev/null; exit 0'",
+              "type": "command"
+            }
+          ]
+        }
+      ],
+      "PreToolUse": [
+        {
+          "hooks": [
+            {
+              "_tag": "tokenade-pre-edit",
+              "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\''tokenade'\\'' pre-edit-snapshot 2>/dev/null; exit 0'",
+              "type": "command"
+            }
+          ],
+          "matcher": "Edit|Write|MultiEdit"
+        },
+        {
+          "hooks": [
+            {
+              "_tag": "tokenade-pretool",
+              "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\''tokenade'\\'' hookwrap-pretool 2>/dev/null; exit 0'",
+              "type": "command"
+            }
+          ],
+          "matcher": "Bash|Read|Grep|WebFetch|WebSearch|Task|Agent|PowerShell|Write|Edit"
+        }
+      ],
+      "SessionStart": [
+        {
+          "hooks": [
+            {
+              "_tag": "tokenade-sessionstart",
+              "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\''tokenade'\\'' hookwrap-sessionstart 2>/dev/null; exit 0'",
+              "type": "command"
+            }
+          ]
+        }
+      ],
+      "SubagentStop": [
+        {
+          "hooks": [
+            {
+              "_tag": "tokenade-subagentstop",
+              "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\''tokenade'\\'' hookwrap-subagentstop 2>/dev/null; exit 0'",
+              "type": "command"
+            }
+          ]
+        }
+      ],
+      "UserPromptSubmit": [
+        {
+          "hooks": [
+            {
+              "_tag": "tokenade-userprompt",
+              "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\''tokenade'\\'' hookwrap-userprompt 2>/dev/null; exit 0'",
+              "type": "command"
+            }
+          ]
+        }
+      ]
+    },
+    "statusLine": {
+      "command": "tokenade statusline",
+      "type": "command"
+    }
   },
-  "hooks": {
-   "PostToolUse": [
-    {
-     "hooks": [
-      {
-       "_tag": "tokenade",
-       "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\'tokenade\\'' hookwrap 2>/dev/null; exit 0'",
-       "type": "command"
-      }
-     ],
-     "matcher": "Bash|Read"
-    },
-    {
-     "hooks": [
-      {
-       "_tag": "tokenade-postread",
-       "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\'tokenade\\'' hookwrap-postread 2>/dev/null; exit 0'",
-       "type": "command"
-      }
-     ],
-     "matcher": "Read|Grep"
-    },
-    {
-     "hooks": [
-      {
-       "_tag": "tokenade-websearch-post",
-       "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\'tokenade\\'' hookwrap-websearch-post 2>/dev/null; exit 0'",
-       "type": "command"
-      }
-     ],
-     "matcher": "WebSearch"
-    },
-    {
-     "hooks": [
-      {
-       "_tag": "tokenade-index",
-       "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\'tokenade\\'' index-touch 2>/dev/null; exit 0'",
-       "type": "command"
-      }
-     ],
-     "matcher": "Edit|Write|MultiEdit"
-    }
-   ],
-   "PreCompact": [
-    {
-     "hooks": [
-      {
-       "_tag": "tokenade-precompact",
-       "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\'tokenade\\'' hookwrap-precompact 2>/dev/null; exit 0'",
-       "type": "command"
-      }
-     ]
-    }
-   ],
-   "PreToolUse": [
-    {
-     "hooks": [
-      {
-       "_tag": "tokenade-pre-edit",
-       "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\'tokenade\\'' pre-edit-snapshot 2>/dev/null; exit 0'",
-       "type": "command"
-      }
-     ],
-     "matcher": "Edit|Write|MultiEdit"
-    },
-    {
-     "hooks": [
-      {
-       "_tag": "tokenade-pretool",
-       "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\'tokenade\\'' hookwrap-pretool 2>/dev/null; exit 0'",
-       "type": "command"
-      }
-     ],
-     "matcher": "Bash|Read|Grep|WebFetch|Task|Agent|PowerShell|Write|Edit"
-    }
-   ],
-   "SessionStart": [
-    {
-     "hooks": [
-      {
-       "_tag": "tokenade-sessionstart",
-       "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\'tokenade\\'' hookwrap-sessionstart 2>/dev/null; exit 0'",
-       "type": "command"
-      }
-     ]
-    }
-   ],
-   "SubagentStop": [
-    {
-     "hooks": [
-      {
-       "_tag": "tokenade-subagentstop",
-       "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\'tokenade\\'' hookwrap-subagentstop 2>/dev/null; exit 0'",
-       "type": "command"
-      }
-     ]
-    }
-   ],
-   "UserPromptSubmit": [
-    {
-     "hooks": [
-      {
-       "_tag": "tokenade-userprompt",
-       "command": "sh -c 'TOKENADE_DEBUG_LOG='\\''${CFG}/../.tokenade/debug.log'\\'' '\\'tokenade\\'' hookwrap-userprompt 2>/dev/null; exit 0'",
-       "type": "command"
-      }
-     ]
-    }
-   ]
-  },
-  "statusLine": {
-   "command": "tokenade statusline",
-   "type": "command"
-  }
- },
- "bash_command_markers": [
-  "tokenade "
- ]
+  "bash_command_markers": [
+    "tokenade "
+  ]
 }
