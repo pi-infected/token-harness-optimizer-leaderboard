@@ -45,9 +45,12 @@ def active_tasks():
 
 # Token-usage bands (control's TOTAL tokens for a task — input+output+cache),
 # so the board can be read per cost regime: where do real sessions land?
+# The top band is open-ended: a fixed ceiling silently drops any task above it
+# from the breakdown while the headline still counts it, so the bands would no
+# longer reconcile with the headline they decompose.
 TOKEN_BANDS = [(0, 200_000, "0–200k"),
                (200_000, 400_000, "200k–400k"),
-               (400_000, 1_000_000, "400k–1M")]
+               (400_000, float("inf"), "400k+")]
 
 # Adoption (= did the agent explicitly invoke the tool?) is undefined for
 # tools with no callable surface (automatic hooks, proxies, pure prompts):
@@ -318,7 +321,8 @@ def compute(ok, bad):
         # cheapest-first; control (ratio 1.0 = 0% reduction) sorts into place
         # at the zero line, so the reader sees who actually beats the baseline.
         rank.sort(key=lambda e: e["aggregate_cost_ratio"])
-        bands.append({"label": label, "lo": lo_b, "hi": hi_b,
+        bands.append({"label": label, "lo": lo_b,
+                      "hi": None if math.isinf(hi_b) else hi_b,
                       "tasks": bt, "n_tasks": len(bt), "ranking": rank})
 
     # ---- HEADLINE ranking: long sessions only (control > 200k tokens). Most

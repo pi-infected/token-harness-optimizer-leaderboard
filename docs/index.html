@@ -119,21 +119,37 @@
         end-to-end USD, geometric-mean-aggregated across tasks (so no single task dominates). <b>Positive =
         cheaper, negative = more expensive; 0% = no difference</b>, with <b>control</b> (vanilla Claude Code)
         sat at the 0% line.</li>
-     <li><b>Adoption</b> = share of runs in which the agent actually invoked the optimizer's tools — a tool the
-        agent never calls cannot save anything. It's shown as <b>N/A</b> for tools the agent doesn't explicitly
-        call: rtk acts via an automatic hook, and prompt/context ones (lean-ctx, claude-token-efficient) are
-        just text. (tokenade also has a hook, but it additionally exposes CLI functions — map, skeleton, query,
-        exec… — the agent calls by hand, so its adoption counts those.)</li>
-     <li>Every raw per-run measurement is in <code>results.json</code> for your own analysis.</li></ul></div>
+     <li><b>Adoption</b> = the number of runs in which the agent actually invoked the optimizer's tools — a tool
+        the agent never calls cannot save anything. It is shown as <b>N/A</b> for tools with nothing to call:
+        those acting through an automatic hook, a proxy, or a system prompt (rtk, claude-token-efficient, caveman,
+        ponytail, squeez, headroom, edgee). For the rest — tokenade, lean-ctx, codegraph, code-review-graph,
+        graphify — the agent has to invoke a CLI or MCP function, so those calls are counted. <b>A starred figure
+        means adoption was zero</b>: what is measured there is the tool's standing overhead plus run-to-run noise,
+        not what the tool does when used.</li>
+     <li><b>Statistical significance.</b> The percentages are means; the 95% confidence intervals are in the
+        published data. Most intervals in this campaign <b>span zero</b> — those tools are indistinguishable from
+        vanilla Claude Code on this battery, whatever the sign of their headline number. Read the ranking as
+        "significantly cheaper / indistinguishable / significantly more expensive", not as a fine-grained order.</li>
+     <li><b>Missing token counts.</b> Some tools route the session through a gateway that does not report usage
+        back in the result stream. Their cost is measured normally, but per-run token counts come back empty and
+        are shown as “—”. That is an absent measurement, not zero consumption.</li>
+     <li>Every raw per-run measurement is published — <code>results.json</code> for the aggregates and
+        <code>results.sqlite</code> for the full run-level dataset.</li></ul></div>
 
   <h2 data-i18n="foundH2">What we found so far</h2>
-  <p class="sub" data-i18n="foundP1"><b>Used as documented, most of these tools don't beat plain Claude Code — several make it
-     more expensive.</b> The dominant reason is <b>adoption</b>: the agent simply doesn't call the optimizer's
-     tools often enough for them to pay back their own overhead. A tool that adds a CLI, an MCP server or a
-     prompt the agent ignores is pure cost.</p>
-  <p class="sub" data-i18n="foundP2">Where any tool does help, it's on <b>long, expensive sessions</b> (see the session-size split
-     below) — never on the short ones. New tools are added over time as token budget allows; this benchmark is
-     expensive to run, so the board grows in batches rather than all at once.</p>
+  <p class="sub" data-i18n="foundP1"><b>Used as documented, almost none of these tools measurably beats plain Claude Code.</b> Across the
+     full battery only <b>one</b> is significantly cheaper than the control, <b>two</b> are significantly more
+     expensive, and every other tool's confidence interval spans the control — measured over ten runs per task,
+     they are indistinguishable from doing nothing. Several show a positive headline number; none of those
+     survives its own error bar.</p>
+  <p class="sub" data-i18n="foundP2">The most common reason is <b>adoption</b>: the agent doesn't call the optimizer's tools often enough
+     for them to pay back their standing overhead, and a CLI or MCP server the agent ignores is pure cost. But
+     adoption alone doesn't decide it — the tool the agent invoked in most of its runs still came out
+     <b>more expensive</b> than the control. Being used is necessary, not sufficient: what the tool returns has
+     to be worth more than the tokens it costs to offer it and to read it.</p>
+  <p class="sub" data-i18n="foundP3">Where a tool does help, it's on <b>long, expensive sessions</b> (see the session-size split below) —
+     never on the short ones. New tools are added over time as token budget allows; this benchmark is expensive
+     to run, so the board grows in batches rather than all at once.</p>
 
   <h2 data-i18n="whyH2">Why most tools do poorly — despite great compression numbers</h2>
   <p class="sub" data-i18n="whyIntro">Almost every tool here advertises an impressive reduction (−58%, −90%, even −99%). Those numbers are
@@ -264,12 +280,10 @@ function renderTables(d){
   const naSet = new Set(d.adoption_na||[]);
   const flaggedSet = new Set(d.no_adoption||[]);
   const naLabel = t("na","N/A");
-  // Denominators are normalized to a single campaign target so "/54" and "/60"
-  // don't sit side by side; the numerator is rate-scaled to that base.
-  const ADOPT_DENOM = 60;
+  // Real counts, real denominator: every arm in a campaign runs the same grid,
+  // so rescaling to a fixed base would only misreport what was measured.
   const adoptCell = (name, adoption, n) =>
-    name==="control" ? "—" : naSet.has(name) ? naLabel :
-    `${n ? Math.round(adoption*ADOPT_DENOM/n) : adoption}/${ADOPT_DENOM}`;
+    name==="control" ? "—" : naSet.has(name) ? naLabel : `${adoption}/${n}`;
 
   const TH = `<th class="num">#</th><th>${t("thOpt","Optimizer")}</th>
       <th class="num">${t("thRed","mean cost reduction")}</th><th class="num">${t("thAdopt","adoption")}</th>
