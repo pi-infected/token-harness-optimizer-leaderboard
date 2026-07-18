@@ -9,8 +9,7 @@ runs/
 fixtures/out/
 fixtures/truth/
 
-# results DB and its backups: local only
-results.sqlite
+# results DB: published as the dataset of record. Backups stay local.
 results.sqlite.*
 *.sqlite-wal
 *.sqlite-shm
