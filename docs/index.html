@@ -138,15 +138,18 @@
 
   <h2 data-i18n="foundH2">What we found so far</h2>
   <p class="sub" data-i18n="foundP1"><b>Used as documented, almost none of these tools measurably beats plain Claude Code.</b> Across the
-     full battery only <b>one</b> is significantly cheaper than the control, <b>two</b> are significantly more
-     expensive, and every other tool's confidence interval spans the control — measured over ten runs per task,
-     they are indistinguishable from doing nothing. Several show a positive headline number; none of those
-     survives its own error bar.</p>
+     full battery exactly one is significantly cheaper than the control — <code>tokenade</code>, which is
+     maintained by this benchmark's author (see <b>Impartiality</b> below) — and two are significantly more
+     expensive: <code>lean-ctx</code> and <code>headroom</code>. Every other tool's confidence interval spans the
+     control: measured over ten runs per task, they are indistinguishable from doing nothing. Several post a
+     positive headline number that does not survive its own error bar — <code>edgee</code>'s +14.7%, for
+     instance, carries an interval running from −11% to +37%.</p>
   <p class="sub" data-i18n="foundP2">The most common reason is <b>adoption</b>: the agent doesn't call the optimizer's tools often enough
      for them to pay back their standing overhead, and a CLI or MCP server the agent ignores is pure cost. But
-     adoption alone doesn't decide it — the tool the agent invoked in most of its runs still came out
-     <b>more expensive</b> than the control. Being used is necessary, not sufficient: what the tool returns has
-     to be worth more than the tokens it costs to offer it and to read it.</p>
+     adoption alone doesn't decide it — <code>lean-ctx</code> is the one tool the agent did invoke in most of its
+     runs (60 of 70 on long sessions), and it still came out <b>more expensive</b> than the control. Being used
+     is necessary, not sufficient: what the tool returns has to be worth more than the tokens it costs to offer
+     it and to read it.</p>
   <p class="sub" data-i18n="foundP3">Where a tool does help, it's on <b>long, expensive sessions</b> (see the session-size split below) —
      never on the short ones. New tools are added over time as token budget allows; this benchmark is expensive
      to run, so the board grows in batches rather than all at once.</p>
