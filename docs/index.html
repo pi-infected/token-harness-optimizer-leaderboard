@@ -137,13 +137,18 @@
         <code>results.sqlite</code> for the full run-level dataset.</li></ul></div>
 
   <h2 data-i18n="foundH2">What we found so far</h2>
-  <p class="sub" data-i18n="foundP1"><b>Used as documented, almost none of these tools measurably beats plain Claude Code.</b> Across the
-     full battery exactly one is significantly cheaper than the control — <code>tokenade</code>, which is
-     maintained by this benchmark's author (see <b>Impartiality</b> below) — and two are significantly more
-     expensive: <code>lean-ctx</code> and <code>headroom</code>. Every other tool's confidence interval spans the
-     control: measured over ten runs per task, they are indistinguishable from doing nothing. Several post a
-     positive headline number that does not survive its own error bar — <code>edgee</code>'s +14.7%, for
-     instance, carries an interval running from −11% to +37%.</p>
+  <p class="sub" data-i18n="foundP1">Most tools in the table post a <b>positive</b> number on long sessions — but <b>only one of them is
+     distinguishable from noise</b>. Across the full battery exactly one is significantly cheaper than the
+     control — <code>tokenade</code>, which is maintained by this benchmark's author (see <b>Impartiality</b>
+     below) — and two are significantly more expensive: <code>lean-ctx</code> and <code>headroom</code>. Every
+     other tool's confidence interval spans the control. <code>edgee</code>'s +14.7%, for instance, carries an
+     interval running from <b>−11% to +37%</b>: on ten runs per task, a real 15% saving and a real 10% penalty
+     both fit the data.</p>
+  <p class="sub" data-i18n="foundP1b"><b>That is a limit of this benchmark as much as a verdict on the tools.</b> Agent runs are noisy and
+     ten runs per task only resolves large effects; a genuine saving of a few percent would not show up here as
+     anything but noise. So the honest reading of a mid-table row is <b>“not shown to help”</b>, not “shown not
+     to help”. What the data does rule out, for the tools whose intervals sit clear of the control, is the
+     order of magnitude their documentation advertises.</p>
   <p class="sub" data-i18n="foundP2">The most common reason is <b>adoption</b>: the agent doesn't call the optimizer's tools often enough
      for them to pay back their standing overhead, and a CLI or MCP server the agent ignores is pure cost. But
      adoption alone doesn't decide it — <code>lean-ctx</code> is the one tool the agent did invoke in most of its
