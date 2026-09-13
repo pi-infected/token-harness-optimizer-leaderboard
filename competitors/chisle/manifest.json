@@ -1,0 +1,17 @@
+{
+  "name": "chisle",
+  "display_name": "Chisle (JayPokale)",
+  "upstream": "https://github.com/JayPokale/Chisle",
+  "version_pin": "3.3.0",
+  "version_checked": "2026-09-13",
+  "verified": true,
+  "install_doc": "README: `npx chisle` (auto-detects agents). THOL runs the documented installer scoped to Claude Code and pinned: `npx -y chisle@3.3.0 --only claude`. On a machine with the `claude` CLI on PATH that registers the marketplace and installs the plugin (`claude plugin marketplace add JayPokale/Chisle`, `claude plugin install chisle@chisle`), which is the upstream-documented primary path; if the plugin route fails the same command falls back to standalone hooks in settings.json. Both write only inside CLAUDE_CONFIG_DIR.",
+  "notes": "Two axes. Output side: a ruleset (SessionStart + UserPromptSubmit hooks, ~1.6k tokens once per session plus a ~50-token per-turn reminder) that asks for terse prose and YAGNI-first code. Input side: a PostToolUse hook that scrubs ANSI, elides oversized tool output head+tail with error-line salvage, and marks byte-identical repeats. Allowlisted tools only (Bash, Agent, WebFetch, WebSearch, Grep, Glob, mcp__*); Read/Edit/Write are never modified, since their exact bytes feed later edits. No MCP server, no proxy, no binary, no network calls at runtime. Since 3.3.0 an elided output is written in full to <config>/chisle-spill/ and the marker carries the path, so the agent can grep back a dropped line instead of re-running the command; that exists specifically because of this board's reason #2 for compressors failing to pay for themselves.",
+  "setup_commands": [
+    "npx -y chisle@3.3.0 --only claude"
+  ],
+  "requires": [],
+  "tool_prefixes": [],
+  "bash_command_markers": [],
+  "verified_note": "verified: the documented install was reproduced on 2026-09-13 in a throwaway HOME with CLAUDE_CONFIG_DIR inside it (Linux, Node 26, Claude Code 2.1.206). It completed rc=0 and wrote only inside the sandbox: plugins/installed_plugins.json (chisle@chisle 3.3.0), enabledPlugins {\"chisle@chisle\": true}, and extraKnownMarketplaces.chisle. No campaign has been run by the submitter; scoring is entirely THOL's."
+}

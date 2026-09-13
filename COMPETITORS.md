@@ -51,6 +51,7 @@ full campaign: every run's setup completed rc=0). Arms run with
 | headroom | proxy (wrap) | 0.27.0 | verified (campaign-validated) |
 | token-optimizer-mcp | MCP + caching/compression | 5.0.1 npm (405★) | manifest stub |
 | squeez | hooks + MCP compressor | 1.22.1 (135★) | verified |
+| chisle | plugin: ruleset hooks + PostToolUse compactor | 3.3.0 | verified (install reproduced, no campaign yet) |
 
 ## Tier 2 — known, manifest not yet written
 
