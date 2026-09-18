@@ -14,7 +14,7 @@
 #   cloned into the sandbox config), claude-context (npx
 #   @zilliz/claude-context-mcp@0.1.14, needs OPENAI_API_KEY), claude-mem
 #   (npx claude-mem@13.5.4 install), token-optimizer-mcp
-#   (npx @ooples/token-optimizer-mcp@5.0.1), claude-token-efficient (CLAUDE.md
+#   (npm i -g @ooples/token-optimizer-mcp@7.1.0), claude-token-efficient (CLAUDE.md
 #   drop-in @ b32fa8b).
 #
 # serena is NOT installed: excluded from the board by the COMPETITORS.md
@@ -33,6 +33,14 @@ echo ">> lean-ctx 3.8.4 (npm prebuilt binary)"
 # CLAUDE.md, permissions) runs per-run inside the sandbox HOME — see
 # competitors/lean-ctx/manifest.json setup_commands.
 npm install -g lean-ctx-bin@3.8.4
+
+echo ">> token-optimizer-mcp 7.1.0 (npm)"
+# The README install is two interactive Claude Code slash commands, so the
+# package is installed here and its own non-interactive installer
+# (`token-optimizer-install`: hooks into $HOME/.claude/settings.json) runs
+# per-run inside the sandbox HOME - see
+# competitors/token-optimizer-mcp/manifest.json setup_commands.
+npm install -g @ooples/token-optimizer-mcp@7.1.0
 
 echo ">> rtk v0.42.3 (cargo, from git tag)"
 cargo install --git https://github.com/rtk-ai/rtk --tag v0.42.3 rtk
