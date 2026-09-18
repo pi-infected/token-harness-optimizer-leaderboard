@@ -49,7 +49,7 @@ full campaign: every run's setup completed rc=0). Arms run with
 | caveman | skill + SessionStart hook | v1.9.0 | verified (campaign-validated) |
 | ponytail | plugin + lifecycle hooks | main | verified (campaign-validated) |
 | headroom | proxy (wrap) | 0.27.0 | verified (campaign-validated) |
-| token-optimizer-mcp | MCP + caching/compression | 5.0.1 npm (405★) | manifest stub |
+| token-optimizer-mcp | MCP + caching/compression | 7.1.0 npm (405★) | verified |
 | squeez | hooks + MCP compressor | 1.22.1 (135★) | verified |
 
 ## Tier 2 — known, manifest not yet written
