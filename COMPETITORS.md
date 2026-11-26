@@ -51,6 +51,7 @@ full campaign: every run's setup completed rc=0). Arms run with
 | headroom | proxy (wrap) | 0.27.0 | verified (campaign-validated) |
 | token-optimizer-mcp | MCP + caching/compression | 5.0.1 npm (405★) | manifest stub |
 | squeez | hooks + MCP compressor | 1.22.1 (135★) | verified |
+| claude-lean | settings + warning-only hook | 0.3.0 npm | verified 2026-11-26 (official `npx claude-lean init` in sandbox; code-bugfix-py smoke run passed) |
 
 ## Tier 2 — known, manifest not yet written
 

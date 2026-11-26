@@ -1,0 +1,12 @@
+{
+  "name": "claude-lean",
+  "display_name": "Claude Lean (JacobTheJacobs)",
+  "upstream": "https://github.com/JacobTheJacobs/claude-lean",
+  "version_pin": "0.3.0",
+  "version_checked": "2026-11-26",
+  "verified": true,
+  "install_doc": "README: `npx claude-lean init` (https://github.com/JacobTheJacobs/claude-lean#readme). It copies itself to ~/.claude-lean and edits $CLAUDE_CONFIG_DIR/settings.json; inside the sandbox both are the sandbox HOME/config, so the official installer runs as-is.",
+  "notes": "Settings only, no MCP server and no instructions for the model: turns off background requests (prompt suggestions, titles, recaps, progress summaries, idle compaction/check-ins), denies ListAgents, caps skill descriptions at 200 chars, makes fast mode per-session, and adds a PreToolUse hook that only warns the user before CLAUDE.md/settings edits.",
+  "requires": ["node", "npx", "python3"],
+  "setup_commands": ["npx -y claude-lean@0.3.0 init"]
+}
